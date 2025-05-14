@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ln(x + 1) vs sqrt(x)</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 600px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<p><b>Which is ln(x + 1) and which is √x?</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li>Both increase</li>
+    <li><code>√x</code> grows faster for large x.</li>
+    <li><span style="color:red;">Red curve</span>: <code>√x</code></li>
+    <li><span style="color:blue;">Blue curve</span>: <code>ln(x + 1)</code></li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-1, 20, 100, -1],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    board.create('functiongraph', [
+        x => x >= 0 ? Math.sqrt(x) : NaN
+    ], { strokeColor: 'red', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => x > -1 ? Math.log(x + 1) : NaN
+    ], { strokeColor: 'blue', strokeWidth: 2 });
+</script>
+
+</body>
+</html>

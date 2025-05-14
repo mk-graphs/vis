@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 600px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<p><b>Which is 1/x and which is 1/x²?</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>1/x</code> has branches in both quadrants I and III (changes sign).</li>
+    <li><code>1/x²</code> is always positive (never below the x-axis).</li>
+    <li><span style="color:blue;">Blue curve</span>: <code>1/x</code></li>
+    <li><span style="color:red;">Red curve</span>: <code>1/x²</code></li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-5, 5, 10, -10],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    board.create('functiongraph', [
+        x => x !== 0 ? 1 / x : NaN
+    ], { strokeColor: 'blue', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => x !== 0 ? 1 / (x * x) : NaN
+    ], { strokeColor: 'red', strokeWidth: 2 });
+</script>
+
+</body>
+</html>

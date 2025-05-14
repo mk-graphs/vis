@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 600px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<p>Which is x² and which is |x|?</p>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>x²</code> is smooth and curved.</li>
+    <li><code>|x|</code> has a sharp corner at x = 0.</li>
+    <li><span style="color:red;">Red curve</span>: <code>|x|</code></li>
+    <li><span style="color:blue;">Blue curve</span>: <code>x²</code></li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-5, 10, 5, -1],
+        axis: true
+    });
+
+    board.create('functiongraph', [
+        x => Math.pow(x, 2)
+    ], { strokeColor: 'blue', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => Math.abs(x)
+    ], { strokeColor: 'red', strokeWidth: 2 });
+</script>
+
+</body>
+</html>
