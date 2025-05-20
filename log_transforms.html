@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transformations of Logarithms</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox { width: 600px; height: 600px; }
+    </style>
+</head>
+<body>
+<p><b>What changes with log(x+1), log(2x)?</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><span style="color:black;">Black</span>: <code>log(x)</code> (base e)</li>
+    <li><span style="color:green;">Green</span>: <code>log(x+1)</code> (shift left)</li>
+    <li><span style="color:purple;">Purple</span>: <code>log(2x)</code> (graph is "squeezed" toward y-axis)</li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-2, 5, 10, -2],
+        axis: true
+    });
+
+    board.create('functiongraph', [
+        x => x > 0 ? Math.log(x) : NaN
+    ], { strokeColor: 'black', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => x > -1 ? Math.log(x + 1) : NaN
+    ], { strokeColor: 'green', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => x > 0 ? Math.log(2 * x) : NaN
+    ], { strokeColor: 'purple', strokeWidth: 2 });
+</script>
+</body>
+</html>
