@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cosmic Velocity - JSXGraph</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+    <style>
+        #jxgbox { width: 800px; height: 600px; margin: 20px auto; }
+        #controls { text-align: center; margin: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="controls">
+        <label>first velocity (km/s): 
+            <input type="range" id="velocity" min="5" max="15" step="0.1" value="7.9">
+            <span id="velocityValue">7.9</span>
+        </label>
+    </div>
+
+
+    <div id="jxgbox"></div>
+
+    <script>
+       
+        const board = JXG.JSXGraph.initBoard('jxgbox', {
+            boundingbox: [-10, 10, 10, -10], 
+            axis: true,
+            showCopyright: false
+        });
+
+        
+        const earth = board.create('point', [0, 0], {
+            name: 'Earth',
+            size: 8,
+            fillColor: '#1E90FF',
+            strokeColor: '#000080'
+        });
+
+      
+        let velocity = 7.9; 
+        let trajectory;     
+
+   
+        function updateOrbit() {
+            if (trajectory) board.removeObject(trajectory); 
+
+            const radius = 5; 
+            const G = 6.674e-11; 
+            const escapeVelocity = Math.sqrt(2 * G * 1 / radius); // 第二宇宙速度公式（比例简化）
+
+            // 根据速度绘制轨迹
+            if (velocity < 7.9) {
+                // 速度过低，坠毁
+                trajectory = board.create('curve', [[], []], {
+                    strokeColor: '#ff0000',
+                    strokeWidth: 2
+                });
+                trajectory.updateDataArray = function() { /* 坠毁动画（略） */ };
+            } else if (velocity < 11.2) {
+                // 椭圆轨道（第一宇宙速度以上）
+                trajectory = board.create('ellipse', [earth, [radius, 0], [0, radius * (velocity / 7.9)]], {
+                    strokeColor: '#00ff00',
+                    strokeWidth: 2
+                });
+            } else {
+                // 抛物线逃逸（第二宇宙速度）
+                trajectory = board.create('curve', [[], []], {
+                    strokeColor: '#ffa500',
+                    strokeWidth: 2
+                });
+                // 抛物线参数方程（简化）
+                const t = board.create('slider', [[-8, 8], [8, 8], [0, 0, 10]], { visible: false });
+                trajectory.updateDataArray = function() {
+                    const x = t.Value() * velocity / 2;
+                    const y = velocity * t.Value() - 0.5 * 9.8 * t.Value() * t.Value(); // 简化的抛物线
+                    this.dataX = [earth.X(), x];
+                    this.dataY = [earth.Y(), y];
+                };
+            }
+        }
+
+        // 绑定滑块事件
+        document.getElementById('velocity').addEventListener('input', function(e) {
+            velocity = parseFloat(e.target.value);
+            document.getElementById('velocityValue').textContent = velocity.toFixed(1);
+            updateOrbit();
+        });
+
+        // 初始绘制
+        updateOrbit();
+    </script>
+</body>
+</html>
