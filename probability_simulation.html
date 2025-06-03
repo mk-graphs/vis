@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.4.6/jsxgraphcore.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.4.6/jsxgraph.css" />
+<style>
+#jxgbox {
+    width: 700px;
+    height: 700px;
+    margin: 20px 0;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+
+.die-display {
+    font-size: 48px;
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    border: 3px solid #333;
+    display: inline-block;
+    min-width: 80px;
+}
+
+</style>
+</head>
+<body>
+    <h2>Rolling a Fair 6-Sided Die - Probability Convergence</h2>
+
+    <div class="controls">
+        <div class="die-display" id="dieDisplay"></div>
+        <br>
+        <button onclick="startRolling()" id="startBtn">Start Rolling</button>
+        <button onclick="stopRolling()" id="stopBtn" disabled>Stop</button>
+        <button onclick="reset()">Reset</button>
+    </div>
+
+    <div id="jxgbox" class="jxgbox"></div>
+
+    <div class="stats" id="stats">
+        Total Rolls: 0<br>
+        Face 1: 0 (0.00%)<br>
+        Face 2: 0 (0.00%)<br>
+        Face 3: 0 (0.00%)<br>
+        Face 4: 0 (0.00%)<br>
+        Face 5: 0 (0.00%)<br>
+        Face 6: 0 (0.00%)
+    </div>
+
+    <div style="margin-top: 20px;">
+    <strong>How it works:</strong>
+    <ul>
+        <li>Each bar shows the relative frequency (probability) of rolling each face (1–6)</li>
+        <li>As more rolls occur, frequencies should converge to approximately 1/6 (≈16.67%) for each face</li>
+        <li>This demonstrates the Law of Large Numbers in probability theory</li>
+        <li>The die face symbols: ⚀ ⚁ ⚂ ⚃ ⚄ ⚅</li>
+    </ul>
+    </div>
+
+
+<script>
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+    boundingbox: [-0.5, -0.05, 6.5, 0.4],
+    axis: true,
+    showNavigation: false,
+    showCopyright: false,
+    grid: false
+});
+
+// axes
+board.defaultAxes.x.setAttribute({
+    ticks: {
+        majorHeight: 10,
+        minorHeight: 5,
+        insertTicks: false,
+        ticksDistance: 1,
+        label: {
+            offset: [0, -15]
+        }
+    },
+    name: 'Die Face',
+    withLabel: true,
+    label: {
+        position: 'rt',
+        offset: [-20, 20]
+    }
+});
+
+board.defaultAxes.y.setAttribute({
+    ticks: {
+        majorHeight: 10,
+        minorHeight: 5,
+        ticksDistance: 0.05,
+        label: {
+            offset: [-35, 0]
+        }
+    },
+    name: 'Probability',
+    withLabel: true,
+    label: {
+        position: 'rt',
+        offset: [20, -20]
+    }
+});
+
+// storage
+const counts = [0, 0, 0, 0, 0, 0];
+let totalRolls = 0;
+let bars = [];
+let intervalId = null;
+let isRolling = false;
+
+
+const dieFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+const dieNumbers = ['1', '2', '3', '4', '5', '6'];
+
+// Create histogram bars
+const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+
+for (let i = 0; i < 6; i++) {
+    // bar as a polygon
+    const bar = board.create('polygon', [
+        [i + 0.1, 0],
+        [i + 0.1, 0],
+        [i + 0.9, 0],
+        [i + 0.9, 0]
+    ], {
+        fillColor: colors[i],
+        fillOpacity: 0.7,
+        strokeColor: '#333',
+        strokeWidth: 2,
+        vertices: { visible: false },
+        borders: { strokeColor: '#333', strokeWidth: 2 }
+    });
+    bars.push(bar);
+    
+    // Add face number labels
+    board.create('text', [i + 0.5, -0.02, dieNumbers[i]], {
+        fontSize: 14,
+        anchorX: 'middle',
+        anchorY: 'top',
+        fontWeight: 'bold'
+    });
+}
+
+
+// label
+board.create('text', [6.1, 1/6, 'Theoretical (1/6 ≈ 16.67%)'], {
+    fontSize: 12,
+    anchorX: 'left',
+    anchorY: 'middle',
+    color: 'red'
+});
+
+function updateHistogram() {
+    for (let i = 0; i < 6; i++) {
+        const freq = totalRolls === 0 ? 0 : counts[i] / totalRolls;
+        // Update bar height by moving the top vertices
+        bars[i].vertices[1].moveTo([i + 0.1, freq]);
+        bars[i].vertices[2].moveTo([i + 0.9, freq]);
+    }
+    board.update();
+    updateStats();
+}
+
+function updateStats() {
+    let statsText = `Total Rolls: ${totalRolls}<br>`;
+    for (let i = 0; i < 6; i++) {
+        const percentage = totalRolls === 0 ? 0 : (counts[i] / totalRolls * 100);
+        statsText += `Face ${i + 1}: ${counts[i]} (${percentage.toFixed(2)}%)<br>`;
+    }
+    document.getElementById('stats').innerHTML = statsText;
+}
+
+function rollDie() {
+    const face = Math.floor(Math.random() * 6);
+    counts[face]++;
+    totalRolls++;
+    
+    // Update die display
+    document.getElementById('dieDisplay').textContent = dieFaces[face];
+    
+    updateHistogram();
+}
+
+function startRolling() {
+    if (!intervalId && !isRolling) {
+        isRolling = true;
+        intervalId = setInterval(rollDie, 150); // 150ms
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+    }
+}
+
+function stopRolling() {
+    if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+        isRolling = false;
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+    }
+}
+
+function reset() {
+    stopRolling();
+    for (let i = 0; i < 6; i++) {
+        counts[i] = 0;
+    }
+    totalRolls = 0;
+    document.getElementById('dieDisplay').textContent = '';
+    updateHistogram();
+}
+
+// Initialize display
+updateHistogram();
+</script>
+</body>
+</html>
