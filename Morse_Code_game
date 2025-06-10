@@ -126,7 +126,7 @@ letters.forEach((letter, i) => {
 });
 
 // === Quiz Logic ===
-const quizWord = "HELLO";  // You can change this to any quiz word
+const quizWord = "WEATHER";  // You can change this to any quiz word, letter must be capital.
 const quizMorse = quizWord.split('').map(ch => morseMap[ch]).join(' ');
 
 function startQuizFlashing() {
