@@ -12,7 +12,6 @@ const board = JXG.JSXGraph.initBoard('morseBox', {
   axis: false
 });
 
-// Morse map
 const morseMap = {
   A: ".-",    B: "-...",  C: "-.-.", D: "-..",  E: ".",
   F: "..-.",  G: "--.",   H: "....", I: "..",   J: ".---",
@@ -22,17 +21,32 @@ const morseMap = {
   Z: "--.."
 };
 
-// Create letter buttons in grid
-const letters = Object.keys(morseMap);
-const cols = 7;
+// Audio setup
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playBeep(duration = 200, frequency = 600) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
 
-const flashCircle = board.create('circle', [[11.5, 1], 0.5], {
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+  osc.start();
+
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime); // volume
+  osc.stop(audioCtx.currentTime + duration / 1000);
+}
+
+// Flash circle
+const flashCircle = board.create('circle', [[5.5, 1], 0.5], {
   fillColor: 'gray', fillOpacity: 0.2, strokeColor: 'black'
 });
-const flashLabel = board.create('text', [10.5, 0, 'Light Output'], {fontSize: 14});
+board.create('text', [5, 0, 'Light Output'], {fontSize: 14});
 
 function flash(symbol, callback) {
   flashCircle.setAttribute({fillColor: 'yellow', fillOpacity: 0.9});
+  playBeep(symbol === '.' ? 200 : 600);
   const duration = symbol === '.' ? 200 : 600;
   setTimeout(() => {
     flashCircle.setAttribute({fillColor: 'gray', fillOpacity: 0.2});
@@ -50,26 +64,26 @@ function playMorseCode(code, index = 0) {
   }
 }
 
-// Create letter + Morse code display
+// Render grid
+const letters = Object.keys(morseMap);
+const cols = 7;
+
 letters.forEach((letter, i) => {
   const col = i % cols;
   const row = Math.floor(i / cols);
   const x = col * 1.7;
   const y = 7 - row;
 
-  // Letter button (as text)
   const btn = board.create('text', [x, y, letter], {
     fontSize: 20,
     cssStyle: 'cursor:pointer; font-weight:bold; color:blue;'
   });
 
-  // Morse code text
   board.create('text', [x + 0.4, y, morseMap[letter]], {
     fontSize: 16,
     cssStyle: 'color: black;'
   });
 
-  // On click, animate flashing
   btn.rendNode.addEventListener('click', () => {
     playMorseCode(morseMap[letter]);
   });
@@ -78,3 +92,4 @@ letters.forEach((letter, i) => {
 
 
 </html>
+
