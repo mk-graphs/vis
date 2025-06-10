@@ -1,14 +1,23 @@
-
 <!DOCTYPE html>
 <html>
 <div id="morseBox" style="width: 800px; height: 700px; position: relative;"></div>
 
+<div id="description" style="max-width:800px; margin-bottom:10px; padding:12px; border:1px solid #ccc; background:#f9f9f9; border-radius:6px; font-size:16px; line-height:1.5;">
+  <strong>Morse Code Quiz Instructions:</strong><br>
+  The light above will flash a word in Morse code using short flashes (dots) and long flashes (dashes).<br>
+  Each flash corresponds to a Morse code symbol:<br>
+  &nbsp;&nbsp;&bull; Short flash (dot) = "." <br>
+  &nbsp;&nbsp;&bull; Long flash (dash) = "-" <br><br>
+  You can also click on any of the letters above to hear and see how that letter is represented in Morse code. This helps you familiarize yourself with the code.<br><br>
+  When you are ready, click the <em>Start Guess</em> button to play the Morse code for the quiz word.<br>
+  Listen or watch carefully, then enter your answer in the Moodle quiz answer box.<br>
+  Adjust the <strong>Playback Speed</strong> slider to speed up or slow down the flashing if needed.<br>
+  Good luck!
+</div>
 <!-- Controls -->
 <div style="position: absolute; top: 660px; left: 50px;">
   <button type="button" onclick="startQuizFlashing()">Start Guess</button>
-  <label style="margin-left: 20px;">Enter the word:</label>
-  <input type="text" id="quizInput" />
-  <button type="button" onclick="checkQuizAnswer()">Submit</button>
+ 
   <span id="quizFeedback" style="margin-left: 20px; font-weight: bold;"></span>
 </div>
 
@@ -90,7 +99,7 @@ function playMorseCode(code, index = 0, light = clickLight) {
 const quizLight = board.create('circle', [[5.5, 1], 0.5], {
   fillColor: 'gray', fillOpacity: 0.2, strokeColor: 'black'
 });
-board.create('text', [5.5, 0.1, 'Quiz Light'], {fontSize: 14});
+board.create('text', [5, 0.1, 'Quiz Light'], {fontSize: 14});
 
 // Letters Grid (for demo playback)
 const letters = Object.keys(morseMap);
@@ -124,17 +133,5 @@ function startQuizFlashing() {
   playMorseCode(quizMorse, 0, quizLight);
 }
 
-function checkQuizAnswer() {
-  const input = document.getElementById('quizInput').value.trim().toUpperCase();
-  const feedback = document.getElementById('quizFeedback');
-  if (input === quizWord) {
-    feedback.textContent = '✅ Correct!';
-    feedback.style.color = 'green';
-  } else {
-    feedback.textContent = '❌ Try Again';
-    feedback.style.color = 'red';
-  }
-}
 </script>
 </html>
-
