@@ -1,0 +1,150 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://jsxgraph.org/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://jsxgraph.org/distrib/jsxgraph.css">
+  <style>
+    #jxgbox {
+      width: 900px;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+    .description {
+      max-width: 900px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 1em;
+    }
+    .quiz {
+      font-weight: bold;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="description">
+  <h2>Survival Curve Explanation</h2>
+  <p>
+    A <b>survival curve</b> represents the probability S(t) that an individual will survive beyond age  t .  
+    We use the <i>Weibull survival function</i> to model this:  
+  </p>
+  <p style="font-family: monospace; font-size: 1.1em;">
+  S(t) = e<sup>-(t/λ)<sup>β</sup></sup>
+  </p>
+  <ul>
+    <li><b>λ (lambda)</b>: lifespan scale, controls typical lifetime</li>
+    <li><b>β (beta)</b>: shape parameter, controls how risk changes with age</li>
+  </ul>
+  <p>Use the sliders below to adjust the parameters and age, then observe survival probability.</p>
+
+  <p class="quiz">
+    <b>Quiz:</b> Estimate at what age only <u>50%</u> of the population is still alive (median survival age).  
+    Try to find the point on the graph where the survival curve crosses 0.5.
+  </p>
+</div>
+
+<div id="jxgbox"></div>
+
+<p>
+  λ (Lifespan scale): <span id="lambdaVal">80</span><br>
+  β (Shape): <span id="betaVal">2</span><br>
+  Age: <span id="ageVal">30</span><br>
+  Survival at this age: <span id="survivalVal">--</span><br>
+  Median survival age (50% survival): <span id="medianVal">--</span>
+</p>
+
+<script>
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+  boundingbox: [-5, 1.1, 105, -0.1],
+  axis: true,
+  keepaspectratio: false
+});
+
+// Sliders
+const lambdaSlider = board.create('slider', [[10, 1.05], [40, 1.05], [50, 80, 120]], {
+  name: 'λ',
+  snapWidth: 1,
+  fillColor: '#dd9999'
+});
+const betaSlider = board.create('slider', [[10, 0.9], [40, 0.9], [0.5, 2, 5]], {
+  name: 'β',
+  snapWidth: 0.1,
+  fillColor: '#99ddaa'
+});
+const ageSlider = board.create('slider', [[10, 0.05], [40, 0.05], [0, 30, 100]], {
+  name: 'Age',
+  snapWidth: 1,
+  fillColor: '#7777ff'
+});
+
+// Survival function
+function survivalFunc(t, lambda, beta) {
+  return Math.exp(-Math.pow(t / lambda, beta));
+}
+
+// Median survival age (t where S(t) = 0.5)
+function medianSurvival(lambda, beta) {
+  return lambda * Math.pow(Math.log(2), 1 / beta);
+}
+
+// Survival curves
+const curve1 = board.create('functiongraph', [
+  function(t) {
+    return survivalFunc(t, lambdaSlider.Value(), betaSlider.Value());
+  }, 0, 100
+], { strokeColor: '#3366cc', strokeWidth: 3 });
+
+
+
+// Point on curve (current age)
+const pointOnCurve = board.create('point', [
+  () => ageSlider.Value(),
+  () => survivalFunc(ageSlider.Value(), lambdaSlider.Value(), betaSlider.Value())
+], {
+  name: 'Age marker',
+  size: 3,
+  fillColor: '#ff4444'
+});
+
+// Median survival marker (dynamic)
+const medianAgeMarker = board.create('point', [
+  () => medianSurvival(lambdaSlider.Value(), betaSlider.Value()),
+  0.5
+], {
+  name: 'Median Age',
+  size: 3,
+  fillColor: '#228822',
+  fixed: true,
+  highlight: false,
+  withLabel: true,
+  label: {offset: [10, -10]}
+});
+
+// Update labels
+function updateLabels() {
+  const λ = lambdaSlider.Value();
+  const β = betaSlider.Value();
+  const age = ageSlider.Value();
+  const survival = survivalFunc(age, λ, β);
+  const medianAge = medianSurvival(λ, β);
+
+  document.getElementById("lambdaVal").innerText = λ.toFixed(0);
+  document.getElementById("betaVal").innerText = β.toFixed(1);
+  document.getElementById("ageVal").innerText = age.toFixed(0);
+  document.getElementById("survivalVal").innerText = (survival * 100).toFixed(1) + "%";
+  document.getElementById("medianVal").innerText = medianAge.toFixed(1);
+
+  board.update();
+}
+
+lambdaSlider.on('drag', updateLabels);
+betaSlider.on('drag', updateLabels);
+ageSlider.on('drag', updateLabels);
+
+updateLabels();
+</script>
+
+</body>
+</html>
