@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<div id="morseBox" style="width: 800px; height: 600px;"></div>
+<script src="https://jsxgraph.org/distrib/jsxgraphcore.js"></script>
+<link rel="stylesheet" href="https://jsxgraph.org/distrib/jsxgraph.css" />
+
+<script>
+const board = JXG.JSXGraph.initBoard('morseBox', {
+  boundingbox: [-1, 8, 13, -1],
+  showNavigation: false,
+  showCopyright: false,
+  axis: false
+});
+
+// Morse map
+const morseMap = {
+  A: ".-",    B: "-...",  C: "-.-.", D: "-..",  E: ".",
+  F: "..-.",  G: "--.",   H: "....", I: "..",   J: ".---",
+  K: "-.-",   L: ".-..",  M: "--",   N: "-.",   O: "---",
+  P: ".--.",  Q: "--.-",  R: ".-.",  S: "...",  T: "-",
+  U: "..-",   V: "...-",  W: ".--",  X: "-..-", Y: "-.--",
+  Z: "--.."
+};
+
+// Create letter buttons in grid
+const letters = Object.keys(morseMap);
+const cols = 7;
+
+const flashCircle = board.create('circle', [[11.5, 1], 0.5], {
+  fillColor: 'gray', fillOpacity: 0.2, strokeColor: 'black'
+});
+const flashLabel = board.create('text', [10.5, 0, 'Light Output'], {fontSize: 14});
+
+function flash(symbol, callback) {
+  flashCircle.setAttribute({fillColor: 'yellow', fillOpacity: 0.9});
+  const duration = symbol === '.' ? 200 : 600;
+  setTimeout(() => {
+    flashCircle.setAttribute({fillColor: 'gray', fillOpacity: 0.2});
+    setTimeout(callback, 200);
+  }, duration);
+}
+
+function playMorseCode(code, index = 0) {
+  if (index >= code.length) return;
+  const symbol = code[index];
+  if (symbol === '.' || symbol === '-') {
+    flash(symbol, () => playMorseCode(code, index + 1));
+  } else {
+    setTimeout(() => playMorseCode(code, index + 1), 400);
+  }
+}
+
+// Create letter + Morse code display
+letters.forEach((letter, i) => {
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  const x = col * 1.7;
+  const y = 7 - row;
+
+  // Letter button (as text)
+  const btn = board.create('text', [x, y, letter], {
+    fontSize: 20,
+    cssStyle: 'cursor:pointer; font-weight:bold; color:blue;'
+  });
+
+  // Morse code text
+  board.create('text', [x + 0.4, y, morseMap[letter]], {
+    fontSize: 16,
+    cssStyle: 'color: black;'
+  });
+
+  // On click, animate flashing
+  btn.rendNode.addEventListener('click', () => {
+    playMorseCode(morseMap[letter]);
+  });
+});
+</script>
+
+
+</html>
