@@ -25,25 +25,41 @@
 <body>
 
 <div class="description">
+
   <h2>Survival Curve Explanation</h2>
+  
+  <h3>What is the Weibull Survival Function?</h3>
   <p>
-    A <b>survival curve</b> represents the probability S(t) that an individual will survive beyond age  t .  
-    We use the <i>Weibull survival function</i> to model this:  
-  </p>
-  <p style="font-family: monospace; font-size: 1.1em;">
-  S(t) = e<sup>-(t/λ)<sup>β</sup></sup>
+    The <b>Weibull survival function</b> is a mathematical model used in reliability engineering, survival analysis, and medicine to describe how the chance of survival changes over time. It has two key parameters:
   </p>
   <ul>
-    <li><b>λ (lambda)</b>: lifespan scale, controls typical lifetime</li>
-    <li><b>β (beta)</b>: shape parameter, controls how risk changes with age</li>
+    <li><b>λ (lambda)</b>: Controls the overall timescale — larger λ means longer typical lifespans.</li>
+    <li><b>β (beta)</b>: Controls the shape of the curve — how the risk of death increases or decreases with age.</li>
   </ul>
+  <p>
+    When β = 1, the model reduces to the exponential distribution (constant risk over time). When β > 1, the risk of death increases with age, which often reflects real-world human aging.
+  </p>
+
+  <p>
+    A <b>survival curve</b> represents the probability S(t) that an individual will survive beyond age <i>t</i>.  
+    We use the Weibull survival function to model this:  
+  </p>
+  <p style="font-family: monospace; font-size: 1.1em;">
+    S(t) = e<sup>-(t/λ)<sup>β</sup></sup>
+  </p>
+
   <p>Use the sliders below to adjust the parameters and age, then observe survival probability.</p>
+  <p>
+  The <b>median survival age</b> is the age at which 50% of the population is expected to have survived. On the graph, this is shown as the point where the survival curve crosses the 0.5 level.
+</p>
 
   <p class="quiz">
-    <b>Quiz:</b> Estimate at what age only <u>50%</u> of the population is still alive (median survival age).  
-    Try to find the point on the graph where the survival curve crosses 0.5.
+    <b>Question:</b> At what age does the survival probability reach approximately 50%?
+    <br>→ <i>Use the sliders to test different values of β and see how the median survival age changes.</i>
   </p>
+
 </div>
+
 
 <div id="jxgbox"></div>
 
@@ -52,7 +68,6 @@
   β (Shape): <span id="betaVal">2</span><br>
   Age: <span id="ageVal">30</span><br>
   Survival at this age: <span id="survivalVal">--</span><br>
-  Median survival age (50% survival): <span id="medianVal">--</span>
 </p>
 
 <script>
@@ -148,3 +163,4 @@ updateLabels();
 
 </body>
 </html>
+
