@@ -68,6 +68,7 @@
   β (Shape): <span id="betaVal">2</span><br>
   Age: <span id="ageVal">30</span><br>
   Survival at this age: <span id="survivalVal">--</span><br>
+  Median survival age (50% survival): <span id="medianVal">--</span>
 </p>
 
 <script>
@@ -160,6 +161,10 @@ ageSlider.on('drag', updateLabels);
 
 updateLabels();
 </script>
+
+</body>
+</html>
+
 
 </body>
 </html>
