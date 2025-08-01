@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Queue Theory</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    #jxgbox { width: 700px; height: 500px; }
+  </style>
+</head>
+<body>
+<p><b>Queue Theory: How arrival rate and service rate affect waiting times</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p>Arrival Rate (λ): <input type="range" id="arrivalSlider" min="1" max="9" step="0.5" value="4"> <span id="arrivalValue">4.0</span> customers/hour</p>
+<p>Service Rate (μ): <input type="range" id="serviceSlider" min="2" max="12" step="0.5" value="6"> <span id="serviceValue">6.0</span> customers/hour</p>
+<p>Utilization (ρ): <span id="utilization">67%</span> | Average Wait Time: <span id="waitTime">--</span> hours</p>
+<p><strong>Explanation:</strong></p>
+<ul>
+  <li><span style="color:blue;">Blue</span>: Average waiting time vs utilization rate</li>
+  <li><span style="color:red;">Red line</span>: Current system utilization</li>
+  <li><span style="color:green;">Green dot</span>: Your current wait time</li>
+  <li>As utilization approaches 100%, wait times explode!</li>
+</ul>
+
+<script>
+  const board = JXG.JSXGraph.initBoard('jxgbox', {
+    boundingbox: [0, 5, 1, -0.5],
+    axis: true,
+    showNavigation: false,
+    showCopyright: false
+  });
+
+  let waitCurve = null;
+  let utilizationLine = null;
+  let currentPoint = null;
+
+  // M/M/1 queue waiting time formula: W = ρ/(μ(1-ρ))
+  function waitingTime(rho, mu) {
+    if (rho >= 1) return Infinity;
+    return rho / (mu * (1 - rho));
+  }
+
+  function updateVisualization() {
+    const lambda = parseFloat(document.getElementById('arrivalSlider').value);
+    const mu = parseFloat(document.getElementById('serviceSlider').value);
+
+    document.getElementById('arrivalValue').textContent = lambda.toFixed(1);
+    document.getElementById('serviceValue').textContent = mu.toFixed(1);
+
+    const rho = lambda / mu;
+    document.getElementById('utilization').textContent = (rho * 100).toFixed(0) + '%';
+
+    const waitTime = waitingTime(rho, mu);
+    document.getElementById('waitTime').textContent = waitTime < 10 ? waitTime.toFixed(2) : '∞';
+
+
+    if (waitCurve) board.removeObject(waitCurve);
+    if (utilizationLine) board.removeObject(utilizationLine);
+    if (currentPoint) board.removeObject(currentPoint);
+
+    // waiting time curve
+    waitCurve = board.create('functiongraph', [x => {
+      if (x >= 0.99) return 5; // Cap for visualization
+      return Math.min(5, x / (mu * (1 - x)));
+    }], {
+      strokeColor: 'blue',
+      strokeWidth: 2
+    });
+
+    // Current utilization line
+    if (rho < 1) {
+      utilizationLine = board.create('line', [[rho, 0], [rho, 5]], {
+        strokeColor: 'red',
+        strokeWidth: 2,
+        dash: 2
+      });
+
+      // Current point
+      const currentWait = Math.min(5, waitTime);
+      currentPoint = board.create('point', [rho, currentWait], {
+        color: 'green',
+        size: 4,
+        name: ''
+      });
+    }
+  }
+
+
+  board.create('text', [0.5, -0.3, 'Utilization (ρ = λ/μ)'], {
+    fontSize: 12,
+    anchorX: 'middle'
+  });
+
+  board.create('text', [-0.05, 2.5, 'Wait Time'], {
+    fontSize: 12,
+    anchorY: 'middle'
+  });
+
+  document.getElementById('arrivalSlider').addEventListener('input', updateVisualization);
+  document.getElementById('serviceSlider').addEventListener('input', updateVisualization);
+  updateVisualization();
+</script>
+</body>
+</html>
