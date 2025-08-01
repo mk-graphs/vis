@@ -85,7 +85,7 @@
         if (startPoint) board.removeObject(startPoint);
         if (endPoint) board.removeObject(endPoint);
 
-        // Purchasing power curve (decreasing)
+        // Purchasing power curve
         purchasingPowerCurve = board.create('functiongraph', [
             x => 100 / Math.pow(1 + inflationRate, x - startYear)
         ], {
@@ -101,7 +101,7 @@
             strokeWidth: 3
         });
 
-        // Mark start and end points
+        // start and end points
         startPoint = board.create('point', [startYear, 100], {
             color: 'blue',
             size: 4,
@@ -115,7 +115,7 @@
         });
     }
 
-    // Add axis labels
+
     board.create('text', [2000, -10, 'Year'], {
         fontSize: 12,
         anchorX: 'middle'
