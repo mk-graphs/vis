@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Birthday Paradox</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    #jxgbox { width: 700px; height: 500px; }
+  </style>
+</head>
+<body>
+<p><b>Birthday Paradox: Probability of shared birthdays in a group</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p>Group Size: <input type="range" id="groupSlider" min="2" max="60" value="23"> <span id="groupValue">23</span></p>
+<p>Probability: <span id="probValue">50.7%</span></p>
+<p><strong>Explanation:</strong></p>
+<ul>
+  <li><span style="color:blue;">Blue</span>: Theoretical probability</li>
+  <li><span style="color:red;">Red line</span>: 50% probability mark</li>
+  <li>At 23 people, probability > 50%</li>
+  <li>At 70 people, probability ≈ 99.9%</li>
+</ul>
+
+<script>
+  const board = JXG.JSXGraph.initBoard('jxgbox', {
+    boundingbox: [0, 1.1, 65, -0.1],
+    axis: true,
+    showNavigation: false,
+    showCopyright: false
+  });
+
+  // 50% probability line
+  board.create('line', [[0, 0.5], [65, 0.5]], {
+    strokeColor: 'red',
+    strokeWidth: 1,
+    dash: 2
+  });
+
+  // Current group size indicator
+  let currentLine = null;
+
+  function birthdayProbability(n) {
+    if (n > 365) return 1;
+    let prob = 1;
+    for (let i = 0; i < n; i++) {
+      prob *= (365 - i) / 365;
+    }
+    return 1 - prob;
+  }
+
+  // Create probability curve
+  const curve = board.create('functiongraph', [x => birthdayProbability(Math.floor(x))], {
+    strokeColor: 'blue',
+    strokeWidth: 3
+  });
+
+  function updateProbability() {
+    const groupSize = parseInt(document.getElementById('groupSlider').value);
+    document.getElementById('groupValue').textContent = groupSize;
+
+    const prob = birthdayProbability(groupSize);
+    document.getElementById('probValue').textContent = (prob * 100).toFixed(1) + '%';
+
+    // Remove previous line
+    if (currentLine) board.removeObject(currentLine);
+
+    // Add current group size line
+    currentLine = board.create('line', [[groupSize, 0], [groupSize, 1]], {
+      strokeColor: 'green',
+      strokeWidth: 2,
+      dash: 1
+    });
+  }
+
+  document.getElementById('groupSlider').addEventListener('input', updateProbability);
+  updateProbability();
+</script>
+</body>
+</html>
