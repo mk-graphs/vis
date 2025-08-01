@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inflation: Your Money's Shrinking Power</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox { width: 700px; height: 400px; margin: 20px auto; }
+        .comparison-box {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+        .money-box {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+
+    </style>
+</head>
+<body>
+<p><b>Inflation: How your buying power loses over time</b></p>
+
+<div class="comparison-box">
+    <div class="money-box">
+        <h3>1990</h3>
+        <p style="font-size: 24px;">100€</p>
+        <p>Could buy a cart of groceries</p>
+    </div>
+    <div class="money-box shrinking">
+        <h3><span id="currentYear">2025</span></h3>
+        <p style="font-size: 24px;"><span id="equivalentValue">52</span>€</p>
+        <p>Same buying power today</p>
+    </div>
+</div>
+
+<div id="jxgbox" class="jxgbox"></div>
+
+<p>Starting Year: <input type="range" id="yearSlider" min="1970" max="2020" step="5" value="1990"> <span id="yearValue">1990</span></p>
+<p>Inflation Rate: <input type="range" id="inflationSlider" min="1" max="8" step="0.5" value="3"> <span id="inflationValue">3.0</span>% per year</p>
+
+<p><strong>What you're seeing:</strong></p>
+<ul>
+    <li><span style="color:green;">Green line</span>: Your money's buying power over time</li>
+    <li><span style="color:red;">Red line</span>: What things actually cost (inflation)</li>
+    <li>The gap between them shows how you lose purchasing power</li>
+</ul>
+
+<p><strong>Key Insight:</strong> At 3% inflation, your money loses <em>half</em> its buying power every 23 years!</p>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [1970, 120, 2030, 0],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    let purchasingPowerCurve = null;
+    let inflationCurve = null;
+    let startPoint = null;
+    let endPoint = null;
+
+    function updateVisualization() {
+        const startYear = parseInt(document.getElementById('yearSlider').value);
+        const inflationRate = parseFloat(document.getElementById('inflationSlider').value) / 100;
+        const currentYear = 2025;
+        const yearsElapsed = currentYear - startYear;
+
+        document.getElementById('yearValue').textContent = startYear;
+        document.getElementById('inflationValue').textContent = (inflationRate * 100).toFixed(1);
+        document.getElementById('currentYear').textContent = currentYear;
+
+        // Calculate what 100€ from start year is worth today
+        const purchasingPower = 100 / Math.pow(1 + inflationRate, yearsElapsed);
+        document.getElementById('equivalentValue').textContent = purchasingPower.toFixed(0);
+
+        // Remove old curves
+        if (purchasingPowerCurve) board.removeObject(purchasingPowerCurve);
+        if (inflationCurve) board.removeObject(inflationCurve);
+        if (startPoint) board.removeObject(startPoint);
+        if (endPoint) board.removeObject(endPoint);
+
+        // Purchasing power curve (decreasing)
+        purchasingPowerCurve = board.create('functiongraph', [
+            x => 100 / Math.pow(1 + inflationRate, x - startYear)
+        ], {
+            strokeColor: 'green',
+            strokeWidth: 3
+        });
+
+        // Inflation curve
+        inflationCurve = board.create('functiongraph', [
+            x => 100 * Math.pow(1 + inflationRate, x - startYear)
+        ], {
+            strokeColor: 'red',
+            strokeWidth: 3
+        });
+
+        // Mark start and end points
+        startPoint = board.create('point', [startYear, 100], {
+            color: 'blue',
+            size: 4,
+            name: '100€'
+        });
+
+        endPoint = board.create('point', [currentYear, purchasingPower], {
+            color: 'green',
+            size: 4,
+            name: `€${purchasingPower.toFixed(0)}`
+        });
+    }
+
+    // Add axis labels
+    board.create('text', [2000, -10, 'Year'], {
+        fontSize: 12,
+        anchorX: 'middle'
+    });
+
+    board.create('text', [1965, 60, 'Dollar Value'], {
+        fontSize: 12,
+        anchorY: 'middle'
+    });
+
+    // Add legend
+    board.create('text', [1975, 110, 'Green: Buying power of your 100€'], {
+        fontSize: 11,
+        color: 'green'
+    });
+
+    board.create('text', [1975, 105, 'Red: Cost of same goods'], {
+        fontSize: 11,
+        color: 'red'
+    });
+
+    document.getElementById('yearSlider').addEventListener('input', updateVisualization);
+    document.getElementById('inflationSlider').addEventListener('input', updateVisualization);
+
+    updateVisualization();
+</script>
+</body>
+</html>
