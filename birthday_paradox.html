@@ -36,7 +36,7 @@
     dash: 2
   });
 
-  // Current group size indicator
+  // Current group size
   let currentLine = null;
 
   function birthdayProbability(n) {
@@ -48,7 +48,7 @@
     return 1 - prob;
   }
 
-  // Create probability curve
+  // probability curve
   const curve = board.create('functiongraph', [x => birthdayProbability(Math.floor(x))], {
     strokeColor: 'blue',
     strokeWidth: 3

@@ -1,1 +1,1 @@
-# vis
+Some visualization experiments with JSXGraph
