@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Antiderivative Visualization</title>
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 750px;
+    padding: 20px;
+  }
+  #box {
+    width: 700px;
+    height: 450px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+  #explanation {
+    background: #eef6fb;
+    border-left: 4px solid #2196F3;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+    line-height: 1.5;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+
+<h2>Antiderivative (Integral) Visualization</h2>
+
+<div id="explanation">
+  <strong>Concept Explanation:</strong><br />
+  The antiderivative (indefinite integral) of a function f(x) is a family of functions F(x) such that F'(x) = f(x).<br />
+  The constant of integration (C) shifts the antiderivative vertically.<br />
+  This visualization shows both f(x) and its antiderivative F(x).<br />
+  Move the slider to see how the constant C changes the vertical position of F(x).
+</div>
+
+<div id="box"></div>
+
+<script>
+  const board = JXG.JSXGraph.initBoard('box', {
+    boundingbox: [-5, 30, 10, -10],
+    axis: true,
+    showNavigation: false,
+    zoom: { wheel: false },
+    pan: { enabled: false }
+  });
+
+  // Original function: f(x) = 2x + 1
+  function f(x) {
+    return 2 * x + 1;
+  }
+
+  // Antiderivative: F(x) = x^2 + x + C
+  function F(x, C) {
+    return x * x + x + C;
+  }
+
+  // Draw original function f(x)
+  board.create('functiongraph', [f, -5, 10], {
+    strokeColor: 'blue',
+    strokeWidth: 2,
+    name: 'f(x)'
+  });
+
+  // Create the antiderivative graph with dynamic C
+  let C = 0;
+  const antiderivative = board.create('functiongraph', [
+    function (x) { return F(x, C); }, -5, 10
+  ], {
+    strokeColor: 'red',
+    strokeWidth: 2
+  });
+
+  // Create slider for C
+  const slider = board.create('slider', [[-4, -8], [4, -8], [-20, 0, 20]], {
+    name: 'C',
+    snapWidth: 1
+  });
+
+  // Label for current value of C
+  const labelC = board.create('text', [0, -9, 'Constant C = 0'], {
+    fontSize: 14
+  });
+
+  // On slider move: update graph without recreating it
+  slider.on('drag', function () {
+    C = slider.Value();
+    labelC.setText('Constant C = ' + C.toFixed(1));
+
+    // Update function definition of the antiderivative
+    antiderivative.Y = function (x) {
+      return F(x, C);
+    };
+
+    board.update(); // Redraw board
+  });
+</script>
+
+</body>
+</html>

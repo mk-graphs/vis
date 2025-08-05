@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Time Dilation - Special Relativity Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f9f9f9;
+    }
+    .jxgbox {
+      margin: 20px auto 40px auto;
+      border: 1px solid #ccc;
+      width: 700px;
+      height: 500px;
+      background: white;
+    }
+    .theory {
+      max-width: 700px;
+      margin: 20px auto;
+      text-align: left;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Time Dilation in Special Relativity</h1>
+
+<div class="theory">
+  Theory and Explanation:
+  ----------------------------------------
+  According to Einstein's <b>Special Relativity</b>, the passage of time depends on the relative velocity between observers.<br><br>
+  The <b>time dilation formula</b> is:<br>
+  Δt' = Δt / √(1 - v²/c²)<br><br>
+  Where:<br>
+  - Δt: Proper time interval measured by a stationary observer (e.g., on Earth)<br>
+  - Δt': Dilated time interval measured by an observer moving at velocity v<br>
+  - v: Relative velocity between observers<br>
+  - c: Speed of light<br><br>
+  As velocity v approaches the speed of light c, the denominator approaches zero, causing Δt' to increase dramatically.<br>
+  This means moving clocks run slower relative to stationary ones.<br><br>
+  Use the slider below to adjust velocity v and see how Δt' changes dynamically.<br>
+</div>
+
+<div id="box" class="jxgbox"></div>
+
+<script type="text/javascript">
+  // --------------------------
+  // Special Relativity - Time Dilation Visualization
+  //
+  // Formula:
+  // Δt' = Δt / sqrt(1 - v^2 / c^2)
+  //
+  // Where:
+  // Δt  = proper time interval (stationary frame)
+  // Δt' = dilated time interval (moving frame)
+  // v   = relative velocity
+  // c   = speed of light (normalized to 1)
+  // --------------------------
+
+  const board = JXG.JSXGraph.initBoard('box', {
+    boundingbox: [-0.1, 10, 1.1, -1],
+    axis: true,
+    showNavigation: false,
+    showCopyright: false
+  });
+
+  const c = 1;       // speed of light normalized
+  const deltaT = 1;  // proper time (seconds)
+
+  // Slider controlling velocity v between 0 and 0.99c
+  const slider = board.create('slider', [[0.2, 9], [0.9, 9], [0, 0.5, 0.99]], {
+    name: 'v (velocity)',
+    snapWidth: 0.01
+  });
+
+  // Display current velocity and dilated time Δt'
+  board.create('text', [0.05, 8, function() {
+    const v = slider.Value();
+    const gamma = 1 / Math.sqrt(1 - v * v);
+    const dtPrime = deltaT * gamma;
+    return `Selected velocity v = ${v.toFixed(2)}\nDilated time Δt' = ${dtPrime.toFixed(3)} seconds`;
+  }], {
+    fontSize: 16,
+    fixed: false,
+    highlight: false,
+    anchorX: 'left'
+  });
+
+  // Graph of Δt' = Δt / sqrt(1 - v²/c²) from v=0 to v=0.99
+  board.create('functiongraph', [
+    function(v) {
+      if (v >= 1) return NaN;  // velocity cannot exceed c
+      return deltaT / Math.sqrt(1 - v * v);
+    }, 
+    0, 0.99
+  ], {
+    strokeWidth: 2,
+    strokeColor: '#0077cc'
+  });
+
+  // Red point on the curve controlled by slider
+  board.create('point', [
+    function() { return slider.Value(); },
+    function() {
+      const v = slider.Value();
+      return deltaT / Math.sqrt(1 - v * v);
+    }
+  ], {
+    name: "Δt' at v",
+    size: 4,
+    color: 'red',
+    fixed: true,
+    highlight: true,
+    showInfobox: false
+  });
+
+  // Label below graph
+  board.create('text', [0.1, -0.5, "Graph: Dilated time Δt' vs Velocity v"], {
+    fontSize: 14
+  });
+
+</script>
+
+</body>
+</html>
