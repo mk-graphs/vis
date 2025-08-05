@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Logarithm Graph</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraph.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraphcore.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        #jxgbox {
+            width: 800px;
+            height: 500px;
+            border: 2px solid black;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .controls {
+            width: 800px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            width: 150px;
+            font-weight: bold;
+        }
+        .control-group input[type="range"] {
+            width: 300px;
+        }
+        .control-group span {
+            margin-left: 10px;
+            width: 40px;
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .explanation {
+            width: 800px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            line-height: 1.6;
+            text-align: left;
+        }
+        .explanation h3 {
+            color: #333;
+        }
+        .explanation ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .explanation li {
+            margin-bottom: 10px;
+        }
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">The Compression Effect of Logarithms</h2>
+    <div id="jxgbox" class="jxgbox"></div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label for="base-slider">Base (b):</label>
+            <input type="range" id="base-slider" min="1.1" max="5" value="2" step="0.1">
+            <span id="base-value">2.0</span>
+        </div>
+        <div style="font-style: italic; color: #555;">
+            Drag the slider to change the base of the exponential and logarithmic functions.
+        </div>
+    </div>
+
+    <div class="explanation">
+        <h3>Mathematical Principles and Explanations</h3>
+        <p>This interactive graph is designed to demonstrate the core relationship between <b>exponential functions</b> (<code>y = b^x</code>) and <b>logarithmic functions</b> (<code>y = log_b(x)</code>).</p>
+        
+        <ul>
+            <li>
+                <h4>Inverse Functions</h4>
+                <p>The most important takeaway is that the blue curve (exponential function <code>y = b^x</code>) and the red curve (logarithmic function <code>y = log_b(x)</code>) are <b>inverse functions</b> of each other. This means they "undo" each other's operation. For example, <code>log_b(b^x) = x</code>.</p>
+                <p>Geometrically, the graphs of inverse functions are always symmetrical with respect to the line <code>y = x</code>. The gray dashed line in the graph represents <code>y = x</code>, and you can see how the blue and red curves mirror each other across this line.</p>
+            </li>
+            <li>
+                <h4>The Effect of the Base <code>b</code></h4>
+                <p>The slider allows you to change the value of the base <code>b</code>. Observe what happens as you adjust it:</p>
+                <ul>
+                    <li>As <code>b</code> <b>increases</b>, the <b>exponential function</b> (<code>y = b^x</code>) grows <b>faster</b>, and its curve becomes steeper.</li>
+                    <li>Conversely, the <b>logarithmic function</b> (<code>y = log_b(x)</code>) grows <b>slower</b>, and its curve becomes flatter.</li>
+                </ul>
+                <p>This illustrates the "compression effect" of logarithms, which allows them to effectively handle and represent values that span a vast range, such as in the Richter scale for earthquakes or decibels for sound intensity.</p>
+            </li>
+            <li>
+                <h4>Domain and Range</h4>
+                <p>Another key relationship between these functions is in their domain and range:</p>
+                <ul>
+                    <li>The <b>exponential function's</b> (<code>y = b^x</code>) <b>domain</b> (all possible x-values) is all real numbers, and its <b>range</b> (all possible y-values) is all positive numbers.</li>
+                    <li>The <b>logarithmic function's</b> (<code>y = log_b(x)</code>) <b>domain</b> is all positive numbers, and its <b>range</b> is all real numbers.</li>
+                </ul>
+                <p>This is a fundamental property of inverse functions: the domain of one is the range of the other, and vice versa.</p>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        // --- 1. JSXGraph Board Setup ---
+        const board = JXG.JSXGraph.initBoard('jxgbox', {
+            boundingbox: [-10, 20, 20, -10],
+            axis: true,
+            showCopyright: false,
+            pan: { enabled: false },
+            zoom: { enabled: false }
+        });
+        
+        // --- 2. Sliders and Control Logic ---
+        const baseSlider = document.getElementById('base-slider');
+        const baseValueSpan = document.getElementById('base-value');
+        
+        let base = parseFloat(baseSlider.value);
+
+        // Function to update displayed values and redraw graphs
+        function updateGraphs() {
+            base = parseFloat(baseSlider.value);
+            baseValueSpan.textContent = base.toFixed(1);
+            board.update();
+        }
+
+        baseSlider.addEventListener('input', updateGraphs);
+        
+        // --- 3. Mathematical Functions ---
+        
+        // Exponential function: y = b^x
+        const expFunc = function(x) {
+            return Math.pow(base, x);
+        };
+        
+        // Logarithmic function: y = log_b(x)
+        const logFunc = function(x) {
+            return Math.log(x) / Math.log(base);
+        };
+        
+        // --- 4. Drawing the Graph Elements ---
+        
+        // Draw the line y = x, for showing symmetry
+        board.create('functiongraph', [function(x){ return x; }], {
+            strokeColor: '#aaa',
+            strokeWidth: 1,
+            dash: 2,
+            fixed: true
+        });
+        
+        // Draw the exponential function
+        board.create('functiongraph', [expFunc], {
+            strokeColor: 'blue',
+            strokeWidth: 3,
+            name: 'y = b^x',
+            withLabel: true,
+            label: {
+                position: 'urt',
+                offset: [-10, -10]
+            }
+        });
+        
+        // Draw the logarithmic function
+        board.create('functiongraph', [logFunc], {
+            strokeColor: 'red',
+            strokeWidth: 3,
+            name: 'y = log_b(x)',
+            withLabel: true,
+            label: {
+                position: 'llt',
+                offset: [10, 10]
+            }
+        });
+        
+        // Initial graph update
+        updateGraphs();
+    </script>
+</body>
+</html>

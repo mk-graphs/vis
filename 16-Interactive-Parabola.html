@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Interactive Parabola y = ax² + bx + c </title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #box {
+      width: 600px;
+      height: 450px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    .slider-container {
+      margin-bottom: 10px;
+    }
+    label {
+      margin-right: 10px;
+    }
+    .value {
+      font-weight: bold;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Interactive Parabola: y = ax² + bx + c </h2>
+  <p>Use the sliders to change parameters a, b, and c and see the parabola update in real time.</p>
+
+  <div id="box"></div>
+
+  <div class="slider-container">
+    <label for="aRange">a: <span id="aValue" class="value">1</span></label>
+    <input type="range" id="aRange" min="-2" max="2" step="0.01" value="1" />
+  </div>
+  <div class="slider-container">
+    <label for="bRange">b: <span id="bValue" class="value">0</span></label>
+    <input type="range" id="bRange" min="-5" max="5" step="0.01" value="0" />
+  </div>
+  <div class="slider-container">
+    <label for="cRange">c: <span id="cValue" class="value">0</span></label>
+    <input type="range" id="cRange" min="-10" max="10" step="0.01" value="0" />
+  </div>
+
+  <script>
+    const board = JXG.JSXGraph.initBoard('box', {
+      boundingbox: [-10, 20, 10, -10],
+      axis: true,
+      showNavigation: false,
+      zoom: { wheel: false, needshift: false, pinch: false },
+      pan: { enabled: false }
+    });
+
+    let a = 1, b = 0, c = 0;
+
+    let parabola = board.create('functiongraph', [function(x) {
+      return a*x*x + b*x + c;
+    }], {strokeWidth: 3, strokeColor: 'blue'});
+
+    let vertex = board.create('point', [-b/(2*a), c - (b*b)/(4*a)], {
+      name: 'Vertex',
+      size: 4,
+      color: 'red',
+      fixed: true,
+      highlight: true,
+      withLabel: true
+    });
+
+    let axis = board.create('line', [[-b/(2*a), -10], [-b/(2*a), 20]], {
+      strokeColor: 'orange',
+      strokeWidth: 2,
+      dash: 2,
+      fixed: true
+    });
+
+    function update() {
+      a = parseFloat(document.getElementById('aRange').value);
+      b = parseFloat(document.getElementById('bRange').value);
+      c = parseFloat(document.getElementById('cRange').value);
+
+      document.getElementById('aValue').textContent = a.toFixed(2);
+      document.getElementById('bValue').textContent = b.toFixed(2);
+      document.getElementById('cValue').textContent = c.toFixed(2);
+
+      parabola.Y = function(x) {
+        return a*x*x + b*x + c;
+      };
+      parabola.fullUpdate();
+
+      // 更新顶点坐标
+      vertex.setCoords([-b/(2*a), c - (b*b)/(4*a)]);
+      // 更新对称轴位置
+      axis.point1.setCoords([-b/(2*a), -10]);
+      axis.point2.setCoords([-b/(2*a), 20]);
+
+      board.update();
+    }
+
+    document.getElementById('aRange').addEventListener('input', update);
+    document.getElementById('bRange').addEventListener('input', update);
+    document.getElementById('cRange').addEventListener('input', update);
+
+  </script>
+
+</body>
+</html>

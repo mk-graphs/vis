@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sine and Cosine Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #box {
+      width: 700px;
+      height: 400px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    label {
+      margin-right: 15px;
+    }
+    #equation {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Sine and Cosine Graph</h2>
+  <p>Choose a function and adjust the parameters to see how the graph changes.</p>
+
+  <div id="equation">y = 1·sin(1x + 0) + 0</div>
+
+  <div id="box"></div>
+
+  <div>
+    <label>Function:
+      <select id="funcType">
+        <option value="sin">Sine: y = A·sin(Bx + C) + D</option>
+        <option value="cos">Cosine: y = A·cos(Bx + C) + D</option>
+      </select>
+    </label>
+  </div>
+
+  <div>
+    <label>A (Amplitude):
+      <input type="range" id="aSlider" min="-5" max="5" step="0.1" value="1">
+      <span id="aVal">1</span>
+    </label>
+    <label>B (Frequency):
+      <input type="range" id="bSlider" min="0.1" max="5" step="0.1" value="1">
+      <span id="bVal">1</span>
+    </label>
+    <label>C (Phase Shift):
+      <input type="range" id="cSlider" min="-10" max="10" step="0.1" value="0">
+      <span id="cVal">0</span>
+    </label>
+    <label>D (Vertical Shift):
+      <input type="range" id="dSlider" min="-5" max="5" step="0.1" value="0">
+      <span id="dVal">0</span>
+    </label>
+  </div>
+
+  <script>
+    const board = JXG.JSXGraph.initBoard('box', {
+      boundingbox: [-10, 10, 10, -10],
+      axis: true
+    });
+
+    let graph;
+
+    function updateGraph() {
+      const type = document.getElementById('funcType').value;
+      const A = parseFloat(document.getElementById('aSlider').value);
+      const B = parseFloat(document.getElementById('bSlider').value);
+      const C = parseFloat(document.getElementById('cSlider').value);
+      const D = parseFloat(document.getElementById('dSlider').value);
+
+      // Update value displays
+      document.getElementById('aVal').textContent = A;
+      document.getElementById('bVal').textContent = B;
+      document.getElementById('cVal').textContent = C;
+      document.getElementById('dVal').textContent = D;
+
+      // Update equation text
+      const funcName = type === 'sin' ? 'sin' : 'cos';
+      const equation = `y = ${A}·${funcName}(${B}x ${C >= 0 ? '+ ' + C : '- ' + Math.abs(C)}) ${D >= 0 ? '+ ' + D : '- ' + Math.abs(D)}`;
+      document.getElementById('equation').textContent = equation;
+
+      // Remove old graph
+      if (graph) board.removeObject(graph);
+
+      const f = (x) => {
+        return type === 'sin'
+          ? A * Math.sin(B * x + C) + D
+          : A * Math.cos(B * x + C) + D;
+      };
+
+      graph = board.create('functiongraph', [f, -10, 10], {
+        strokeWidth: 2,
+        strokeColor: type === 'sin' ? 'blue' : 'orange'
+      });
+    }
+
+    // Initialize
+    updateGraph();
+
+    // Add listeners
+    document.getElementById('funcType').addEventListener('change', updateGraph);
+    document.getElementById('aSlider').addEventListener('input', updateGraph);
+    document.getElementById('bSlider').addEventListener('input', updateGraph);
+    document.getElementById('cSlider').addEventListener('input', updateGraph);
+    document.getElementById('dSlider').addEventListener('input', updateGraph);
+
+    // Mouse tracker
+    const tracker = board.create('point', [0, 0], {
+      name: '',
+      visible: false,
+      size: 2,
+      color: 'red',
+      fixed: true,
+      showInfoBox: false
+    });
+
+    board.on('mousemove', function(e) {
+      const absPos = JXG.getPosition(e, 0);
+      const x = board.canvasXToUsr(absPos[0]);
+      const y = board.canvasYToUsr(absPos[1]);
+      if (x < -10 || x > 10 || y < -10 || y > 10) {
+        tracker.setAttribute({ visible: false });
+        return;
+      }
+      tracker.moveTo([x, y]);
+      tracker.setAttribute({
+        visible: true,
+        name: `(${x.toFixed(2)}, ${y.toFixed(2)})`
+      });
+    });
+  </script>
+
+</body>
+</html>
