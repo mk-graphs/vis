@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Compound Effect of Habits</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+  <style>
+    #jxgbox {
+      width: 900px;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+    .description {
+      max-width: 900px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 1em;
+    }
+    .quiz {
+      font-weight: bold;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="description">
+  <h2>Compound Effect of Small Daily Changes</h2>
+  <p>
+    This graph shows how small daily improvements or declines compound over one year (365 days).
+    The green curve represents improvement, and the red curve represents decline.
+  </p>
+  <p>
+    Adjust the sliders to change the daily rates and see how the final outcome changes.
+  </p>
+  <p class="quiz">
+    <b>Question:</b> What happens if you improve by just 1% per day? What about declining by 1% per day?
+  </p>
+</div>
+
+<div id="jxgbox"></div>
+
+<p>
+  Daily Improvement Rate: <span id="improvementVal">0.0100</span> /day<br>
+  Daily Decline Rate: <span id="declineVal">0.0100</span> /day<br>
+  Final Improvement Value after 365 days: <span id="finalUpVal">--</span><br>
+  Final Decline Value after 365 days: <span id="finalDownVal">--</span>
+</p>
+
+<script>
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+  boundingbox: [-10, 40, 370, -5], // x from 0 to 365 days
+  axis: true,
+  keepaspectratio: false
+});
+
+// Sliders
+const improvementSlider = board.create('slider', [[10, 35], [200, 35], [0, 0.01, 0.02]], {
+  name: 'Daily Improvement Rate',
+  snapWidth: 0.0001,
+  suffix: '/day',
+  fillColor: '#66cc66'
+});
+
+const declineSlider = board.create('slider', [[10, 32], [200, 32], [0, 0.01, 0.02]], {
+  name: 'Daily Decline Rate',
+  snapWidth: 0.0001,
+  suffix: '/day',
+  fillColor: '#cc6666'
+});
+
+// Improvement curve
+const improvementCurve = board.create('functiongraph', [
+  function(day) {
+    return Math.pow(1 + improvementSlider.Value(), day);
+  },
+  0, 365
+], {
+  strokeColor: 'green',
+  strokeWidth: 3
+});
+
+// Decline curve
+const declineCurve = board.create('functiongraph', [
+  function(day) {
+    return Math.pow(1 - declineSlider.Value(), day);
+  },
+  0, 365
+], {
+  strokeColor: 'red',
+  strokeWidth: 3
+});
+
+// Update displayed values
+function updateLabels() {
+  const impRate = improvementSlider.Value();
+  const decRate = declineSlider.Value();
+  const finalUp = Math.pow(1 + impRate, 365);
+  const finalDown = Math.pow(1 - decRate, 365);
+
+  document.getElementById("improvementVal").innerText = impRate.toFixed(4);
+  document.getElementById("declineVal").innerText = decRate.toFixed(4);
+  document.getElementById("finalUpVal").innerText = finalUp.toFixed(2);
+  document.getElementById("finalDownVal").innerText = finalDown.toFixed(2);
+
+  board.update();
+}
+
+// Attach event listeners
+improvementSlider.on('drag', updateLabels);
+declineSlider.on('drag', updateLabels);
+
+// Initial update
+updateLabels();
+</script>
+
+</body>
+</html>

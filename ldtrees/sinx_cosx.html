@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>sin(x)/x vs cos(x)/x</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 600px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<p><b>Which is sin(x)/x and which is cos(x)/x?</b></h>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li>Both have infinite oscillations with decreasing amplitude.</li>
+    <li><code>sin(x)/x → 1</code> at x = 0 (smooth); <code>cos(x)/x</code> has a vertical asymptote.</li>
+    <li><span style="color:blue;">Blue curve</span>: <code>sin(x)/x</code></li>
+    <li><span style="color:red;">Red curve</span>: <code>cos(x)/x</code></li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-10, 5, 10, -5],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    board.create('functiongraph', [
+        x => x === 0 ? 1 : Math.sin(x) / x
+    ], { strokeColor: 'blue', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => Math.cos(x) / x
+    ], { strokeColor: 'red', strokeWidth: 2 });
+</script>
+
+</body>
+</html>

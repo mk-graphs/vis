@@ -1,0 +1,603 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Interactive Polynomial Visualization</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.4.4/distrib/jsxgraph.css" />
+<style>
+  #container {
+    width: 1200px;
+    margin: 0 auto;
+  }
+  #box {
+    width: 800px;
+    height: 600px;
+    border: 1px solid #ccc;
+    float: left;
+  }
+  #controls {
+    float: left;
+    width: 350px;
+    margin-left: 20px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+  }
+  .control-group {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .param-row {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+  }
+  .param-label {
+    width: 60px;
+    font-family: monospace;
+  }
+  input[type="number"] {
+    width: 80px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin-left: 10px;
+  }
+  .color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <h2>Interactive Polynomial Functions Visualization</h2>
+  <div id="box"></div>
+  <div id="controls">
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.4.4/distrib/jsxgraphcore.js"></script>
+<script>
+(function() {
+  const board = JXG.JSXGraph.initBoard('box', {
+    boundingbox: [-10, 10, 10, -10],
+    axis: true,
+    showNavigation: true,
+    keepaspectratio: true,
+    pan: { enabled: true },
+    zoom: { enabled: true }
+  });
+
+  // 参数配置
+  const config = {
+    colors: {
+      linear: '#FF4444',
+      quadratic: '#44AA44',
+      cubic: '#4444FF',
+      quartic: '#AA44AA'
+    },
+    decimal: 1
+  };
+
+
+  let params = {
+    linear: { k: 1, b: 0 },
+    quadratic: { a: 1, b: 0, c: 0 },
+    cubic: { a: 1, b: 0, c: 0, d: 0 },
+    quartic: { a: 1, b: 0, c: 0, d: 0, e: 0 }
+  };
+
+  function createControlPanel() {
+    const controls = document.getElementById('controls');
+    
+    controls.appendChild(createControlGroup(
+      'Linear Function', 
+      'linear', 
+      ['k', 'b'],
+      params.linear
+    ));
+
+    controls.appendChild(createControlGroup(
+      'Quadratic Function', 
+      'quadratic', 
+      ['a', 'b', 'c'],
+      params.quadratic
+    ));
+
+    controls.appendChild(createControlGroup(
+      'Cubic Function', 
+      'cubic', 
+      ['a', 'b', 'c', 'd'],
+      params.cubic
+    ));
+
+    controls.appendChild(createControlGroup(
+      'Quartic Function', 
+      'quartic', 
+      ['a', 'b', 'c', 'd', 'e'],
+      params.quartic
+    ));
+
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('change', updateParamsFromInputs);
+    });
+  }
+
+  function createControlGroup(title, type, paramsList, values) {
+    const group = document.createElement('div');
+    group.className = 'control-group';
+    
+    const color = config.colors[type];
+    group.innerHTML = `
+      <div style="color:${color}; margin-bottom:12px; font-weight:bold;">
+        <span class="color-dot" style="background:${color}"></span>${title}
+      </div>
+      ${paramsList.map(p => `
+        <div class="param-row">
+          <div class="param-label">${p}:</div>
+          <input type="number" 
+                 data-type="${type}" 
+                 data-param="${p}" 
+                 value="${values[p].toFixed(config.decimal)}"
+                 step="0.1"
+                 ${p === 'a' || p === 'k' ? 'required' : ''}>
+        </div>
+      `).join('')}
+    `;
+    return group;
+  }
+
+  // 一次函数
+  const linear = {
+    graph: board.create('functiongraph', [x => params.linear.k * x + params.linear.b], 
+      { strokeColor: config.colors.linear, strokeWidth: 2 }),
+    p1: board.create('point', [-8, () => params.linear.k * -8 + params.linear.b], 
+      { color: config.colors.linear, size: 4, fixed: false }),
+    p2: board.create('point', [0, () => params.linear.b], 
+      { color: config.colors.linear, size: 4, fixed: false })
+  };
+
+  linear.p1.on('drag', function() {
+    const dx = this.X();
+    const dy = this.Y();
+    params.linear.k = (dy - params.linear.b) / dx;
+    if(Math.abs(params.linear.k) < 0.1) params.linear.k = params.linear.k < 0 ? -0.1 : 0.1;
+    updateAll();
+  });
+
+  linear.p2.on('drag', function() {
+    params.linear.b = this.Y();
+    updateAll();
+  });
+
+  // 二次函数
+  const quadratic = {
+    graph: board.create('functiongraph', [x => params.quadratic.a*x*x + params.quadratic.b*x + params.quadratic.c], 
+      { strokeColor: config.colors.quadratic, strokeWidth: 2 }),
+    vertex: board.create('point', [() => -params.quadratic.b/(2*params.quadratic.a), 
+      () => params.quadratic.c - (params.quadratic.b**2)/(4*params.quadratic.a)], 
+      { color: config.colors.quadratic, size: 4, fixed: false }),
+    control: board.create('point', [() => -params.quadratic.b/(2*params.quadratic.a) + 1, 
+      () => params.quadratic.a*1**2 + params.quadratic.b*1 + params.quadratic.c], 
+      { color: config.colors.quadratic, size: 4, fixed: false })
+  };
+
+  quadratic.vertex.on('drag', function() {
+    const h = this.X();
+    const k = this.Y();
+    params.quadratic.b = -2 * params.quadratic.a * h;
+    params.quadratic.c = params.quadratic.a * h**2 + k;
+    updateAll();
+  });
+
+  quadratic.control.on('drag', function() {
+    const x = this.X();
+    const y = this.Y();
+    const h = quadratic.vertex.X();
+    params.quadratic.a = (y - quadratic.vertex.Y()) / ((x - h)**2);
+    if(Math.abs(params.quadratic.a) < 0.1) params.quadratic.a = params.quadratic.a < 0 ? -0.1 : 0.1;
+    params.quadratic.b = -2 * params.quadratic.a * h;
+    params.quadratic.c = params.quadratic.a * h**2 + quadratic.vertex.Y();
+    updateAll();
+  });
+
+  // 三次函数
+  const cubic = {
+    graph: board.create('functiongraph', [x => params.cubic.a*x**3 + params.cubic.b*x**2 + params.cubic.c*x + params.cubic.d], 
+      { strokeColor: config.colors.cubic, strokeWidth: 2 }),
+    points: {
+      a: board.create('point', [-9, () => params.cubic.a], { color: config.colors.cubic, size: 4, fixed: false }),
+      b: board.create('point', [-7, () => params.cubic.b], { color: config.colors.cubic, size: 4, fixed: false }),
+      c: board.create('point', [-5, () => params.cubic.c], { color: config.colors.cubic, size: 4, fixed: false }),
+      d: board.create('point', [-3, () => params.cubic.d], { color: config.colors.cubic, size: 4, fixed: false })
+    }
+  };
+
+  Object.keys(cubic.points).forEach(key => {
+    cubic.points[key].on('drag', function() {
+      params.cubic[key] = this.Y();
+      if(key === 'a' && Math.abs(params.cubic.a) < 0.1) {
+        params.cubic.a = params.cubic.a < 0 ? -0.1 : 0.1;
+      }
+      updateAll();
+    });
+  });
+
+  // 四次函数
+  const quartic = {
+    graph: board.create('functiongraph', [x => params.quartic.a*x**4 + params.quartic.b*x**3 + params.quartic.c*x**2 + params.quartic.d*x + params.quartic.e], 
+      { strokeColor: config.colors.quartic, strokeWidth: 2 }),
+    points: {
+      a: board.create('point', [3, () => params.quartic.a], { color: config.colors.quartic, size: 4, fixed: false }),
+      b: board.create('point', [5, () => params.quartic.b], { color: config.colors.quartic, size: 4, fixed: false }),
+      c: board.create('point', [7, () => params.quartic.c], { color: config.colors.quartic, size: 4, fixed: false }),
+      d: board.create('point', [9, () => params.quartic.d], { color: config.colors.quartic, size: 4, fixed: false }),
+      e: board.create('point', [10, () => params.quartic.e], { color: config.colors.quartic, size: 4, fixed: false })
+    }
+  };
+
+  Object.keys(quartic.points).forEach(key => {
+    quartic.points[key].on('drag', function() {
+      params.quartic[key] = this.Y();
+      if(key === 'a' && Math.abs(params.quartic.a) < 0.1) {
+        params.quartic.a = params.quartic.a < 0 ? -0.1 : 0.1;
+      }
+      updateAll();
+    });
+  });
+
+  // ================== 更新逻辑 ==================
+  function updateParamsFromInputs() {
+    document.querySelectorAll('input').forEach(input => {
+      const type = input.dataset.type;
+      const param = input.dataset.param;
+      let value = parseFloat(input.value);
+      
+      if ((param === 'a' || param === 'k') && Math.abs(value) < 0.1) {
+        value = value < 0 ? -0.1 : 0.1;
+        input.value = value.toFixed(config.decimal);
+      }
+      
+      params[type][param] = value;
+    });
+    updateAll();
+  }
+
+  function updateAll() {
+    // 更新控制点位置
+    linear.p1.setPosition(JXG.COORDS_BY_USER, [-8, params.linear.k * -8 + params.linear.b]);
+    linear.p2.setPosition(JXG.COORDS_BY_USER, [0, params.linear.b]);
+    
+    quadratic.vertex.setPosition(JXG.COORDS_BY_USER, [
+      -params.quadratic.b/(2*params.quadratic.a),
+      params.quadratic.c - (params.quadratic.b**2)/(4*params.quadratic.a)
+    ]);
+    quadratic.control.setPosition(JXG.COORDS_BY_USER, [
+      -params.quadratic.b/(2*params.quadratic.a) + 1,
+      params.quadratic.a*1**2 + params.quadratic.b*1 + params.quadratic.c
+    ]);
+
+    Object.keys(cubic.points).forEach(k => {
+      cubic.points[k].setPosition(JXG.COORDS_BY_USER, [cubic.points[k].X(), params.cubic[k]]);
+    });
+
+    Object.keys(quartic.points).forEach(k => {
+      quartic.points[k].setPosition(JXG.COORDS_BY_USER, [quartic.points[k].X(), params.quartic[k]]);
+    });
+
+    // 更新输入框
+    document.querySelectorAll('input').forEach(input => {
+      const type = input.dataset.type;
+      const param = input.dataset.param;
+      input.value = params[type][param].toFixed(config.decimal);
+    });
+
+    // 更新图形
+    board.update();
+  }
+
+  // 初始化
+  createControlPanel();
+  updateAll();
+})();
+</script>
+</body>
+</html>
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Visualisation of the effect of constant and exponential variation on the graphs of polynomial functions</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.4.4/distrib/jsxgraph.css" />
+<style>
+  #box {
+    width: 800px;
+    height: 500px;
+    border: 1px solid #ccc;
+    float: left;
+  }
+  #equations {
+    float: left;
+    margin-left: 20px;
+    font-family: monospace;
+    line-height: 1.6em;
+  }
+  .eq-line {
+    margin-bottom: 10px;
+  }
+  .color-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<h2>Visualisation of the effect of constant and exponential variation on the graphs of polynomial functions</h2>
+<div id="box"></div>
+<div id="equations">
+  <div class="eq-line" id="eq1"><span class="color-box" style="background: red;"></span> y = kx + b</div>
+  <div class="eq-line" id="eq2"><span class="color-box" style="background: green;"></span> y = a x² + b x + c</div>
+  <div class="eq-line" id="eq3"><span class="color-box" style="background: blue;"></span> y = a x³ + b x² + c x + d</div>
+  <div class="eq-line" id="eq4"><span class="color-box" style="background: purple;"></span> y = a x⁴ + b x³ + c x² + d x + e</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.4.4/distrib/jsxgraphcore.js"></script>
+<script>
+  (function() {
+    const board = JXG.JSXGraph.initBoard('box', {
+      boundingbox: [-10, 10, 10, -10],
+      axis:true,
+      showNavigation: false,
+      keepaspectratio:true,
+      pan: true,
+      zoom: true,
+    });
+
+ 
+    let params = {
+      linear: {k: 1, b: 0},
+      quadratic: {a: 1, b: 0, c: 0},
+      cubic: {a: 1, b: 0, c: 0, d: 0},
+      quartic: {a: 1, b: 0, c: 0, d: 0, e: 0}
+    };
+
+ 
+    function createSlider(x, y, min, max, step, initial, ondrag) {
+      return board.create('point', [x, initial], {
+        name: '',
+        size: 4,
+        fixed: false,
+        snapToGrid: true,
+        drag: ondrag,
+        showInfobox: false,
+        withLabel: false,
+        restrictBoundingBox: board.getBoundingBox()
+      });
+    }
+
+   
+    let kPoint = board.create('point', [-8, params.linear.k * -8 + params.linear.b], {color:'red', name:'k', size:4, fixed:false, withLabel:false});
+    let bPoint = board.create('point', [0, params.linear.b], {color:'red', name:'b', size:4, fixed:false, withLabel:false});
+
+    // 线性函数图形
+    let linearFunc = board.create('functiongraph', function(x) {
+      return params.linear.k * x + params.linear.b;
+    }, {strokeColor:'red', strokeWidth:2});
+
+    // 拖动更新线性参数
+    kPoint.on('drag', function() {
+      let dx = kPoint.X();
+      let dy = kPoint.Y();
+      let newK = (dy - params.linear.b) / dx;
+      if (Math.abs(newK) < 0.01) newK = (newK < 0) ? -0.01 : 0.01; // 防止0
+      params.linear.k = newK;
+      updateAll();
+    });
+
+    bPoint.on('drag', function() {
+      let newB = bPoint.Y();
+      params.linear.b = newB;
+      updateAll();
+    });
+
+    // --- 二次函数 y = a x² + b x + c ---
+    // 控制顶点和开口大小
+    // 通过顶点点和一个辅助点确定a, b, c
+    let vertexQ = board.create('point', [0, params.quadratic.c], {color:'green', size:4});
+    let controlQ = board.create('point', [1, params.quadratic.a*1*1 + params.quadratic.b*1 + params.quadratic.c], {color:'green', size:4});
+
+    let quadraticFunc = board.create('functiongraph', function(x) {
+      return params.quadratic.a*x*x + params.quadratic.b*x + params.quadratic.c;
+    }, {strokeColor:'green', strokeWidth:2});
+
+    vertexQ.on('drag', function() {
+      // 移动顶点，改变b和c（a不变）
+      let h = vertexQ.X();
+      let k = vertexQ.Y();
+      // 从顶点形式转成标准形式 y=a(x-h)^2 + k => y=ax^2 -2ah x + a h^2 + k
+      params.quadratic.b = -2*params.quadratic.a*h;
+      params.quadratic.c = params.quadratic.a*h*h + k;
+      updateAll();
+      updateControlPointQ();
+    });
+
+    controlQ.on('drag', function() {
+      // 调整a开口大小，保持顶点不变，控制点纵坐标y控制a
+      let x1 = controlQ.X();
+      let y1 = controlQ.Y();
+      let h = vertexQ.X();
+      let k = vertexQ.Y();
+      let newA = (y1 - k) / ((x1 - h)*(x1 - h));
+      if (Math.abs(newA) < 0.01) newA = (newA < 0) ? -0.01 : 0.01;
+      params.quadratic.a = newA;
+      // 重新计算b,c
+      params.quadratic.b = -2*params.quadratic.a*h;
+      params.quadratic.c = params.quadratic.a*h*h + k;
+      updateAll();
+    });
+
+    function updateControlPointQ() {
+      let h = vertexQ.X();
+      let k = vertexQ.Y();
+      let x1 = h + 1;
+      let y1 = params.quadratic.a*(x1 - h)*(x1 - h) + k;
+      controlQ.setPosition(JXG.COORDS_BY_USER, [x1, y1]);
+    }
+
+    updateControlPointQ();
+
+    // 二次函数整体移动 (拖动函数图形，改变b,c，a不变)
+    quadraticFunc.on('mousedown', function(e) {
+      quadraticFunc.dragging = true;
+      quadraticFunc.startPos = e;
+      quadraticFunc.startVertex = [vertexQ.X(), vertexQ.Y()];
+    });
+    board.on('mouseup', function() {
+      quadraticFunc.dragging = false;
+    });
+    board.on('mousemove', function(e) {
+      if (quadraticFunc.dragging) {
+        let dx = board.getCoordsTopLeftCorner(e).usrCoords[1] - quadraticFunc.startPos.usrCoords[1];
+        let dy = board.getCoordsTopLeftCorner(e).usrCoords[2] - quadraticFunc.startPos.usrCoords[2];
+        // 移动顶点
+        let newH = quadraticFunc.startVertex[0] + dx;
+        let newK = quadraticFunc.startVertex[1] + dy;
+        vertexQ.setPosition(JXG.COORDS_BY_USER, [newH, newK]);
+        quadraticFunc.startPos = board.getCoordsTopLeftCorner(e);
+        updateAll();
+        updateControlPointQ();
+      }
+    });
+
+    // --- 三次函数 y = a x³ + b x² + c x + d ---
+    // 控制点：a, b, c, d 四个参数均用点控制
+    // 创建四个点横坐标固定，纵坐标控制参数大小
+    let cubicPoints = {
+      a: board.create('point', [-9, params.cubic.a], {color:'blue', size:4, name:'a'}),
+      b: board.create('point', [-7, params.cubic.b], {color:'blue', size:4, name:'b'}),
+      c: board.create('point', [-5, params.cubic.c], {color:'blue', size:4, name:'c'}),
+      d: board.create('point', [-3, params.cubic.d], {color:'blue', size:4, name:'d'}),
+    };
+
+    let cubicFunc = board.create('functiongraph', function(x) {
+      return params.cubic.a*x*x*x + params.cubic.b*x*x + params.cubic.c*x + params.cubic.d;
+    }, {strokeColor:'blue', strokeWidth:2});
+
+    for (let key in cubicPoints) {
+      cubicPoints[key].on('drag', function() {
+        let val = cubicPoints[key].Y();
+        if (key === 'a' && Math.abs(val) < 0.01) val = (val < 0) ? -0.01 : 0.01;
+        params.cubic[key] = val;
+        updateAll();
+      });
+    }
+
+    // 三次函数整体拖动实现：移动d参数（常数项）
+    cubicFunc.on('mousedown', function(e) {
+      cubicFunc.dragging = true;
+      cubicFunc.startPos = e;
+      cubicFunc.startD = params.cubic.d;
+    });
+    board.on('mouseup', function() {
+      cubicFunc.dragging = false;
+    });
+    board.on('mousemove', function(e) {
+      if (cubicFunc.dragging) {
+        let dy = board.getCoordsTopLeftCorner(e).usrCoords[2] - cubicFunc.startPos.usrCoords[2];
+        params.cubic.d = cubicFunc.startD + dy;
+        cubicPoints.d.setPosition(JXG.COORDS_BY_USER, [cubicPoints.d.X(), params.cubic.d]);
+        updateAll();
+      }
+    });
+
+    // --- 四次函数 y = a x⁴ + b x³ + c x² + d x + e ---
+    // 同三次函数，五个参数分别用点控制
+    let quarticPoints = {
+      a: board.create('point', [9, params.quartic.a], {color:'purple', size:4, name:'a'}),
+      b: board.create('point', [7, params.quartic.b], {color:'purple', size:4, name:'b'}),
+      c: board.create('point', [5, params.quartic.c], {color:'purple', size:4, name:'c'}),
+      d: board.create('point', [3, params.quartic.d], {color:'purple', size:4, name:'d'}),
+      e: board.create('point', [1, params.quartic.e], {color:'purple', size:4, name:'e'}),
+    };
+
+    let quarticFunc = board.create('functiongraph', function(x) {
+      return params.quartic.a*x*x*x*x + params.quartic.b*x*x*x + params.quartic.c*x*x + params.quartic.d*x + params.quartic.e;
+    }, {strokeColor:'purple', strokeWidth:2});
+
+    for (let key in quarticPoints) {
+      quarticPoints[key].on('drag', function() {
+        let val = quarticPoints[key].Y();
+        if (key === 'a' && Math.abs(val) < 0.01) val = (val < 0) ? -0.01 : 0.01;
+        params.quartic[key] = val;
+        updateAll();
+      });
+    }
+
+    // 四次函数整体拖动（移动e参数）
+    quarticFunc.on('mousedown', function(e) {
+      quarticFunc.dragging = true;
+      quarticFunc.startPos = e;
+      quarticFunc.startE = params.quartic.e;
+    });
+    board.on('mouseup', function() {
+      quarticFunc.dragging = false;
+    });
+    board.on('mousemove', function(e) {
+      if (quarticFunc.dragging) {
+        let dy = board.getCoordsTopLeftCorner(e).usrCoords[2] - quarticFunc.startPos.usrCoords[2];
+        params.quartic.e = quarticFunc.startE + dy;
+        quarticPoints.e.setPosition(JXG.COORDS_BY_USER, [quarticPoints.e.X(), params.quartic.e]);
+        updateAll();
+      }
+    });
+
+    // display 
+    function updateAll() {
+      linearFunc.updateCurve();
+      quadraticFunc.updateCurve();
+      cubicFunc.updateCurve();
+      quarticFunc.updateCurve();
+
+      //y=kx+b contral points
+      kPoint.setPosition(JXG.COORDS_BY_USER, [-8, params.linear.k * -8 + params.linear.b]);
+      bPoint.setPosition(JXG.COORDS_BY_USER, [2, params.linear.k * 2 + params.linear.b]);
+
+      // y=ax^2+bx+c contral points
+      updateControlPointQ();
+
+      // y=ax^3+bx^2+cx+d contral points
+      cubicPoints.a.setPosition(JXG.COORDS_BY_USER, [cubicPoints.a.X(), params.cubic.a]);
+      cubicPoints.b.setPosition(JXG.COORDS_BY_USER, [cubicPoints.b.X(), params.cubic.b]);
+      cubicPoints.c.setPosition(JXG.COORDS_BY_USER, [cubicPoints.c.X(), params.cubic.c]);
+      cubicPoints.d.setPosition(JXG.COORDS_BY_USER, [cubicPoints.d.X(), params.cubic.d]);
+
+      // y=ax^4+bx^3+cx^2+dx+e contral points
+      quarticPoints.a.setPosition(JXG.COORDS_BY_USER, [quarticPoints.a.X(), params.quartic.a]);
+      quarticPoints.b.setPosition(JXG.COORDS_BY_USER, [quarticPoints.b.X(), params.quartic.b]);
+      quarticPoints.c.setPosition(JXG.COORDS_BY_USER, [quarticPoints.c.X(), params.quartic.c]);
+      quarticPoints.d.setPosition(JXG.COORDS_BY_USER, [quarticPoints.d.X(), params.quartic.d]);
+      quarticPoints.e.setPosition(JXG.COORDS_BY_USER, [quarticPoints.e.X(), params.quartic.e]);
+
+      // 更新右边方程文字内容，保留小数点后1位
+      document.getElementById('eq1').innerHTML = `<span class="color-box" style="background: red;"></span> y = ${params.linear.k.toFixed(1)} x + ${params.linear.b.toFixed(1)}`;
+      document.getElementById('eq2').innerHTML = `<span class="color-box" style="background: green;"></span> y = ${params.quadratic.a.toFixed(1)} x² + ${params.quadratic.b.toFixed(1)} x + ${params.quadratic.c.toFixed(1)}`;
+      document.getElementById('eq3').innerHTML = `<span class="color-box" style="background: blue;"></span> y = ${params.cubic.a.toFixed(1)} x³ + ${params.cubic.b.toFixed(1)} x² + ${params.cubic.c.toFixed(1)} x + ${params.cubic.d.toFixed(1)}`;
+      document.getElementById('eq4').innerHTML = `<span class="color-box" style="background: purple;"></span> y = ${params.quartic.a.toFixed(1)} x⁴ + ${params.quartic.b.toFixed(1)} x³ + ${params.quartic.c.toFixed(1)} x² + ${params.quartic.d.toFixed(1)} x + ${params.quartic.e.toFixed(1)}`;
+    }
+
+    updateAll();
+  })();
+</script>
+</body>
+</html> --> -->

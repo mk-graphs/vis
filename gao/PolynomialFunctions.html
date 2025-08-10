@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Visualisation of the effect of constant and exponential variation on the graphs of polynomial functions</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.4.4/distrib/jsxgraph.css" />
+<style>
+  #box {
+    width: 800px;
+    height: 500px;
+    border: 1px solid #ccc;
+    float: left;
+  }
+  #equations {
+    float: left;
+    margin-left: 20px;
+    font-family: monospace;
+    line-height: 1.6em;
+  }
+  .eq-line {
+    margin-bottom: 10px;
+  }
+  .color-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+<h2>Visualisation of the effect of constant and exponential variation on the graphs of polynomial functions</h2>
+<div id="box"></div>
+<div id="equations">
+  <div class="eq-line" id="eq1"><span class="color-box" style="background: red;"></span> y = kx + b</div>
+  <div class="eq-line" id="eq2"><span class="color-box" style="background: green;"></span> y = a x² + b x + c</div>
+  <div class="eq-line" id="eq3"><span class="color-box" style="background: blue;"></span> y = a x³ + b x² + c x + d</div>
+  <div class="eq-line" id="eq4"><span class="color-box" style="background: purple;"></span> y = a x⁴ + b x³ + c x² + d x + e</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.4.4/distrib/jsxgraphcore.js"></script>
+<script>
+  (function() {
+    const board = JXG.JSXGraph.initBoard('box', {
+      boundingbox: [-10, 10, 10, -10],
+      axis:true,
+      showNavigation: false,
+      keepaspectratio:true,
+      pan: true,
+      zoom: true,
+    });
+
+ 
+    let params = {
+      linear: {k: 1, b: 0},
+      quadratic: {a: 1, b: 0, c: 0},
+      cubic: {a: 1, b: 0, c: 0, d: 0},
+      quartic: {a: 1, b: 0, c: 0, d: 0, e: 0}
+    };
+
+ 
+    function createSlider(x, y, min, max, step, initial, ondrag) {
+      return board.create('point', [x, initial], {
+        name: '',
+        size: 4,
+        fixed: false,
+        snapToGrid: true,
+        drag: ondrag,
+        showInfobox: false,
+        withLabel: false,
+        restrictBoundingBox: board.getBoundingBox()
+      });
+    }
+
+   
+    let kPoint = board.create('point', [-8, params.linear.k * -8 + params.linear.b], {color:'red', name:'k', size:4, fixed:false, withLabel:false});
+    let bPoint = board.create('point', [0, params.linear.b], {color:'red', name:'b', size:4, fixed:false, withLabel:false});
+
+    // Primary Function graph
+    let linearFunc = board.create('functiongraph', function(x) {
+      return params.linear.k * x + params.linear.b;
+    }, {strokeColor:'red', strokeWidth:2});
+
+    // Drag to update linear parameters
+    kPoint.on('drag', function() {
+      let dx = kPoint.X();
+      let dy = kPoint.Y();
+      let newK = (dy - params.linear.b) / dx;
+      if (Math.abs(newK) < 0.01) newK = (newK < 0) ? -0.01 : 0.01; // no 0
+      params.linear.k = newK;
+      updateAll();
+    });
+
+    bPoint.on('drag', function() {
+      let newB = bPoint.Y();
+      params.linear.b = newB;
+      updateAll();
+    });
+
+    // --- y = a x² + b x + c ---
+    // Determine a, b, c by vertex points and an auxiliary point
+    let vertexQ = board.create('point', [0, params.quadratic.c], {color:'green', size:4});
+    let controlQ = board.create('point', [1, params.quadratic.a*1*1 + params.quadratic.b*1 + params.quadratic.c], {color:'green', size:4});
+
+    let quadraticFunc = board.create('functiongraph', function(x) {
+      return params.quadratic.a*x*x + params.quadratic.b*x + params.quadratic.c;
+    }, {strokeColor:'green', strokeWidth:2});
+
+    vertexQ.on('drag', function() {
+      // Move the vertices and change b and c (a stays the same)
+      let h = vertexQ.X();
+      let k = vertexQ.Y();
+      // Conversion from vertex form to standard form y=a(x-h)^2 + k => y=ax^2 -2ah x + a h^2 + k
+      params.quadratic.b = -2*params.quadratic.a*h;
+      params.quadratic.c = params.quadratic.a*h*h + k;
+      updateAll();
+      updateControlPointQ();
+    });
+
+    controlQ.on('drag', function() {
+      // Adjust the size of the a opening, keeping the vertices unchanged, and the control point vertical coordinates y control a
+      let x1 = controlQ.X();
+      let y1 = controlQ.Y();
+      let h = vertexQ.X();
+      let k = vertexQ.Y();
+      let newA = (y1 - k) / ((x1 - h)*(x1 - h));
+      if (Math.abs(newA) < 0.01) newA = (newA < 0) ? -0.01 : 0.01;
+      params.quadratic.a = newA;
+      // recalculate b,c
+      params.quadratic.b = -2*params.quadratic.a*h;
+      params.quadratic.c = params.quadratic.a*h*h + k;
+      updateAll();
+    });
+
+    function updateControlPointQ() {
+      let h = vertexQ.X();
+      let k = vertexQ.Y();
+      let x1 = h + 1;
+      let y1 = params.quadratic.a*(x1 - h)*(x1 - h) + k;
+      controlQ.setPosition(JXG.COORDS_BY_USER, [x1, y1]);
+    }
+
+    updateControlPointQ();
+
+    // Quadratic function moves as a whole (drag the graph of the function to change b,c, a stays the same)
+    quadraticFunc.on('mousedown', function(e) {
+      quadraticFunc.dragging = true;
+      quadraticFunc.startPos = e;
+      quadraticFunc.startVertex = [vertexQ.X(), vertexQ.Y()];
+    });
+    board.on('mouseup', function() {
+      quadraticFunc.dragging = false;
+    });
+    board.on('mousemove', function(e) {
+      if (quadraticFunc.dragging) {
+        let dx = board.getCoordsTopLeftCorner(e).usrCoords[1] - quadraticFunc.startPos.usrCoords[1];
+        let dy = board.getCoordsTopLeftCorner(e).usrCoords[2] - quadraticFunc.startPos.usrCoords[2];
+        // move the vertex
+        let newH = quadraticFunc.startVertex[0] + dx;
+        let newK = quadraticFunc.startVertex[1] + dy;
+        vertexQ.setPosition(JXG.COORDS_BY_USER, [newH, newK]);
+        quadraticFunc.startPos = board.getCoordsTopLeftCorner(e);
+        updateAll();
+        updateControlPointQ();
+      }
+    });
+
+    // --- y = a x³ + b x² + c x + d ---
+    // control points：a, b, c, d Point control for all four parameters
+    // Create four points with fixed horizontal coordinates and vertical coordinates to control the size of the parameter
+    let cubicPoints = {
+      a: board.create('point', [-9, params.cubic.a], {color:'blue', size:4, name:'a'}),
+      b: board.create('point', [-7, params.cubic.b], {color:'blue', size:4, name:'b'}),
+      c: board.create('point', [-5, params.cubic.c], {color:'blue', size:4, name:'c'}),
+      d: board.create('point', [-3, params.cubic.d], {color:'blue', size:4, name:'d'}),
+    };
+
+    let cubicFunc = board.create('functiongraph', function(x) {
+      return params.cubic.a*x*x*x + params.cubic.b*x*x + params.cubic.c*x + params.cubic.d;
+    }, {strokeColor:'blue', strokeWidth:2});
+
+    for (let key in cubicPoints) {
+      cubicPoints[key].on('drag', function() {
+        let val = cubicPoints[key].Y();
+        if (key === 'a' && Math.abs(val) < 0.01) val = (val < 0) ? -0.01 : 0.01;
+        params.cubic[key] = val;
+        updateAll();
+      });
+    }
+
+    // Integral drag implementation of cubic functions: moving the d-parameter (constant term)
+    cubicFunc.on('mousedown', function(e) {
+      cubicFunc.dragging = true;
+      cubicFunc.startPos = e;
+      cubicFunc.startD = params.cubic.d;
+    });
+    board.on('mouseup', function() {
+      cubicFunc.dragging = false;
+    });
+    board.on('mousemove', function(e) {
+      if (cubicFunc.dragging) {
+        let dy = board.getCoordsTopLeftCorner(e).usrCoords[2] - cubicFunc.startPos.usrCoords[2];
+        params.cubic.d = cubicFunc.startD + dy;
+        cubicPoints.d.setPosition(JXG.COORDS_BY_USER, [cubicPoints.d.X(), params.cubic.d]);
+        updateAll();
+      }
+    });
+
+    // --- y = a x⁴ + b x³ + c x² + d x + e ---
+    // Same as the cubic function, each of the five parameters is controlled with a point
+    let quarticPoints = {
+      a: board.create('point', [9, params.quartic.a], {color:'purple', size:4, name:'a'}),
+      b: board.create('point', [7, params.quartic.b], {color:'purple', size:4, name:'b'}),
+      c: board.create('point', [5, params.quartic.c], {color:'purple', size:4, name:'c'}),
+      d: board.create('point', [3, params.quartic.d], {color:'purple', size:4, name:'d'}),
+      e: board.create('point', [1, params.quartic.e], {color:'purple', size:4, name:'e'}),
+    };
+
+    let quarticFunc = board.create('functiongraph', function(x) {
+      return params.quartic.a*x*x*x*x + params.quartic.b*x*x*x + params.quartic.c*x*x + params.quartic.d*x + params.quartic.e;
+    }, {strokeColor:'purple', strokeWidth:2});
+
+    for (let key in quarticPoints) {
+      quarticPoints[key].on('drag', function() {
+        let val = quarticPoints[key].Y();
+        if (key === 'a' && Math.abs(val) < 0.01) val = (val < 0) ? -0.01 : 0.01;
+        params.quartic[key] = val;
+        updateAll();
+      });
+    }
+
+    // Quadratic function whole drag (move e parameter)
+    quarticFunc.on('mousedown', function(e) {
+      quarticFunc.dragging = true;
+      quarticFunc.startPos = e;
+      quarticFunc.startE = params.quartic.e;
+    });
+    board.on('mouseup', function() {
+      quarticFunc.dragging = false;
+    });
+    board.on('mousemove', function(e) {
+      if (quarticFunc.dragging) {
+        let dy = board.getCoordsTopLeftCorner(e).usrCoords[2] - quarticFunc.startPos.usrCoords[2];
+        params.quartic.e = quarticFunc.startE + dy;
+        quarticPoints.e.setPosition(JXG.COORDS_BY_USER, [quarticPoints.e.X(), params.quartic.e]);
+        updateAll();
+      }
+    });
+
+    // display 
+    function updateAll() {
+      linearFunc.updateCurve();
+      quadraticFunc.updateCurve();
+      cubicFunc.updateCurve();
+      quarticFunc.updateCurve();
+
+      //y=kx+b contral points
+      kPoint.setPosition(JXG.COORDS_BY_USER, [-8, params.linear.k * -8 + params.linear.b]);
+      bPoint.setPosition(JXG.COORDS_BY_USER, [2, params.linear.k * 2 + params.linear.b]);
+
+      // y=ax^2+bx+c contral points
+      updateControlPointQ();
+
+      // y=ax^3+bx^2+cx+d contral points
+      cubicPoints.a.setPosition(JXG.COORDS_BY_USER, [cubicPoints.a.X(), params.cubic.a]);
+      cubicPoints.b.setPosition(JXG.COORDS_BY_USER, [cubicPoints.b.X(), params.cubic.b]);
+      cubicPoints.c.setPosition(JXG.COORDS_BY_USER, [cubicPoints.c.X(), params.cubic.c]);
+      cubicPoints.d.setPosition(JXG.COORDS_BY_USER, [cubicPoints.d.X(), params.cubic.d]);
+
+      // y=ax^4+bx^3+cx^2+dx+e contral points
+      quarticPoints.a.setPosition(JXG.COORDS_BY_USER, [quarticPoints.a.X(), params.quartic.a]);
+      quarticPoints.b.setPosition(JXG.COORDS_BY_USER, [quarticPoints.b.X(), params.quartic.b]);
+      quarticPoints.c.setPosition(JXG.COORDS_BY_USER, [quarticPoints.c.X(), params.quartic.c]);
+      quarticPoints.d.setPosition(JXG.COORDS_BY_USER, [quarticPoints.d.X(), params.quartic.d]);
+      quarticPoints.e.setPosition(JXG.COORDS_BY_USER, [quarticPoints.e.X(), params.quartic.e]);
+
+      // Update the text of the equations on the right to 1 decimal place.
+      document.getElementById('eq1').innerHTML = `<span class="color-box" style="background: red;"></span>Primary Function y = ${params.linear.k.toFixed(1)} x + ${params.linear.b.toFixed(1)}`;
+      document.getElementById('eq2').innerHTML = `<span class="color-box" style="background: green;"></span>Secondary Function y = ${params.quadratic.a.toFixed(1)} x² + ${params.quadratic.b.toFixed(1)} x + ${params.quadratic.c.toFixed(1)}`;
+      document.getElementById('eq3').innerHTML = `<span class="color-box" style="background: blue;"></span>Cubic Function y = ${params.cubic.a.toFixed(1)} x³ + ${params.cubic.b.toFixed(1)} x² + ${params.cubic.c.toFixed(1)} x + ${params.cubic.d.toFixed(1)}`;
+      document.getElementById('eq4').innerHTML = `<span class="color-box" style="background: purple;"></span>Quadratic Function y = ${params.quartic.a.toFixed(1)} x⁴ + ${params.quartic.b.toFixed(1)} x³ + ${params.quartic.c.toFixed(1)} x² + ${params.quartic.d.toFixed(1)} x + ${params.quartic.e.toFixed(1)}`;
+    }
+
+    updateAll();
+  })();
+</script>
+</body>
+</html>

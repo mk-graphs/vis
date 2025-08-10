@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pizza Math</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .pizza { display: inline-block; margin: 20px; padding: 15px; border: 1px solid #ccc; }
+        .better { background-color: #e8f5e8; border-color: green; }
+        input { margin: 5px; }
+    </style>
+</head>
+<body>
+<p><b>Pizza Value Calculator</b></p>
+
+<div class="pizza" id="small">
+    <h3>30cm Pizza</h3>
+    <p>Price: <span id="price1">12</span>€</p>
+    <p>Area: <span id="area1">707</span> cm²</p>
+    <p>Cost per cm²: <span id="cost1">0.017</span>€</p>
+</div>
+
+<div class="pizza" id="large">
+    <h3>40cm Pizza</h3>
+    <p>Price: <span id="price2">18</span>€</p>
+    <p>Area: <span id="area2">1257</span> cm²</p>
+    <p>Cost per cm²: <span id="cost2">0.014</span>€</p>
+</div>
+
+<div>
+    <p>30cm price: €<input type="range" id="slider1" min="8" max="20" value="12"> <span id="display1">12</span></p>
+    <p>40cm price: €<input type="range" id="slider2" min="12" max="30" value="18"> <span id="display2">18</span></p>
+</div>
+
+<p><strong>Why bigger is better:</strong> Area = π × (diameter/2)². A 40cm pizza has 78% more area than 30cm!</p>
+
+<script>
+    function update() {
+        const p1 = parseInt(document.getElementById('slider1').value);
+        const p2 = parseInt(document.getElementById('slider2').value);
+
+        const area1 = Math.PI * 15 * 15;
+        const area2 = Math.PI * 20 * 20;
+
+        const cost1 = p1 / area1;
+        const cost2 = p2 / area2;
+
+        document.getElementById('price1').textContent = p1;
+        document.getElementById('price2').textContent = p2;
+        document.getElementById('display1').textContent = p1;
+        document.getElementById('display2').textContent = p2;
+        document.getElementById('area1').textContent = Math.round(area1);
+        document.getElementById('area2').textContent = Math.round(area2);
+        document.getElementById('cost1').textContent = cost1.toFixed(3);
+        document.getElementById('cost2').textContent = cost2.toFixed(3);
+
+        document.getElementById('small').className = 'pizza';
+        document.getElementById('large').className = 'pizza';
+
+        if (cost1 < cost2) {
+            document.getElementById('small').className = 'pizza better';
+        } else {
+            document.getElementById('large').className = 'pizza better';
+        }
+    }
+
+    document.getElementById('slider1').oninput = update;
+    document.getElementById('slider2').oninput = update;
+    update();
+</script>
+</body>
+</html>

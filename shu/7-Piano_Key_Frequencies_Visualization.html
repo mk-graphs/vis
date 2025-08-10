@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Piano Key Frequencies Visualization</title>
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+<style>
+  #jxgbox {
+    width: 900px;
+    height: 450px;
+    border: 1px solid #ccc;
+  }
+  .description {
+    max-width: 900px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 1em;
+  }
+  #keyVal, #freqVal {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+  .highlight {
+    fill: #cc3333;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="description">
+  <h2>Piano Key Frequencies and Mathematical Relation</h2>
+  <p>
+    This graph shows the frequency \( f(n) \) of each piano key \( n \) (1 to 88), calculated by the formula:
+  </p>
+  <p style="font-family: monospace; font-size: 1.2em;">
+    \( f(n) = 440 \times 2^{\frac{n-49}{12}} \)
+  </p>
+  <p>
+    Key 49 is the standard A4 note tuned to 440 Hz. Use the slider below to select a piano key and see its frequency.
+  </p>
+</div>
+
+<div id="jxgbox"></div>
+
+<p>
+  Selected Key: <span id="keyVal">49</span>  
+  &nbsp;&nbsp;&nbsp;
+  Frequency: <span id="freqVal">440.00</span> Hz
+</p>
+
+<div>
+  <label for="keySlider">Select Piano Key (1-88): </label>
+  <input type="range" id="keySlider" min="1" max="88" step="1" value="49" style="width:400px;">
+</div>
+
+<script>
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+  boundingbox: [0, 5000, 90, 0], // x: 0-90 keys, y: freq 0-5000Hz
+  axis: true,
+  keepaspectratio: false,
+  showNavigation: false,
+  showCopyright: false
+});
+
+// Frequency function
+function freq(n) {
+  return 440 * Math.pow(2, (n - 49) / 12);
+}
+
+// Plot all keys as points (small dots)
+let points = [];
+for(let n = 1; n <= 88; n++) {
+  points.push(board.create('point', [n, freq(n)], {
+    name: '',
+    size: 2,
+    fixed: true,
+    highlight: false,
+    showInfobox: false,
+    strokeColor: '#555',
+    fillColor: '#555'
+  }));
+}
+
+// Highlight A4 (key 49) and Middle C (key 40)
+const highlightA4 = board.create('point', [49, freq(49)], {
+  name: 'A4 (440Hz)',
+  size: 5,
+  fixed: true,
+  strokeColor: '#cc3333',
+  fillColor: '#cc3333',
+  withLabel: true,
+  label: { offset: [10, -15], fontWeight: 'bold', fontSize: 14 }
+});
+const highlightC4 = board.create('point', [40, freq(40)], {
+  name: 'Middle C (C4)',
+  size: 5,
+  fixed: true,
+  strokeColor: '#3366cc',
+  fillColor: '#3366cc',
+  withLabel: true,
+  label: { offset: [10, 15], fontWeight: 'bold', fontSize: 14 }
+});
+
+// Selected key marker (moves with slider)
+const selectedKeyPoint = board.create('point', [49, freq(49)], {
+  name: '',
+  size: 6,
+  fillColor: '#228822',
+  strokeColor: '#228822',
+  fixed: true,
+  withLabel: false
+});
+
+const keySlider = document.getElementById('keySlider');
+const keyValSpan = document.getElementById('keyVal');
+const freqValSpan = document.getElementById('freqVal');
+
+function updateSelectedKey() {
+  let n = parseInt(keySlider.value);
+  keyValSpan.textContent = n;
+  let f = freq(n);
+  freqValSpan.textContent = f.toFixed(2);
+  selectedKeyPoint.setPosition(JXG.COORDS_BY_USER, [n, f]);
+  board.update();
+}
+
+keySlider.addEventListener('input', updateSelectedKey);
+
+updateSelectedKey();
+</script>
+
+</body>
+</html>

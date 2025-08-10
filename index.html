@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>some visualisations</title>
+  <style>
+  body { font-family: sans-serif; padding: 20px; }
+  ul { list-style-type: none; }
+  li { margin: 5px 0; }
+  .folder { font-weight: bold; cursor: pointer; }
+  .hidden { display: none; }
+  </style>
+</head>
+<body>
+<ul>
+<li class='folder'>gao/</li>
+<ul class='hidden'>
+<li><a href='gao/PolynomialFunctions.html'>PolynomialFunctions.html</a></li>
+<li><a href='gao/example.html'>example.html</a></li>
+<li><a href='gao/velocity.html'>velocity.html</a></li>
+</ul>
+<li class='folder'>ldtrees/</li>
+<ul class='hidden'>
+<li><a href='ldtrees/birthday_paradox.html'>birthday_paradox.html</a></li>
+<li><a href='ldtrees/compound_interest.html'>compound_interest.html</a></li>
+<li><a href='ldtrees/invx.html'>invx.html</a></li>
+<li><a href='ldtrees/linear_log.html'>linear_log.html</a></li>
+<li><a href='ldtrees/lnx_sqrtx.html'>lnx_sqrtx.html</a></li>
+<li><a href='ldtrees/log_exp_inv.html'>log_exp_inv.html</a></li>
+<li><a href='ldtrees/log_transforms.html'>log_transforms.html</a></li>
+<li><a href='ldtrees/matrix_transform.html'>matrix_transform.html</a></li>
+<li><a href='ldtrees/pizza_example.html'>pizza_example.html</a></li>
+<li><a href='ldtrees/probability_simulation.html'>probability_simulation.html</a></li>
+<li><a href='ldtrees/purchasing_power.html'>purchasing_power.html</a></li>
+<li><a href='ldtrees/queue_theory.html'>queue_theory.html</a></li>
+<li><a href='ldtrees/random_walk.html'>random_walk.html</a></li>
+<li><a href='ldtrees/riemann.html'>riemann.html</a></li>
+<li><a href='ldtrees/sinx_cosx.html'>sinx_cosx.html</a></li>
+<li><a href='ldtrees/sorting.html'>sorting.html</a></li>
+<li><a href='ldtrees/sqrx_absx.html'>sqrx_absx.html</a></li>
+<li><a href='ldtrees/testing.html'>testing.html</a></li>
+<li><a href='ldtrees/tip_calculator.html'>tip_calculator.html</a></li>
+<li><a href='ldtrees/vectors.html'>vectors.html</a></li>
+</ul>
+<li class='folder'>shu/</li>
+<ul class='hidden'>
+<li><a href='shu/1-Morse_Code_game.html'>1-Morse_Code_game.html</a></li>
+<li><a href='shu/10-Muscle_Gain_Beats_Dieting_for_Metabolism.html'>10-Muscle_Gain_Beats_Dieting_for_Metabolism.html</a></li>
+<li><a href='shu/11-Time_Dilation_Special_Relativity_Visualization.html'>11-Time_Dilation_Special_Relativity_Visualization.html</a></li>
+<li><a href='shu/12-Interactive_Function_Graph.html'>12-Interactive_Function_Graph.html</a></li>
+<li><a href='shu/13-Binomial_Distribution.html'>13-Binomial_Distribution.html</a></li>
+<li><a href='shu/14-Sine_and_Cosine_Graph.html'>14-Sine_and_Cosine_Graph.html</a></li>
+<li><a href='shu/15-Tangent_Line_to_a_Circle.html'>15-Tangent_Line_to_a_Circle.html</a></li>
+<li><a href='shu/16-Interactive-Parabola.html'>16-Interactive-Parabola.html</a></li>
+<li><a href='shu/18-Riemann-Sums-Visualization.html'>18-Riemann-Sums-Visualization.html</a></li>
+<li><a href='shu/19-Intersection_of_Function_Graphs.html'>19-Intersection_of_Function_Graphs.html</a></li>
+<li><a href='shu/2-Weibull_survival_function.html'>2-Weibull_survival_function.html</a></li>
+<li><a href='shu/20-Binary-Visualizer.html'>20-Binary-Visualizer.html</a></li>
+<li><a href='shu/21-Antiderivative-Visualization.html'>21-Antiderivative-Visualization.html</a></li>
+<li><a href='shu/22-Logarithm-Graph.html'>22-Logarithm-Graph.html</a></li>
+<li><a href='shu/3-Compound-Effect-of-Habits.html'>3-Compound-Effect-of-Habits.html</a></li>
+<li><a href='shu/4-Diminishing-Marginal-Utility.html'>4-Diminishing-Marginal-Utility.html</a></li>
+<li><a href='shu/5-Forgetting-Curve-in-Language-Learning.html'>5-Forgetting-Curve-in-Language-Learning.html</a></li>
+<li><a href='shu/6-Guitar_Strings_Harmonic_Visualization.html'>6-Guitar_Strings_Harmonic_Visualization.html</a></li>
+<li><a href='shu/7-Piano_Key_Frequencies_Visualization.html'>7-Piano_Key_Frequencies_Visualization.html</a></li>
+<li><a href='shu/8-Kaleidoscope_Symmetry_Visualization.html'>8-Kaleidoscope_Symmetry_Visualization.html</a></li>
+<li><a href='shu/9-Black_Hole_Gravitational_Lensing.html'>9-Black_Hole_Gravitational_Lensing.html</a></li>
+</ul>
+</ul>
+<script>
+document.querySelectorAll('.folder').forEach(folder => {
+    folder.addEventListener('click', () => {
+        const next = folder.nextElementSibling;
+        next.classList.toggle('hidden');
+    });
+});
+</script>
+</body></html>

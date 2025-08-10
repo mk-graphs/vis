@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<div id="morseBox" style="width: 800px; height: 700px; position: relative;"></div>
+
+<div id="description" style="max-width:800px; margin-bottom:10px; padding:12px; border:1px solid #ccc; background:#f9f9f9; border-radius:6px; font-size:16px; line-height:1.5;">
+  <strong>Morse Code Quiz Instructions:</strong><br>
+  The light above will flash a word in Morse code using short flashes (dots) and long flashes (dashes).<br>
+  Each flash corresponds to a Morse code symbol:<br>
+  &nbsp;&nbsp;&bull; Short flash (dot) = "." <br>
+  &nbsp;&nbsp;&bull; Long flash (dash) = "-" <br><br>
+  You can also click on any of the letters above to hear and see how that letter is represented in Morse code. This helps you familiarize yourself with the code.<br><br>
+  When you are ready, click the <em>Start Guess</em> button to play the Morse code for the quiz word.<br>
+  Listen or watch carefully, then enter your answer.<br>
+  Adjust the <strong>Playback Speed</strong> slider to speed up or slow down the flashing if needed.<br>
+  Good luck!
+</div>
+<!-- Controls -->
+<div style="position: absolute; top: 660px; left: 50px;">
+  <button type="button" onclick="startQuizFlashing()">Start Guess</button>
+ 
+  <span id="quizFeedback" style="margin-left: 20px; font-weight: bold;"></span>
+</div>
+
+<script src="https://jsxgraph.org/distrib/jsxgraphcore.js"></script>
+<link rel="stylesheet" href="https://jsxgraph.org/distrib/jsxgraph.css" />
+
+<script>
+const board = JXG.JSXGraph.initBoard('morseBox', {
+  boundingbox: [-1, 10, 13, -1],
+  showNavigation: false,
+  showCopyright: false,
+  axis: false
+});
+
+const morseMap = {
+  A: ".-",    B: "-...",  C: "-.-.", D: "-..",  E: ".",
+  F: "..-.",  G: "--.",   H: "....", I: "..",   J: ".---",
+  K: "-.-",   L: ".-..",  M: "--",   N: "-.",   O: "---",
+  P: ".--.",  Q: "--.-",  R: ".-.",  S: "...",  T: "-",
+  U: "..-",   V: "...-",  W: ".--",  X: "-..-", Y: "-.--",
+  Z: "--.."
+};
+
+// Audio
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playBeep(duration = 200, frequency = 600) {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration / 1000);
+}
+
+// === Speed Slider ===
+const speedSlider = board.create('slider', [[1, 9], [11, 9], [0.5, 1, 2]], {
+  name: 'Speed',
+  snapWidth: 0.1,
+  precision: 2,
+  size: 4,
+  color: 'blue'
+});
+board.create('text', [0.2, 9.5, 'Playback Speed (x)'], {fontSize: 14});
+function getSpeedFactor() {
+  return speedSlider.Value();
+}
+
+// === Light Circles ===
+const clickLight = board.create('circle', [[5.5, 4], 0.5], {
+  fillColor: 'gray', fillOpacity: 0.2, strokeColor: 'black'
+});
+board.create('text', [5, 3, 'Light Output'], {fontSize: 14});
+
+function flash(light, symbol, callback) {
+  const baseDuration = symbol === '.' ? 200 : 600;
+  const speed = getSpeedFactor();
+  const duration = baseDuration / speed;
+  light.setAttribute({fillColor: 'yellow', fillOpacity: 0.9});
+  playBeep(duration);
+  setTimeout(() => {
+    light.setAttribute({fillColor: 'gray', fillOpacity: 0.2});
+    setTimeout(callback, 200 / speed);
+  }, duration);
+}
+
+function playMorseCode(code, index = 0, light = clickLight) {
+  if (index >= code.length) return;
+  const symbol = code[index];
+  if (symbol === '.' || symbol === '-') {
+    flash(light, symbol, () => playMorseCode(code, index + 1, light));
+  } else {
+    setTimeout(() => playMorseCode(code, index + 1, light), 400 / getSpeedFactor());
+  }
+}
+
+const quizLight = board.create('circle', [[5.5, 1], 0.5], {
+  fillColor: 'gray', fillOpacity: 0.2, strokeColor: 'black'
+});
+board.create('text', [5, 0.1, 'Quiz Light'], {fontSize: 14});
+
+// Letters Grid (for demo playback)
+const letters = Object.keys(morseMap);
+const cols = 7;
+letters.forEach((letter, i) => {
+  const col = i % cols;
+  const row = Math.floor(i / cols);
+  const x = col * 1.7;
+  const y = 8 - row;
+
+  const btn = board.create('text', [x, y, letter], {
+    fontSize: 20,
+    cssStyle: 'cursor:pointer; font-weight:bold; color:blue;'
+  });
+
+  board.create('text', [x + 0.4, y, morseMap[letter]], {
+    fontSize: 16,
+    cssStyle: 'color: black;'
+  });
+
+  btn.rendNode.addEventListener('click', () => {
+    playMorseCode(morseMap[letter], 0, clickLight);
+  });
+});
+
+// === Quiz Logic ===
+const quizWord = "WEATHER";  // You can change this to any quiz word, letter must be capital.
+const quizMorse = quizWord.split('').map(ch => morseMap[ch]).join(' ');
+
+function startQuizFlashing() {
+  playMorseCode(quizMorse, 0, quizLight);
+}
+
+</script>
+</html>
