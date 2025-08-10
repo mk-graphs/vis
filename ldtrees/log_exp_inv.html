@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log and Exponential Inverses</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox { width: 600px; height: 600px; }
+    </style>
+</head>
+<body>
+<p><b>How are log(x) and e<sup>x</sup> related?</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li><code>log(x)</code> and <code>e<sup>x</sup></code> are inverse functions.</li>
+    <li><span style="color:blue;">Blue</span>: <code>log(x)</code></li>
+    <li><span style="color:red;">Red</span>: <code>e<sup>x</sup></code></li>
+    <li><span style="color:gray;">Gray</span>: Line y = x (mirror axis)</li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-2, 10, 10, -2],
+        axis: true
+    });
+
+    board.create('functiongraph', [
+        x => x > 0 ? Math.log(x) : NaN
+    ], { strokeColor: 'blue', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => Math.exp(x)
+    ], { strokeColor: 'red', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => x
+    ], { strokeColor: 'gray', dash: 2 });
+</script>
+</body>
+</html>

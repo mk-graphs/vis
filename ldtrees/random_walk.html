@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>2D Random Walk</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css"/>
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    #jxgbox { width: 80vw; max-width: 600px; height: 600px; margin: 1rem auto; border: 1px solid #ccc; }
+    .controls { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+<p><b>2D Random Walk</b></p>
+<p>A walker starts at (0,0) and takes N random steps.</p>
+<div id="jxgbox" class="jxgbox"></div>
+<div class="controls">
+  <label for="stepsSlider">Number of Steps: </label>
+  <input type="range" id="stepsSlider" min="10" max="10000" step="10" value="2000">
+  <span id="stepsValue">2000</span>
+  <button onclick="runWalk()">New Walk</button>
+</div>
+<p>
+  <strong style="color:green;">Green dot</strong> is the starting point.
+  <br>
+  <strong style="color:red;">Red dot</strong> is the final position.
+</p>
+
+<script>
+  const board = JXG.JSXGraph.initBoard('jxgbox', {
+    boundingbox: [-50, 50, 50, -50], // Start with a decent view
+    axis: true,
+    showCopyright: false,
+  });
+
+  let pathCurve, startPoint, endPoint;
+
+  function runWalk() {
+    const steps = parseInt(document.getElementById('stepsSlider').value);
+    document.getElementById('stepsValue').textContent = steps;
+
+    // Clear previous walk elements
+    if (pathCurve) board.removeObject([pathCurve, startPoint, endPoint]);
+
+    let x = 0;
+    let y = 0;
+    const pathDataX = [0];
+    const pathDataY = [0];
+
+    for (let i = 0; i < steps; i++) {
+      const direction = Math.floor(Math.random() * 4); // 0: Right, 1: Left, 2: Up, 3: Down
+      switch (direction) {
+        case 0: x++; break;
+        case 1: x--; break;
+        case 2: y++; break;
+        case 3: y--; break;
+      }
+      pathDataX.push(x);
+      pathDataY.push(y);
+    }
+
+    // Plot the entire path as a single curve for performance
+    pathCurve = board.create('curve', [pathDataX, pathDataY], {
+      strokeColor: 'darkcyan',
+      strokeWidth: 1.5
+    });
+
+    // start and end points
+    startPoint = board.create('point', [0, 0], { name: 'Start', color: 'green', size: 3 });
+    endPoint = board.create('point', [x, y], { name: 'End', color: 'red', size: 3 });
+
+    board.zoomElements([startPoint, endPoint]);
+    board.zoomOut();
+  }
+
+  document.getElementById('stepsSlider').addEventListener('input', (e) => {
+    document.getElementById('stepsValue').textContent = e.target.value;
+  });
+
+  document.getElementById('stepsSlider').addEventListener('change', runWalk);
+
+  runWalk();
+</script>
+</body>
+</html>

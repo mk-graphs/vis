@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Riemann Sum</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 500px;
+            height: 500px;
+            margin-bottom: 1em;
+        }
+        #controls {
+            margin-bottom: 1em;
+        }
+    </style>
+</head>
+<body>
+
+<p><b>Riemann Sum Approximation for <code>f(x) = x<sup>n</sup></code></b></p>
+<div id="jxgbox" class="jxgbox"></div>
+
+<div id="controls">
+    <label>Choose exponent (n): <span id="expLabel">2</span></label><br>
+    <input type="range" id="expSlider" min="1" max="5" value="2" />
+</div>
+
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li>Left Riemann sum approximation with 25 rectangles</li>
+</ul>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-5, 20, 5, -20],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    let exponent = 2;
+    const a = 0, b = 5;
+    const numRects = 25;
+    let rectangles = [];
+    let graph = null;
+
+    function getFunction(exp) {
+        return x => Math.pow(x, exp);
+    }
+
+    function drawGraphAndRectangles(exp) {
+        // Clear
+        rectangles.forEach(r => board.removeObject(r));
+        rectangles = [];
+        if (graph) board.removeObject(graph);
+
+        const f = getFunction(exp);
+
+        graph = board.create('functiongraph', [f], {
+            strokeColor: 'green',
+            strokeWidth: 2
+        });
+
+        // left endpoint
+        const dx = (b - a) / numRects;
+
+        for (let i = 0; i < numRects; i++) {
+            const xLeft = a + i * dx;
+            const height = f(xLeft);
+
+            const rect = board.create('polygon', [
+                [xLeft, 0],
+                [xLeft, height],
+                [xLeft + dx, height],
+                [xLeft + dx, 0]
+            ], {
+                fillColor: 'yellow',
+                fillOpacity: 0.5,
+                borders: { strokeWidth: 1 }
+            });
+
+            rectangles.push(rect);
+        }
+    }
+
+
+    drawGraphAndRectangles(exponent);
+
+    // Slider
+    document.getElementById('expSlider').addEventListener('input', function () {
+        exponent = parseInt(this.value);
+        document.getElementById('expLabel').textContent = exponent;
+        drawGraphAndRectangles(exponent);
+    });
+</script>
+
+</body>
+</html>

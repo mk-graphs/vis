@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>2D Matrix Transformation</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 500px;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<h3>2D Matrix Transformation of Square</h3>
+<div id="jxgbox" class="jxgbox"></div>
+
+<p>
+    Matrix:
+    <br>
+    [ <span id="a11val">1</span> &nbsp; <span id="a12val">0</span> ]<br>
+    [ <span id="a21val">0</span> &nbsp; <span id="a22val">1</span> ]
+</p>
+
+<div>
+    <label>a11: <input type="range" id="a11" min="-3" max="3" step="0.1" value="1"></label><br>
+    <label>a12: <input type="range" id="a12" min="-3" max="3" step="0.1" value="0"></label><br>
+    <label>a21: <input type="range" id="a21" min="-3" max="3" step="0.1" value="0"></label><br>
+    <label>a22: <input type="range" id="a22" min="-3" max="3" step="0.1" value="1"></label><br>
+</div>
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-4, 4, 4, -4],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    // Original points
+    const origin = board.create('point', [0, 0], { visible: false });
+    const p1 = board.create('point', [1, 0], { visible: false });
+    const p2 = board.create('point', [1, 1], { visible: false });
+    const p3 = board.create('point', [0, 1], { visible: false });
+
+    const square = board.create('polygon', [origin, p1, p2, p3], {
+        fillColor: '#E0E0E0',
+        withLines: true,
+        borders: { strokeWidth: 1 },
+        vertices: { visible: false }
+    });
+
+    // Transformed points
+    let tp1 = board.create('point', [1, 0], { visible: false });
+    let tp2 = board.create('point', [1, 1], { visible: false });
+    let tp3 = board.create('point', [0, 1], { visible: false });
+
+    let transformedSquare = board.create('polygon', [origin, tp1, tp2, tp3], {
+        fillColor: 'lightblue',
+        borders: { strokeColor: 'blue', strokeWidth: 2 },
+        vertices: { visible: false }
+    });
+
+    // slider
+    function getMatrixValues() {
+        return [
+            parseFloat(document.getElementById('a11').value),
+            parseFloat(document.getElementById('a12').value),
+            parseFloat(document.getElementById('a21').value),
+            parseFloat(document.getElementById('a22').value)
+        ];
+    }
+
+    // transformation
+    function updateTransformedSquare() {
+        const [a11, a12, a21, a22] = getMatrixValues();
+
+
+        document.getElementById('a11val').textContent = a11;
+        document.getElementById('a12val').textContent = a12;
+        document.getElementById('a21val').textContent = a21;
+        document.getElementById('a22val').textContent = a22;
+
+        // Transformation matrix applied to unit square points
+        tp1.moveTo([a11, a21]); // T([1,0])
+        tp2.moveTo([a11 + a12, a21 + a22]); // T([1,1])
+        tp3.moveTo([a12, a22]); // T([0,1])
+
+        board.update();
+    }
+
+
+    ['a11', 'a12', 'a21', 'a22'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateTransformedSquare);
+    });
+
+    updateTransformedSquare();
+</script>
+
+</body>
+</html>

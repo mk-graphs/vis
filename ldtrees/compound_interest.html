@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compound Interest: The 8th Wonder of the World</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox { width: 600px; height: 400px; margin: 20px auto; }
+        .comparison-box {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+        .money-box {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        .controls {
+            font-family: Arial, sans-serif;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<p><b>Compound Interest: Why Einstein called it "the most powerful force in the universe"</b></p>
+
+<div class="comparison-box">
+    <div class="money-box">
+        <h3>Simple Interest</h3>
+        <p style="font-size: 24px; color: red;">$<span id="simpleTotal">16000</span></p>
+        <p>Linear growth only</p>
+    </div>
+    <div class="money-box">
+        <h3>Compound Interest</h3>
+        <p style="font-size: 24px; color: green;">$<span id="compoundTotal">43219</span></p>
+        <p>Growth on growth!</p>
+    </div>
+</div>
+
+<div id="jxgbox" class="jxgbox"></div>
+
+<div class="controls">
+    <p>Initial Investment: $<input type="range" id="principalSlider" min="1000" max="10000" step="500" value="1000"> <span id="principalValue">$1,000</span></p>
+    <p>Annual Interest Rate: <input type="range" id="rateSlider" min="1" max="15" step="0.5" value="8"> <span id="rateValue">8.0</span>%</p>
+    <p>Time Period: <input type="range" id="timeSlider" min="5" max="50" step="5" value="20"> <span id="timeValue">20</span> years</p>
+</div>
+
+<p><strong>Explanation</strong></p>
+<ul>
+    <li><span style="color:red;">Red line</span>: Simple interest (fixed annual return)</li>
+    <li><span style="color:green;">Green line</span>: Compound interest (exponential growth)</li>
+    <li><span style="color:blue;">Blue line</span>: Just your principal (no growth)</li>
+</ul>
+
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [0, 100000, 50, -5000],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    let simpleCurve = null;
+    let compoundCurve = null;
+    let principalLine = null;
+
+    function updateVisualization() {
+        const principal = parseInt(document.getElementById('principalSlider').value);
+        const rate = parseFloat(document.getElementById('rateSlider').value) / 100;
+        const time = parseInt(document.getElementById('timeSlider').value);
+
+        document.getElementById('principalValue').textContent = '$' + principal.toLocaleString();
+        document.getElementById('rateValue').textContent = (rate * 100).toFixed(1);
+        document.getElementById('timeValue').textContent = time;
+
+
+        const simpleInterest = principal * (1 + rate * time);
+        const compoundInterest = principal * Math.pow(1 + rate, time);
+
+        document.getElementById('simpleTotal').textContent = simpleInterest.toLocaleString();
+        document.getElementById('compoundTotal').textContent = compoundInterest.toLocaleString();
+
+
+        if (simpleCurve) board.removeObject(simpleCurve);
+        if (compoundCurve) board.removeObject(compoundCurve);
+        if (principalLine) board.removeObject(principalLine);
+
+        // Simple interest curve (linear)
+        simpleCurve = board.create('functiongraph', [
+            x => principal * (1 + rate * x)
+        ], {
+            strokeColor: 'red',
+            strokeWidth: 3
+        });
+
+        // Compound interest curve (exponential)
+        compoundCurve = board.create('functiongraph', [
+            x => principal * Math.pow(1 + rate, x)
+        ], {
+            strokeColor: 'green',
+            strokeWidth: 3
+        });
+
+        // Principal line (no growth)
+        principalLine = board.create('functiongraph', [
+            x => principal
+        ], {
+            strokeColor: 'blue',
+            strokeWidth: 2,
+            dash: 2
+        });
+    }
+
+    // Labels
+    board.create('text', [25, -3000, 'Years'], {
+        fontSize: 12,
+        anchorX: 'middle'
+    });
+
+    board.create('text', [-3, 50000, 'Value ($)'], {
+        fontSize: 12,
+        anchorY: 'middle'
+    });
+
+    // Legend
+    board.create('text', [5, 90000, 'Green: Compound Interest'], {
+        fontSize: 11,
+        color: 'green'
+    });
+
+    board.create('text', [5, 85000, 'Red: Simple Interest'], {
+        fontSize: 11,
+        color: 'red'
+    });
+
+    board.create('text', [5, 80000, 'Blue: Principal Only'], {
+        fontSize: 11,
+        color: 'blue'
+    });
+
+    document.getElementById('principalSlider').addEventListener('input', updateVisualization);
+    document.getElementById('rateSlider').addEventListener('input', updateVisualization);
+    document.getElementById('timeSlider').addEventListener('input', updateVisualization);
+
+    updateVisualization();
+</script>
+</body>
+</html>
