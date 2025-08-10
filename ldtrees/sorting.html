@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sorting Algorithms Visualization</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.4.6/jsxgraphcore.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.4.6/jsxgraph.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #sort-box {
+      width: 800px;
+      height: 400px;
+      margin: 20px auto;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      background: white;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .controls {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .controls select, .controls button {
+      margin: 0 5px;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+    .controls button {
+      background: #007bff;
+      color: white;
+      border: 1px solid #007bff;
+    }
+    .controls button:hover {
+      background: #0056b3;
+    }
+    .controls button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    .legend {
+      margin: 20px 0;
+      text-align: center;
+      font-size: 14px;
+    }
+    .legend span {
+      padding: 4px 12px;
+      margin: 0 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 4px;
+      margin: 20px 0;
+      border-left: 4px solid #007bff;
+    }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Sorting Algorithms Visualizer</h1>
+
+  <div class="controls">
+    <select id="algorithm">
+      <option value="bubble">Bubble Sort</option>
+      <option value="selection">Selection Sort</option>
+      <option value="insertion">Insertion Sort</option>
+      <option value="merge">Merge Sort</option>
+      <option value="quick">Quick Sort</option>
+    </select>
+    <button id="start">Start Sort</button>
+    <button id="pause">Pause</button>
+    <button id="reset">Reset Data</button>
+    <select id="speed">
+      <option value="200">Slow</option>
+      <option value="100" selected>Normal</option>
+      <option value="50">Fast</option>
+      <option value="20">Very Fast</option>
+    </select>
+  </div>
+
+  <div id="sort-box"></div>
+
+  <div class="legend">
+    <span style="background: #4a90e2; color: white;">Unsorted</span>
+    <span style="background: #e74c3c; color: white;">Comparing</span>
+    <span style="background: #f39c12; color: white;">Selected/Pivot</span>
+    <span style="background: #27ae60; color: white;">Sorted</span>
+  </div>
+
+  <div class="stats">
+    <span id="comparisons">Comparisons: 0</span>
+    <span id="swaps">Swaps: 0</span>
+    <span id="steps">Steps: 0</span>
+  </div>
+
+  <div class="info" id="algorithm-info">
+    <strong>Bubble Sort:</strong> Repeatedly steps through the list, compares adjacent elements and swaps them if they're in wrong order. Time complexity: O(n²)
+  </div>
+</div>
+
+<script>
+  const board = JXG.JSXGraph.initBoard('sort-box', {
+    boundingbox: [-1, 12, 21, -1],
+    axis: false,
+    showNavigation: false,
+    showCopyright: false,
+    keepaspectratio: false
+  });
+
+
+  let data = [];
+  let bars = [];
+  let sorting = false;
+  let comparisons = 0;
+  let swaps = 0;
+  let steps = 0;
+  let speed = 100;
+
+  // Algorithms
+  const algorithmInfo = {
+    bubble: "Bubble Sort: Repeatedly steps through the list, compares adjacent elements and swaps them if they're in wrong order. Time complexity: O(n²)",
+    selection: "Selection Sort: Finds the minimum element and places it at the beginning. Repeats for remaining elements. Time complexity: O(n²)",
+    insertion: "Insertion Sort: Builds sorted array one element at a time by inserting each element into its correct position. Time complexity: O(n²)",
+    merge: "Merge Sort: Divide and conquer algorithm that divides array into halves, sorts them, then merges. Time complexity: O(n log n)",
+    quick: "Quick Sort: Picks a pivot element and partitions array around it, then recursively sorts subarrays. Average time complexity: O(n log n)"
+  };
+
+
+  function initData() {
+    data = [];
+    comparisons = 0;
+    swaps = 0;
+    steps = 0;
+    updateStats();
+
+    for (let i = 0; i < 20; i++) {
+      data.push(Math.random() * 10 + 0.5);
+    }
+    drawBars();
+  }
+
+  // Draw bars
+  function drawBars() {
+    bars.forEach(bar => board.removeObject(bar));
+    bars = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const bar = board.create('polygon', [
+        [i, 0], [i + 0.8, 0], [i + 0.8, data[i]], [i, data[i]]
+      ], {
+        fillColor: '#4a90e2',
+        fillOpacity: 0.8,
+        strokeWidth: 1,
+        strokeColor: '#2c3e50'
+      });
+      bars.push(bar);
+    }
+    board.update();
+  }
+
+  // Color bars
+  function colorBars(indices, color) {
+    bars.forEach((bar, idx) => {
+      if (indices.includes(idx)) {
+        bar.setAttribute({fillColor: color});
+      }
+    });
+    board.update();
+  }
+
+  // Reset bar colors
+  function resetBarColors(sortedIndices = []) {
+    bars.forEach((bar, idx) => {
+      if (sortedIndices.includes(idx)) {
+        bar.setAttribute({fillColor: '#27ae60'});
+      } else {
+        bar.setAttribute({fillColor: '#4a90e2'});
+      }
+    });
+    board.update();
+  }
+
+  // Update statistics
+  function updateStats() {
+    document.getElementById('comparisons').textContent = `Comparisons: ${comparisons}`;
+    document.getElementById('swaps').textContent = `Swaps: ${swaps}`;
+    document.getElementById('steps').textContent = `Steps: ${steps}`;
+  }
+
+  // Swap elements with animation
+  function swapElements(i, j) {
+    if (i !== j) {
+      [data[i], data[j]] = [data[j], data[i]];
+      swaps++;
+      drawBars();
+    }
+  }
+
+  // Bubble Sort
+  async function bubbleSort() {
+    let n = data.length;
+    for (let i = 0; i < n - 1; i++) {
+      for (let j = 0; j < n - i - 1; j++) {
+        if (!sorting) return;
+
+        steps++;
+        comparisons++;
+        updateStats();
+
+        // Highlight comparing elements
+        resetBarColors();
+        colorBars([j, j + 1], '#e74c3c');
+
+        await sleep(speed);
+
+        if (data[j] > data[j + 1]) {
+          swapElements(j, j + 1);
+          updateStats();
+        }
+      }
+      // Mark last element as sorted
+      colorBars([n - i - 1], '#27ae60');
+    }
+    colorBars([0], '#27ae60'); // Mark first element as sorted
+  }
+
+  // Selection Sort
+  async function selectionSort() {
+    let n = data.length;
+    for (let i = 0; i < n - 1; i++) {
+      if (!sorting) return;
+
+      let minIdx = i;
+      colorBars([i], '#f39c12'); // Current position
+
+      for (let j = i + 1; j < n; j++) {
+        if (!sorting) return;
+
+        steps++;
+        comparisons++;
+        updateStats();
+
+        colorBars([j], '#e74c3c'); // Currently comparing
+        await sleep(speed);
+
+        if (data[j] < data[minIdx]) {
+          resetBarColors(Array.from({length: i}, (_, k) => k)); // Keep sorted elements green
+          colorBars([i], '#f39c12');
+          colorBars([minIdx], '#4a90e2');
+          minIdx = j;
+          colorBars([minIdx], '#f39c12');
+        }
+
+        colorBars([j], '#4a90e2');
+      }
+
+      if (minIdx !== i) {
+        swapElements(i, minIdx);
+        updateStats();
+      }
+
+      colorBars([i], '#27ae60'); // Mark as sorted
+    }
+    colorBars([n - 1], '#27ae60'); // Mark last element as sorted
+  }
+
+  // Insertion Sort
+  async function insertionSort() {
+    let n = data.length;
+    colorBars([0], '#27ae60'); // First element is sorted
+
+    for (let i = 1; i < n; i++) {
+      if (!sorting) return;
+
+      let key = data[i];
+      let j = i - 1;
+
+      colorBars([i], '#f39c12'); // Current element to insert
+      await sleep(speed);
+
+      while (j >= 0 && data[j] > key) {
+        if (!sorting) return;
+
+        steps++;
+        comparisons++;
+        updateStats();
+
+        colorBars([j], '#e74c3c'); // Element being moved
+        await sleep(speed);
+
+        data[j + 1] = data[j];
+        drawBars();
+        resetBarColors(Array.from({length: i}, (_, k) => k));
+        j--;
+      }
+
+      if (j >= 0) {
+        comparisons++;
+        updateStats();
+      }
+
+      data[j + 1] = key;
+      drawBars();
+      colorBars(Array.from({length: i + 1}, (_, k) => k), '#27ae60');
+    }
+  }
+
+  // Merge Sort
+  async function mergeSort(arr = data, start = 0, end = data.length - 1) {
+    if (start >= end || !sorting) return;
+
+    let mid = Math.floor((start + end) / 2);
+
+    // Highlight current subarray
+    colorBars(Array.from({length: end - start + 1}, (_, i) => start + i), '#f39c12');
+    await sleep(speed);
+
+    await mergeSort(arr, start, mid);
+    await mergeSort(arr, mid + 1, end);
+    await merge(arr, start, mid, end);
+  }
+
+  async function merge(arr, start, mid, end) {
+    if (!sorting) return;
+
+    let left = arr.slice(start, mid + 1);
+    let right = arr.slice(mid + 1, end + 1);
+    let i = 0, j = 0, k = start;
+
+    while (i < left.length && j < right.length) {
+      if (!sorting) return;
+
+      steps++;
+      comparisons++;
+      updateStats();
+
+      colorBars([k], '#e74c3c');
+      await sleep(speed);
+
+      if (left[i] <= right[j]) {
+        arr[k] = left[i];
+        i++;
+      } else {
+        arr[k] = right[j];
+        j++;
+      }
+
+      drawBars();
+      k++;
+    }
+
+    while (i < left.length) {
+      if (!sorting) return;
+      steps++;
+      arr[k] = left[i];
+      colorBars([k], '#e74c3c');
+      drawBars();
+      await sleep(speed);
+      i++;
+      k++;
+    }
+
+    while (j < right.length) {
+      if (!sorting) return;
+      steps++;
+      arr[k] = right[j];
+      colorBars([k], '#e74c3c');
+      drawBars();
+      await sleep(speed);
+      j++;
+      k++;
+    }
+
+    // merged section as sorted temp
+    colorBars(Array.from({length: end - start + 1}, (_, i) => start + i), '#27ae60');
+    await sleep(speed);
+    resetBarColors();
+  }
+
+  // Quick Sort
+  async function quickSort(arr = data, low = 0, high = data.length - 1) {
+    if (low < high && sorting) {
+      let pi = await partition(arr, low, high);
+      await quickSort(arr, low, pi - 1);
+      await quickSort(arr, pi + 1, high);
+    }
+  }
+
+  async function partition(arr, low, high) {
+    let pivot = arr[high];
+    let i = low - 1;
+
+    colorBars([high], '#f39c12'); // Pivot
+    await sleep(speed);
+
+    for (let j = low; j < high; j++) {
+      if (!sorting) return i + 1;
+
+      steps++;
+      comparisons++;
+      updateStats();
+
+      colorBars([j], '#e74c3c');
+      await sleep(speed);
+
+      if (arr[j] < pivot) {
+        i++;
+        if (i !== j) {
+          swapElements(i, j);
+          updateStats();
+        }
+      }
+
+      resetBarColors();
+      colorBars([high], '#f39c12');
+    }
+
+    swapElements(i + 1, high);
+    updateStats();
+    colorBars([i + 1], '#27ae60');
+
+    return i + 1;
+  }
+
+  // Sleep animation
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Start sorting
+  async function startSort() {
+    if (sorting) return;
+
+    sorting = true;
+    document.getElementById('start').disabled = true;
+
+    const algorithm = document.getElementById('algorithm').value;
+    resetBarColors();
+
+    try {
+      switch (algorithm) {
+        case 'bubble':
+          await bubbleSort();
+          break;
+        case 'selection':
+          await selectionSort();
+          break;
+        case 'insertion':
+          await insertionSort();
+          break;
+        case 'merge':
+          await mergeSort();
+          // Mark all as sorted after merge sort
+          if (sorting) colorBars(Array.from({length: data.length}, (_, i) => i), '#27ae60');
+          break;
+        case 'quick':
+          await quickSort();
+          // Mark all as sorted after quick sort
+          if (sorting) colorBars(Array.from({length: data.length}, (_, i) => i), '#27ae60');
+          break;
+      }
+    } catch (error) {
+      console.error('Sorting error:', error);
+    }
+
+    sorting = false;
+    document.getElementById('start').disabled = false;
+  }
+
+
+  document.getElementById('start').addEventListener('click', startSort);
+
+  document.getElementById('pause').addEventListener('click', () => {
+    sorting = false;
+    document.getElementById('start').disabled = false;
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    sorting = false;
+    document.getElementById('start').disabled = false;
+    initData();
+  });
+
+  document.getElementById('speed').addEventListener('change', (e) => {
+    speed = parseInt(e.target.value);
+  });
+
+  document.getElementById('algorithm').addEventListener('change', (e) => {
+    document.getElementById('algorithm-info').innerHTML =
+            `<strong>${e.target.options[e.target.selectedIndex].text}:</strong> ${algorithmInfo[e.target.value]}`;
+  });
+
+  // Initialize
+  initData();
+</script>
+</body>
+</html>

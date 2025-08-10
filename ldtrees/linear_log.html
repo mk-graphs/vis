@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>log(x) and x</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        #jxgbox {
+            width: 600px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<p><b>Compare log(x) and x</b></p>
+<div id="jxgbox" class="jxgbox"></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+    <li>Logarithmic growth is slower than linear.</li>
+    <li><span style="color:blue;">Blue curve</span>: <code>log(x)</code></li>
+    <li><span style="color:red;">Red curve</span>: <code>x</code></li>
+    <li>Useful in algorithms complexity</li>
+</ul>
+
+
+<script>
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-1, 10, 10, -2],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    board.create('functiongraph', [
+        x => x > 0 ? Math.log(x) : NaN
+    ], { strokeColor: 'blue', strokeWidth: 2 });
+
+    board.create('functiongraph', [
+        x => x
+    ], { strokeColor: 'red', strokeWidth: 2 });
+</script>
+
+</body>
+</html>
