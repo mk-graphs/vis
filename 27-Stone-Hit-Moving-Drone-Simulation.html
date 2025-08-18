@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stone Hit Moving Drone Simulation</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraph.css" />
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraphcore.js"></script>
+    <script>
+        MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          },
+          svg: {
+            fontCache: 'global'
+          }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+   
+
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+  #jxgbox { width: 900px; height: 600px; margin: 20px auto; border: 2px solid #ccc; background-color: #fff; }
+  .controls { margin-top: 20px; display: flex; justify-content: center; gap: 20px; }
+  .slider-group { display: flex; align-items: center; gap: 10px; }
+  input[type="range"] { width: 200px; }
+  #feedback-text { font-size: 24px; font-weight: bold; margin-top: 10px; }
+  #feedback-text.hit { color: green; }
+  #feedback-text.miss { color: red; }
+  .knowledge { text-align: left; width: 900px; margin: 0 auto 20px auto; background: #e8f0fe; padding: 15px; border-radius: 8px; }
+  .question { text-align: left; width: 900px; margin: 20px auto; background: #fff3e0; padding: 15px; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Stone Hit Moving Drone Simulation</h1>
+
+<div class="knowledge">
+  <h2>Knowledge Points:</h2>
+  <ul>
+    <li><strong>Projectile Motion:</strong> Stone moves along a parabolic trajectory. Horizontal speed is constant; vertical speed is affected by gravity.</li>
+    <li><strong>Maximum Height & Landing Point:</strong> Maximum height occurs when vertical velocity is zero. Landing point occurs when stone returns to ground or drone height.</li>
+    <li><strong>Relative Motion:</strong> Drone moves horizontally at a constant speed. Collision happens when the stone's and drone's positions coincide.</li>
+  </ul>
+  <h2>Key Formulas:</h2>
+  <ul>
+    <li>Stone's horizontal position: $x(t) = v_0 \cos(\theta) \cdot t$</li>
+    <li>Stone's vertical position: $y(t) = v_0 \sin(\theta) \cdot t - \frac{1}{2} g t^2$</li>
+    <li>Maximum height: $y_{max} = \frac{(v_0 \sin(\theta))^2}{2g}$</li>
+  </ul>
+</div>
+<div id="jxgbox" class="jxgbox"></div>
+
+<div class="controls">
+  <div class="slider-group">
+    <label>Initial Velocity (m/s):</label>
+    <input type="range" id="velocitySlider" min="5" max="25" value="12" step="0.5">
+    <span id="velocityValue">12</span>
+  </div>
+  <div class="slider-group">
+    <label>Launch Angle (°):</label>
+    <input type="range" id="angleSlider" min="10" max="80" value="45" step="1">
+    <span id="angleValue">45</span>
+  </div>
+  <button id="playBtn">Start Simulation</button>
+  <button id="resetBtn">Reset</button>
+</div>
+
+<div id="feedback-text"></div>
+
+<div class="question">
+  <h2>Practice Question:</h2>
+  <p>A stone is launched from the bottom left corner with an initial velocity of <strong>v₀ = 12 m/s</strong> at an angle of <strong>45°</strong>. The drone moves horizontally left from position <strong>x = 12, y = 5</strong> at a speed of 0.2 units per 0.05s. Will the stone hit the drone?</p>
+  <ol type="A">
+    <li>Yes</li>
+    <li>No</li>
+  </ol>
+  <h3>Answer & Explanation:</h3>
+  <p>Answer: <strong>B. No</strong></p>
+  <p>Solution Breakdown:</p>
+  <ul>
+    <li>**1. Calculate the Maximum Height**</li>
+    <li>The initial vertical velocity component of the stone is:<br>
+     $v_{y0} = v_0 \sin(\theta) = 12 \cdot \sin(45°) \approx 8.485 \text{ m/s}$</li>
+    <li>The time required to reach the highest point is:<br>
+     $t_{max\_height} = \frac{v_{y0}}{g} = \frac{8.485}{9.8} \approx 0.866 \text{ s}$</li>
+    <li>Substitute this time into the vertical position formula to calculate the maximum height:<br>
+     $y_{max} = v_{y0} \cdot t - \frac{1}{2} g t^2 = 8.485 \cdot (0.866) - 0.5 \cdot (9.8) \cdot (0.866)^2 \approx 3.68 \text{ m}$</li>
+    <li>**2. Determine if it will hit**</li>
+    <li>The drone's height is **5 meters**.</li>
+    <li>The stone's maximum height is **3.68 meters**.</li>
+    <li>Because the stone's maximum height is lower than the drone's height (3.68 m < 5 m), the stone will never reach the drones altitude and therefore cannot hit it.</li>
+  </ul>
+</div>
+
+<script>
+const g = 9.8;
+let board;
+const startX = 0, startY = 0;
+const droneStartX = 12, droneStartY = 5;
+const droneSpeed = -0.2; // units per 0.05s
+const intervalTime = 50;
+
+const velocitySlider = document.getElementById('velocitySlider');
+const angleSlider = document.getElementById('angleSlider');
+const velocityValue = document.getElementById('velocityValue');
+const angleValue = document.getElementById('angleValue');
+const playBtn = document.getElementById('playBtn');
+const resetBtn = document.getElementById('resetBtn');
+const feedbackText = document.getElementById('feedback-text');
+
+let stone, drone, trajectory, intervalId, t;
+
+function initBoard() {
+  if (board) JXG.JSXGraph.freeBoard(board);
+  board = JXG.JSXGraph.initBoard('jxgbox', {
+    boundingbox: [-1, 10, 15, -1],
+    axis: true,
+    showCopyright: false
+  });
+  
+  // Drone point
+  drone = board.create('point', [droneStartX, droneStartY], {
+    name: 'Drone', size: 6, color: 'red', fixed: true, withlabel: false
+  });
+  
+  // Stone point
+  stone = board.create('point', [startX, startY], {
+    name: 'Stone', size: 6, color: 'blue', fixed: false, withlabel: false
+  });
+}
+
+function updateSliders() {
+  velocityValue.textContent = velocitySlider.value;
+  angleValue.textContent = angleSlider.value;
+}
+
+function drawTrajectory(v0, theta) {
+  if (trajectory) board.removeObject(trajectory);
+  const a = -g / (2 * v0 * v0 * Math.cos(theta)**2);
+  const b = Math.tan(theta);
+  const c = startY;
+  trajectory = board.create('functiongraph', [x => a*x**2 + b*x + c, startX, 15], {
+    strokeColor: 'green', strokeWidth: 2
+  });
+}
+
+function startSimulation() {
+  clearInterval(intervalId);
+  t = 0;
+  feedbackText.textContent = '';
+  stone.moveTo([startX, startY]);
+  drone.moveTo([droneStartX, droneStartY]);
+
+  const v0 = parseFloat(velocitySlider.value);
+  const theta = parseFloat(angleSlider.value) * Math.PI / 180;
+  drawTrajectory(v0, theta);
+
+  const vx = v0 * Math.cos(theta);
+  const vy0 = v0 * Math.sin(theta);
+
+  intervalId = setInterval(() => {
+    t += 0.05;
+    const x = startX + vx*t;
+    const y = startY + vy0*t - 0.5*g*t*t;
+    stone.moveTo([x, y]);
+
+    // Move drone left at constant speed
+    const droneX = droneStartX + droneSpeed*(t/0.05);
+    drone.moveTo([droneX, droneStartY]);
+
+    // Check hit
+    const tolerance = 0.5;
+    if (Math.abs(x - droneX) <= tolerance && Math.abs(y - droneStartY) <= tolerance) {
+      feedbackText.textContent = 'Hit!';
+      feedbackText.className = 'hit';
+      clearInterval(intervalId);
+    }
+
+    // Stop if stone falls below ground
+    if (y < -1 || x > 15) {
+      if (!feedbackText.textContent) {
+        feedbackText.textContent = 'Miss!';
+        feedbackText.className = 'miss';
+      }
+      clearInterval(intervalId);
+    }
+
+    board.update();
+  }, intervalTime);
+}
+
+function resetSimulation() {
+  clearInterval(intervalId);
+  t = 0;
+  feedbackText.textContent = '';
+  stone.moveTo([startX, startY]);
+  drone.moveTo([droneStartX, droneStartY]);
+  if (trajectory) board.removeObject(trajectory);
+}
+
+velocitySlider.addEventListener('input', updateSliders);
+angleSlider.addEventListener('input', updateSliders);
+playBtn.addEventListener('click', startSimulation);
+resetBtn.addEventListener('click', resetSimulation);
+
+updateSliders();
+initBoard();
+</script>
+
+</body>
+</html>

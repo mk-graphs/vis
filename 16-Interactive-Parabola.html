@@ -1,112 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Interactive Parabola y = ax² + bx + c </title>
-  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    #box {
-      width: 600px;
-      height: 450px;
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-    }
-    .slider-container {
-      margin-bottom: 10px;
-    }
-    label {
-      margin-right: 10px;
-    }
-    .value {
-      font-weight: bold;
-      margin-left: 5px;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Interactive Parabola y = ax² + bx + c</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <script>
+        // MathJax configuration for rendering LaTeX
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #box {
+            width: 600px;
+            height: 450px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+        .slider-container {
+            margin-bottom: 10px;
+        }
+        label {
+            margin-right: 10px;
+        }
+        .value {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        #equation {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .question-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ccc;
+        }
+        .answer-container {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-  <h2>Interactive Parabola: y = ax² + bx + c </h2>
-  <p>Use the sliders to change parameters a, b, and c and see the parabola update in real time.</p>
+    <h2>Interactive Parabola: $y = ax^2 + bx + c$</h2>
+     <p>
+        This interactive graph helps you explore how the quadratic function 
+        $y = ax^2 + bx + c$ changes. By adjusting the sliders, you can see 
+        how the parameters $a$, $b$, and $c$ affect the shape, position, 
+        and intercepts of the parabola.
+    </p>
+    <p>Use the sliders to change parameters a, b, and c and see the parabola update in real time.</p>
 
-  <div id="box"></div>
+    <div id="equation"></div>
+    <div id="box"></div>
 
-  <div class="slider-container">
-    <label for="aRange">a: <span id="aValue" class="value">1</span></label>
-    <input type="range" id="aRange" min="-2" max="2" step="0.01" value="1" />
-  </div>
-  <div class="slider-container">
-    <label for="bRange">b: <span id="bValue" class="value">0</span></label>
-    <input type="range" id="bRange" min="-5" max="5" step="0.01" value="0" />
-  </div>
-  <div class="slider-container">
-    <label for="cRange">c: <span id="cValue" class="value">0</span></label>
-    <input type="range" id="cRange" min="-10" max="10" step="0.01" value="0" />
-  </div>
+    <div class="slider-container">
+        <label for="aRange">a: <span id="aValue" class="value">1</span></label>
+        <input type="range" id="aRange" min="-2" max="2" step="0.01" value="1" />
+    </div>
+    <div class="slider-container">
+        <label for="bRange">b: <span id="bValue" class="value">0</span></label>
+        <input type="range" id="bRange" min="-5" max="5" step="0.01" value="0" />
+    </div>
+    <div class="slider-container">
+        <label for="cRange">c: <span id="cValue" class="value">0</span></label>
+        <input type="range" id="cRange" min="-10" max="10" step="0.01" value="0" />
+    </div>
 
-  <script>
-    const board = JXG.JSXGraph.initBoard('box', {
-      boundingbox: [-10, 20, 10, -10],
-      axis: true,
-      showNavigation: false,
-      zoom: { wheel: false, needshift: false, pinch: false },
-      pan: { enabled: false }
-    });
+    <div class="question-section">
+        <h3>Test Your Knowledge (Level 1)</h3>
+        <p><strong>Question 1:</strong> When you increase the value of the parameter <strong>c</strong> using the slider, what happens to the parabola?</p>
+        <ul>
+            <li>A) The parabola moves up.</li>
+            <li>B) The parabola moves down.</li>
+            <li>C) The parabola becomes wider.</li>
+            <li>D) The parabola becomes narrower.</li>
+        </ul>
+        <button id="show-answer-btn-1">Show Answer</button>
+        <div id="answer-container-1" class="answer-container">
+            <p><strong>Correct Answer: A) The parabola moves up.</strong></p>
+            <p><strong>Explanation:</strong></p>
+            <p>In the standard form of a parabola, $y = ax^2 + bx + c$, the parameter <strong>c</strong> represents the <strong>y-intercept</strong>. This is the point where the parabola crosses the y-axis, because when $x=0$, the equation simplifies to $y = c$.</p>
+            <p>Changing the value of <strong>c</strong> causes a <strong>vertical shift</strong> of the entire graph. Increasing <strong>c</strong> shifts the graph up, while decreasing <strong>c</strong> shifts it down.</p>
+        </div>
+    </div>
+    
+    <div class="question-section">
+        <h3>Test Your Knowledge (Level 2)</h3>
+        <p><strong>Question 2:</strong> Given the parabola with the equation $y = 2x^2 - 8x + 5$, calculate the coordinates of its vertex.</p>
+        <ul>
+            <li>A) (2, -3)</li>
+            <li>B) (-2, -3)</li>
+            <li>C) (2, 3)</li>
+            <li>D) (-2, 3)</li>
+        </ul>
+        <button id="show-answer-btn-2">Show Answer</button>
+        <div id="answer-container-2" class="answer-container">
+            <p><strong>Correct Answer: A) (2, -3)</strong></p>
+            <p><strong>Explanation:</strong></p>
+            <p>The coordinates of the vertex for a parabola in the form $y = ax^2 + bx + c$ can be found using the vertex formula. The x-coordinate is given by $x = -\frac{b}{2a}$. The y-coordinate is found by substituting this x-value back into the original equation.</p>
+            <ol>
+                <li><strong>Find the x-coordinate:</strong>
+                    <p>In the equation $y = 2x^2 - 8x + 5$, we have $a=2$ and $b=-8$.</p>
+                    <p>$x = -\frac{(-8)}{2(2)} = \frac{8}{4} = 2$</p>
+                </li>
+                <li><strong>Find the y-coordinate:</strong>
+                    <p>Substitute $x=2$ back into the equation:</p>
+                    <p>$y = 2(2)^2 - 8(2) + 5$</p>
+                    <p>$y = 8 - 16 + 5 = -3$</p>
+                </li>
+            </ol>
+            <p>Therefore, the vertex is at the point <strong>(2, -3)</strong>.</p>
+        </div>
+    </div>
 
-    let a = 1, b = 0, c = 0;
+    <script>
+        // Initialize JSXGraph board
+        const board = JXG.JSXGraph.initBoard('box', {
+            boundingbox: [-10, 20, 10, -10],
+            axis: true,
+            showNavigation: false,
+            zoom: { wheel: false, needshift: false, pinch: false },
+            pan: { enabled: false }
+        });
 
-    let parabola = board.create('functiongraph', [function(x) {
-      return a*x*x + b*x + c;
-    }], {strokeWidth: 3, strokeColor: 'blue'});
+        // Initialize parameters
+        let a = 1, b = 0, c = 0;
 
-    let vertex = board.create('point', [-b/(2*a), c - (b*b)/(4*a)], {
-      name: 'Vertex',
-      size: 4,
-      color: 'red',
-      fixed: true,
-      highlight: true,
-      withLabel: true
-    });
+        // Create parabola, vertex, and axis of symmetry
+        let parabola = board.create('functiongraph', [function(x) {
+            return a * x * x + b * x + c;
+        }], { strokeWidth: 3, strokeColor: 'blue' });
 
-    let axis = board.create('line', [[-b/(2*a), -10], [-b/(2*a), 20]], {
-      strokeColor: 'orange',
-      strokeWidth: 2,
-      dash: 2,
-      fixed: true
-    });
+        let vertex = board.create('point', [
+            function() { return -b / (2 * a); },
+            function() { return c - (b * b) / (4 * a); }
+        ], {
+            name: 'Vertex',
+            size: 4,
+            color: 'red',
+            fixed: true,
+            withLabel: true,
+            label: { offset: [5, 10] }
+        });
 
-    function update() {
-      a = parseFloat(document.getElementById('aRange').value);
-      b = parseFloat(document.getElementById('bRange').value);
-      c = parseFloat(document.getElementById('cRange').value);
+        let axis = board.create('line', [
+            function() { return [-b / (2 * a), -10]; },
+            function() { return [-b / (2 * a), 20]; }
+        ], {
+            strokeColor: 'orange',
+            strokeWidth: 2,
+            dash: 2,
+            fixed: true
+        });
 
-      document.getElementById('aValue').textContent = a.toFixed(2);
-      document.getElementById('bValue').textContent = b.toFixed(2);
-      document.getElementById('cValue').textContent = c.toFixed(2);
+        const equationEl = document.getElementById('equation');
+        const aRange = document.getElementById('aRange');
+        const bRange = document.getElementById('bRange');
+        const cRange = document.getElementById('cRange');
+        const aValueSpan = document.getElementById('aValue');
+        const bValueSpan = document.getElementById('bValue');
+        const cValueSpan = document.getElementById('cValue');
 
-      parabola.Y = function(x) {
-        return a*x*x + b*x + c;
-      };
-      parabola.fullUpdate();
+        /**
+         * Format and render equation text (with MathJax)
+         */
+        function updateEquationDisplay() {
+            const a = parseFloat(aRange.value);
+            const b = parseFloat(bRange.value);
+            const c = parseFloat(cRange.value);
 
-      // 更新顶点坐标
-      vertex.setCoords([-b/(2*a), c - (b*b)/(4*a)]);
-      // 更新对称轴位置
-      axis.point1.setCoords([-b/(2*a), -10]);
-      axis.point2.setCoords([-b/(2*a), 20]);
+            const aStr = a.toFixed(2);
+            const bStr = b.toFixed(2);
+            const cStr = c.toFixed(2);
 
-      board.update();
-    }
+            let equation = `y = ${aStr}x^2`;
+            if (Math.abs(a) < 0.01) {
+              // When a ≈ 0, show linear equation
+              equation = `y = ${bStr}x ${b >= 0 ? '+' : '-'} ${Math.abs(cStr)}`;
+            } else {
+              // Normal quadratic equation
+              equation += `${b >= 0 ? ' + ' : ' - '}${Math.abs(bStr)}x`;
+              equation += `${c >= 0 ? ' + ' : ' - '}${Math.abs(cStr)}`;
+            }
 
-    document.getElementById('aRange').addEventListener('input', update);
-    document.getElementById('bRange').addEventListener('input', update);
-    document.getElementById('cRange').addEventListener('input', update);
+            equationEl.innerHTML = `$${equation.replace(/\+ \-|\- \-/g, m => m.includes('+ -') ? '-' : '+')}$`;
+            MathJax.typeset();
+        }
 
-  </script>
+        /**
+         * Main update function: update slider values, graph, and equation
+         */
+        function update() {
+            a = parseFloat(aRange.value);
+            b = parseFloat(bRange.value);
+            c = parseFloat(cRange.value);
 
+            aValueSpan.textContent = a.toFixed(2);
+            bValueSpan.textContent = b.toFixed(2);
+            cValueSpan.textContent = c.toFixed(2);
+
+            // Hide vertex and axis when a ≈ 0 (line)
+            if (Math.abs(a) < 0.01) {
+                vertex.setAttribute({ visible: false });
+                axis.setAttribute({ visible: false });
+                parabola.setAttribute({ strokeColor: 'green' }); // Line color
+            } else {
+                vertex.setAttribute({ visible: true });
+                axis.setAttribute({ visible: true });
+                parabola.setAttribute({ strokeColor: 'blue' });
+
+                const vertexX = -b / (2 * a);
+                const vertexY = c - (b * b) / (4 * a);
+                vertex.setLabel(`Vertex (${vertexX.toFixed(2)}, ${vertexY.toFixed(2)})`);
+            }
+            
+            updateEquationDisplay();
+            board.update();
+        }
+
+        /**
+         * Toggle answer visibility
+         */
+        function toggleAnswer(answerId, buttonId) {
+            const answerContainer = document.getElementById(answerId);
+            const button = document.getElementById(buttonId);
+            if (answerContainer.style.display === 'none') {
+                answerContainer.style.display = 'block';
+                button.textContent = 'Hide Answer';
+            } else {
+                answerContainer.style.display = 'none';
+                button.textContent = 'Show Answer';
+            }
+        }
+
+        // Event listeners
+        aRange.addEventListener('input', update);
+        bRange.addEventListener('input', update);
+        cRange.addEventListener('input', update);
+        document.getElementById('show-answer-btn-1').addEventListener('click', () => toggleAnswer('answer-container-1', 'show-answer-btn-1'));
+        document.getElementById('show-answer-btn-2').addEventListener('click', () => toggleAnswer('answer-container-2', 'show-answer-btn-2'));
+
+        // Initial update on page load
+        update();
+    </script>
 </body>
 </html>

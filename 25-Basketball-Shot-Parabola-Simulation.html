@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basketball Shot Parabola Simulation</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraph.css" />
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraphcore.js"></script>
+
+<script>
+      MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+        svg: { fontCache: 'global' }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; text-align: center; background-color: #f4f4f4; }
+    h1 { color: #333; }
+    #jxgbox { width: 900px; height: 600px; margin: 20px auto; border: 2px solid #ccc; background-color: #fff; }
+    .controls { margin-top: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
+    .slider-group { display: flex; align-items: center; gap: 10px; width: 350px; }
+    .slider-group label { flex-shrink: 0; }
+    input[type="range"] { flex-grow: 1; }
+    .button-group { display: flex; gap: 10px; }
+    
+    .question-section { margin-top: 40px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .question-section h2 { border-bottom: 2px solid #333; padding-bottom: 10px; }
+    .options label { display: block; margin: 10px 0; font-size: 16px; cursor: pointer; }
+    .options input[type="radio"] { margin-right: 10px; }
+    .answer-btn { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007BFF; color: #fff; border: none; border-radius: 5px; }
+    
+    .explanation { margin-top: 20px; padding: 15px; background-color: #e9f5ff; border: 1px solid #b0d8ff; border-radius: 5px; display: none; }
+    .explanation h3 { color: #0056b3; }
+    .explanation p, .explanation ol { font-size: 15px; line-height: 1.6; }
+    
+    #feedback-text {
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 10px;
+        text-align: center;
+    }
+    #feedback-text.hit { color: #28a745; }
+    #feedback-text.miss { color: #dc3545; }
+</style>
+</head>
+<body>
+
+<h1>Basketball Shot Parabola Simulation</h1>
+<p>Drag the sliders to change the shot parameters and click the buttons to start or reset the simulation.</p>
+
+<div id="jxgbox" class="jxgbox"></div>
+<div id="feedback-text"></div>
+
+<div class="controls">
+    <div class="slider-group">
+        <label>Initial Velocity (m/s):</label>
+        <input type="range" id="velocitySlider" min="5" max="20" value="12" step="0.5">
+        <span id="velocityValue">12.0</span>
+    </div>
+    <div class="slider-group">
+        <label>Shot Angle (degrees):</label>
+        <input type="range" id="angleSlider" min="20" max="80" value="50" step="1">
+        <span id="angleValue">50</span>
+    </div>
+    <div class="button-group">
+        <button id="playBtn">Animate Shot</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+</div>
+
+<div class="question-section">
+    <h2>Math Exercise: Solving a Parabolic Equation</h2>
+    <p>The trajectory of a basketball can be approximated as a quadratic function. Assume a shot's path follows the function $y = ax^2 + bx + c$. The shot is released from point $(0, 2)$, and the basketball's highest point is $(5, 8)$.</p>
+    <p>What is the function that describes the trajectory of this parabola?</p>
+    
+    <div class="options">
+        <label><input type="radio" name="answer" value="A"> A. $y = -0.24x^2 + 2.4x + 2$</label>
+        <label><input type="radio" name="answer" value="B"> B. $y = -0.48x^2 + 4.8x + 2$</label>
+        <label><input type="radio" name="answer" value="C"> C. $y = -0.24x^2 + 2.4x + 8$</label>
+        <label><input type="radio" name="answer" value="D"> D. $y = -0.48x^2 + 4.8x + 8$</label>
+    </div>
+    
+    <button class="answer-btn" id="showAnswerBtn">Show Solution</button>
+    
+    <div class="explanation" id="explanationBox">
+        <h3>Solution:</h3>
+        <p>This problem is a classic example of determining a quadratic function based on points on its parabola.</p>
+        <ol>
+            <li><strong>Use the Vertex Form</strong><br>
+                The vertex form of a quadratic function is $y = a(x - h)^2 + k$, where $(h, k)$ is the vertex of the parabola.<br>
+                The problem gives the highest point (the vertex) as $(5, 8)$. Substituting this into the vertex form gives:
+                $$y = a(x - 5)^2 + 8$$
+            </li>
+            <li><strong>Solve for $a$ using the initial point</strong><br>
+                The parabola passes through the initial point of the shot, $(0, 2)$. Substitute these coordinates into the vertex form to solve for the coefficient $a$:
+                $$2 = a(0 - 5)^2 + 8$$
+                $$2 = 25a + 8$$
+                $$-6 = 25a$$
+                $$a = -0.24$$
+            </li>
+            <li><strong>Expand the function</strong><br>
+                Substitute the value of $a$ back into the vertex form and expand it to get the standard form $y = ax^2 + bx + c$:
+                $$y = -0.24(x - 5)^2 + 8$$
+                $$y = -0.24(x^2 - 10x + 25) + 8$$
+                $$y = -0.24x^2 + 2.4x - 6 + 8$$
+                $$y = -0.24x^2 + 2.4x + 2$$
+            </li>
+        </ol>
+        <p>Therefore, the correct function is **$y = -0.24x^2 + 2.4x + 2$**.</p>
+    </div>
+</div>
+
+<div class="question-section">
+    <h2>Math Exercise 2: Basketball Shot Analysis</h2>
+    <p>The basketball follows a parabolic path from point (0, 2) to the hoop at (10.5, 3.05). Use the sliders to adjust the initial velocity and shot angle, then predict the outcome.</p>
+
+    <p><strong>Question 1:</strong> If the initial velocity is 12 m/s and the shot angle is 50°, will the basketball hit the hoop?</p>
+    <div class="options">
+        <label><input type="radio" name="q2_answer1" value="A"> A. Yes, it will hit the hoop</label>
+        <label><input type="radio" name="q2_answer1" value="B"> B. No, it will miss the hoop</label>
+    </div>
+
+  
+
+    <button class="answer-btn" id="showAnswerBtn2">Show Solution</button>
+
+    <div class="explanation" id="explanationBox2">
+        <h3>Solution:</h3>
+        <ol>
+            <li><strong>Question 1:</strong> 
+                <br>
+                Using the sliders for 12 m/s at 50°, simulate the trajectory. Observing the graph, the basketball does not reach the hoop horizontally before descending, so the shot <strong>misses</strong>.
+                <br><strong>Answer:</strong> B. No, it will miss the hoop.
+            </li>
+         
+        </ol>
+    </div>
+</div>
+
+<script>
+// Show/hide solution functionality for Q2
+const showAnswerBtn2 = document.getElementById('showAnswerBtn2');
+const explanationBox2 = document.getElementById('explanationBox2');
+
+showAnswerBtn2.addEventListener('click', () => {
+    if (explanationBox2.style.display === 'none' || explanationBox2.style.display === '') {
+        explanationBox2.style.display = 'block';
+        showAnswerBtn2.textContent = 'Hide Solution';
+    } else {
+        explanationBox2.style.display = 'none';
+        showAnswerBtn2.textContent = 'Show Solution';
+    }
+});
+</script>
+
+
+<script>
+const g = 9.8;
+const boardId = 'jxgbox';
+let board;
+
+const hoopX = 10.5;
+const hoopY = 3.05;
+const startX = 0;
+const startY = 2;
+
+const velocitySlider = document.getElementById('velocitySlider');
+const angleSlider = document.getElementById('angleSlider');
+const velocityValueSpan = document.getElementById('velocityValue');
+const angleValueSpan = document.getElementById('angleValue');
+const playBtn = document.getElementById('playBtn');
+const resetBtn = document.getElementById('resetBtn');
+const showAnswerBtn = document.getElementById('showAnswerBtn');
+const explanationBox = document.getElementById('explanationBox');
+const feedbackText = document.getElementById('feedback-text');
+
+let trajectory = null;
+let basketball = null;
+let highestPointMarker = null;
+let intervalId = null;
+let t = 0;
+
+function updateGraph() {
+    if (trajectory) board.removeObject(trajectory);
+    if (basketball) board.removeObject(basketball);
+    if (highestPointMarker) board.removeObject(highestPointMarker);
+    feedbackText.textContent = '';
+    
+    const v0 = parseFloat(velocitySlider.value);
+    const theta = parseFloat(angleSlider.value) * Math.PI / 180;
+    
+    // Calculate parabola coefficients
+    const a = -g / (2 * v0 * v0 * Math.cos(theta) * Math.cos(theta));
+    const b = Math.tan(theta);
+    const c = startY;
+
+    // Determine highest point (vertex) for highlighting
+    const highestPointX = -b / (2 * a);
+    const highestPointY = a * highestPointX * highestPointX + b * highestPointX + c;
+
+    // Fixed bounding box for a static coordinate system
+    const fixedBoundingBox = [-1, 12, 18, -1];
+    
+    // Re-initialize the board with the fixed bounding box
+    if (board) JXG.JSXGraph.freeBoard(board);
+    board = JXG.JSXGraph.initBoard(boardId, {
+        boundingbox: fixedBoundingBox,
+        axis: true,
+        showCopyright: false,
+        pan: { enabled: false },
+        zoom: { enabled: false }
+    });
+
+    // Re-create static elements on the new board
+    board.create('point', [hoopX, hoopY], { name: 'hoop', size: 5, fixed: true, color: 'orange', style: 6, withlabel: false });
+    board.create('segment', [[hoopX, hoopY], [hoopX, hoopY - 0.45]], { strokeWidth: 4, strokeColor: 'orange' });
+    board.create('text', [hoopX + 0.5, hoopY + 0.2, 'Hoop'], { fontSize: 14 });
+    board.create('point', [startX, startY], { name: 'shot_point', size: 5, fixed: true, color: 'blue' });
+
+    // Create the trajectory curve
+    trajectory = board.create('functiongraph', [
+        function(x) { return a * Math.pow(x, 2) + b * x + c; },
+        startX, 25 // Set a fixed range for the function graph
+    ], { strokeWidth: 3, strokeColor: 'red' });
+
+    // Create the basketball point
+    basketball = board.create('point', [startX, startY], {
+        name: 'Basketball',
+        size: 8,
+        fixed: false,
+        color: 'orange',
+        style: 2,
+        withlabel: false
+    });
+    
+    // Create the highest point marker, initially invisible
+    highestPointMarker = board.create('point', [highestPointX, highestPointY], {
+        name: 'Max', size: 3, fixed: true, color: 'red', style: 6, withlabel: false, visible: false
+    });
+
+    board.update();
+}
+
+function startAnimation() {
+    clearInterval(intervalId);
+    resetSimulation();
+    
+    const v0 = parseFloat(velocitySlider.value);
+    const theta = parseFloat(angleSlider.value) * Math.PI / 180;
+    
+    const vx = v0 * Math.cos(theta);
+    const vy0 = v0 * Math.sin(theta);
+    
+    let isAtHighestPoint = false;
+    
+    intervalId = setInterval(() => {
+        t += 0.05;
+        let x = startX + vx * t;
+        let y = startY + vy0 * t - 0.5 * g * t * t;
+
+        basketball.moveTo([x, y]);
+
+        // Check for highest point
+        if (!isAtHighestPoint && vy0 - g * t <= 0) {
+            highestPointMarker.setAttribute({ visible: true });
+            isAtHighestPoint = true;
+        }
+
+        // Check for shot completion or out of bounds
+        if (x >= hoopX || y < -1) {
+            clearInterval(intervalId);
+            
+            // Check for a hit
+            const tolerance = 0.5; // Tolerance for hitting the hoop
+            if (x >= hoopX - tolerance && x <= hoopX + tolerance && y >= hoopY - 0.5 && y <= hoopY + 0.5) {
+                feedbackText.textContent = 'Hit!';
+                feedbackText.className = 'hit';
+            } else {
+                feedbackText.textContent = 'Miss!';
+                feedbackText.className = 'miss';
+            }
+        }
+        
+        board.update();
+    }, 50);
+}
+
+function resetSimulation() {
+    clearInterval(intervalId);
+    t = 0;
+    feedbackText.textContent = '';
+    highestPointMarker.setAttribute({ visible: false });
+    if (basketball) {
+        basketball.moveTo([startX, startY]);
+    }
+    board.update();
+}
+
+// Show/hide solution functionality
+showAnswerBtn.addEventListener('click', () => {
+    if (explanationBox.style.display === 'none' || explanationBox.style.display === '') {
+        explanationBox.style.display = 'block';
+        showAnswerBtn.textContent = 'Hide Solution';
+    } else {
+        explanationBox.style.display = 'none';
+        showAnswerBtn.textContent = 'Show Solution';
+    }
+});
+
+// Event listeners for sliders and buttons
+velocitySlider.addEventListener('input', () => {
+    velocityValueSpan.textContent = parseFloat(velocitySlider.value).toFixed(1);
+    updateGraph();
+});
+angleSlider.addEventListener('input', () => {
+    angleValueSpan.textContent = angleSlider.value;
+    updateGraph();
+});
+playBtn.addEventListener('click', startAnimation);
+resetBtn.addEventListener('click', resetSimulation);
+
+updateGraph();
+</script>
+
+</body>
+</html>

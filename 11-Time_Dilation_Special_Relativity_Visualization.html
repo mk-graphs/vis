@@ -1,137 +1,258 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Time Dilation - Special Relativity Visualization</title>
-  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
-  <style>
-    html, body {
-      margin: 0; padding: 0;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f9f9f9;
-    }
-    .jxgbox {
-      margin: 20px auto 40px auto;
-      border: 1px solid #ccc;
-      width: 700px;
-      height: 500px;
-      background: white;
-    }
-    .theory {
-      max-width: 700px;
-      margin: 20px auto;
-      text-align: left;
-      padding: 15px;
-      background: #fff;
-      border: 1px solid #ddd;
-      font-size: 16px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      font-family: Consolas, monospace;
-    }
-  </style>
+    <meta charset="utf-8">
+    <title>Gravitational Time Dilation: The Interstellar Story</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.5.0/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.5.0/distrib/jsxgraph.css" />
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #intro-text, #formula-section {
+            width: 800px;
+            margin: 20px auto;
+            text-align: left;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #intro-text h2, #formula-section h2 {
+            color: #4CAF50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        #jxgbox {
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            background-color: #000;
+        }
+        .controls {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .slider-container {
+            width: 300px;
+            height: 30px;
+            margin: 10px auto;
+        }
+        .clock-display {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .clock-label {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 20px;
+        }
+        .control-buttons button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .math-formula {
+            font-size: 1.2em;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .math-legend {
+            font-size: 1em;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Time Dilation in Special Relativity</h1>
+    <h1>Gravitational Time Dilation: A 2D Simulation</h1>
+    <p>The physical parameters in this simulation are scaled to enhance the time dilation effect.</p>
 
-<div class="theory">
-  Theory and Explanation:
-  ----------------------------------------
-  According to Einstein's <b>Special Relativity</b>, the passage of time depends on the relative velocity between observers.<br><br>
-  The <b>time dilation formula</b> is:<br>
-  Δt' = Δt / √(1 - v²/c²)<br><br>
-  Where:<br>
-  - Δt: Proper time interval measured by a stationary observer (e.g., on Earth)<br>
-  - Δt': Dilated time interval measured by an observer moving at velocity v<br>
-  - v: Relative velocity between observers<br>
-  - c: Speed of light<br><br>
-  As velocity v approaches the speed of light c, the denominator approaches zero, causing Δt' to increase dramatically.<br>
-  This means moving clocks run slower relative to stationary ones.<br><br>
-  Use the slider below to adjust velocity v and see how Δt' changes dynamically.<br>
-</div>
+    <div id="intro-text">
+        <h2>What is Gravitational Time Dilation?</h2>
+        <p>According to Albert Einstein's Theory of General Relativity, **gravity warps spacetime**. A massive object, like a black hole, creates a strong gravitational field that causes time to pass more slowly for objects nearby than it does for objects far away. This is the phenomenon of **gravitational time dilation**.</p>
+        <p>A classic example of this is the movie *Interstellar*. In the film, Cooper and Brand visit **Miller's Planet**, which orbits extremely close to a massive black hole named **Gargantua**. Dr. Romilly stays on the **Endurance** spaceship, far from the black hole's intense gravity. When Cooper and Brand return after spending just a few hours on the planet, they discover that 23 years have passed for Romilly.</p>
+        <p>This simulation allows you to recreate and understand this exact phenomenon. The **Endurance** (blue dot) is in a weak gravitational field and its clock runs normally. **Miller's Planet** (red dot) is in a strong gravitational field, so its clock runs slower. You can observe this by comparing their clock displays and the rotation of their clock hands.</p>
+    </div>
 
-<div id="box" class="jxgbox"></div>
+    <div id="formula-section">
+        <h2>The Key Formula</h2>
+        <p>The relationship between time in a strong gravitational field and a weak one is given by the formula for time dilation in a static gravitational field:</p>
+        <div class="math-formula">
+            $$ \Delta t_{near} = \Delta t_{far} \sqrt{1 - \frac{R_s}{r}} $$
+        </div>
+        <div class="math-legend">
+            <ul>
+                <li>$$ \Delta t_{near} $$: The time measured by a clock near the massive object (e.g., **Cooper & Brand** on Miller's Planet).</li>
+                <li>$$ \Delta t_{far} $$: The time measured by a clock far away (e.g., **Romilly** on the Endurance).</li>
+                <li>$$ R_s $$: The **Schwarzschild Radius** of the massive object (**Gargantua**). This is a critical radius beyond which nothing, not even light, can escape.</li>
+                <li>$$ r $$: The distance from the center of the massive object to the clock.</li>
+            </ul>
+        </div>
+        <p>Drag the slider to move **Miller's Planet** closer to the black hole. You will see its clock run slower, just like in the movie!</p>
+    </div>
 
-<script type="text/javascript">
-  // --------------------------
-  // Special Relativity - Time Dilation Visualization
-  //
-  // Formula:
-  // Δt' = Δt / sqrt(1 - v^2 / c^2)
-  //
-  // Where:
-  // Δt  = proper time interval (stationary frame)
-  // Δt' = dilated time interval (moving frame)
-  // v   = relative velocity
-  // c   = speed of light (normalized to 1)
-  // --------------------------
+    <div id="jxgbox" class="jxgbox"></div>
+    
+    <div class="controls">
+        <label for="distance-slider-outside">Distance of Miller's Planet from the Black Hole (r): <span id="distance-value">8.00</span></label>
+        <div id="distance-slider-outside" class="slider-container"></div>
+        <div class="control-buttons">
+            <button id="startButton" class="start-button">Start Simulation</button>
+            <button id="resetButton" class="start-button">Reset</button>
+        </div>
+    </div>
 
-  const board = JXG.JSXGraph.initBoard('box', {
-    boundingbox: [-0.1, 10, 1.1, -1],
-    axis: true,
-    showNavigation: false,
-    showCopyright: false
-  });
+    <div class="clock-display">
+        <div class="clock-label" style="color: blue;">Endurance Clock: <span id="clockOutside">0.00</span> sec</div>
+        <div class="clock-label" style="color: red;">Miller's Planet Clock: <span id="clockInside">0.00</span> sec</div>
+    </div>
+    
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create JSXGraph board
+            var board = JXG.JSXGraph.initBoard('jxgbox', {
+                boundingbox: [-15, 15, 15, -15],
+                axis: false,
+                grid: false,
+                showCopyright: false,
+                showNavigation: true,
+                pan: { enabled: false },
+                zoom: { enabled: false }
+            });
 
-  const c = 1;       // speed of light normalized
-  const deltaT = 1;  // proper time (seconds)
+            // --- Core Parameters (scaled, not real physics values) ---
+            var VIRTUAL_SCHWARZSCHILD_RADIUS = 3; 
+            var blackHoleRadius = VIRTUAL_SCHWARZSCHILD_RADIUS; 
+            var initialPlanetDistance = 8; 
+            var initialSliderValue = (initialPlanetDistance - VIRTUAL_SCHWARZSCHILD_RADIUS) / 9;
 
-  // Slider controlling velocity v between 0 and 0.99c
-  const slider = board.create('slider', [[0.2, 9], [0.9, 9], [0, 0.5, 0.99]], {
-    name: 'v (velocity)',
-    snapWidth: 0.01
-  });
+            // --- Draw Scene Objects ---
+            // Draw black hole (Gargantua)
+            board.create('circle', [[0, 0], blackHoleRadius], {
+                fillColor: '#222',
+                strokeColor: '#aaa',
+                strokeWidth: 2,
+                fixed: true,
+                label: 'Gargantua'
+            });
 
-  // Display current velocity and dilated time Δt'
-  board.create('text', [0.05, 8, function() {
-    const v = slider.Value();
-    const gamma = 1 / Math.sqrt(1 - v * v);
-    const dtPrime = deltaT * gamma;
-    return `Selected velocity v = ${v.toFixed(2)}\nDilated time Δt' = ${dtPrime.toFixed(3)} seconds`;
-  }], {
-    fontSize: 16,
-    fixed: false,
-    highlight: false,
-    anchorX: 'left'
-  });
+            // Draw spaceship (Endurance)
+            var spaceship = board.create('point', [12, 12], {
+                color: 'blue',
+                size: 5,
+                name: 'Endurance (Romilly)',
+                fixed: true
+            });
 
-  // Graph of Δt' = Δt / sqrt(1 - v²/c²) from v=0 to v=0.99
-  board.create('functiongraph', [
-    function(v) {
-      if (v >= 1) return NaN;  // velocity cannot exceed c
-      return deltaT / Math.sqrt(1 - v * v);
-    }, 
-    0, 0.99
-  ], {
-    strokeWidth: 2,
-    strokeColor: '#0077cc'
-  });
+            // Draw planet (Miller's Planet)
+            var planet = board.create('point', [initialPlanetDistance, 0], {
+                color: 'red',
+                size: 5,
+                name: 'Miller\'s Planet (Cooper & Brand)',
+                fixed: true
+            });
+            
+            // Create a separate board for the slider
+            var sliderBoard = JXG.JSXGraph.initBoard('distance-slider-outside', {
+                boundingbox: [-2, 1, 2, -1],
+                axis: false,
+                showCopyright: false,
+                showNavigation: false
+            });
 
-  // Red point on the curve controlled by slider
-  board.create('point', [
-    function() { return slider.Value(); },
-    function() {
-      const v = slider.Value();
-      return deltaT / Math.sqrt(1 - v * v);
-    }
-  ], {
-    name: "Δt' at v",
-    size: 4,
-    color: 'red',
-    fixed: true,
-    highlight: true,
-    showInfobox: false
-  });
+            // Create slider on the new board
+           
+            var distanceSlider = sliderBoard.create('slider', [[-0.8, 0], [0.8, 0], [0, initialSliderValue, 1]], {
+                name: 'd', 
+                precision: 2,
+                snapWidth: 0.01
+            });
+            distanceSlider.on('up', function() { board.update(); });
+            
+            // --- Clock and Animation Logic ---
+            var timeOutside = 0;
+            var timeInside = 0;
+            var animationInterval;
+            
+            var clockHandLength = 1; 
 
-  // Label below graph
-  board.create('text', [0.1, -0.5, "Graph: Dilated time Δt' vs Velocity v"], {
-    fontSize: 14
-  });
+            // Endurance's clock hand
+            var handOutside = board.create('line', [spaceship, [
+                () => spaceship.X() + clockHandLength * Math.cos(timeOutside * 360 * Math.PI / 180),
+                () => spaceship.Y() + clockHandLength * Math.sin(timeOutside * 360 * Math.PI / 180)
+            ]], {
+                strokeColor: 'blue',
+                strokeWidth: 2,
+                lastArrow: true
+            });
+            
+            // Miller's Planet's clock hand
+            var handInside = board.create('line', [planet, [
+                () => planet.X() + clockHandLength * Math.cos(timeInside * 360 * Math.PI / 180),
+                () => planet.Y() + clockHandLength * Math.sin(timeInside * 360 * Math.PI / 180)
+            ]], {
+                strokeColor: 'red',
+                strokeWidth: 2,
+                lastArrow: true
+            });
+            
+            // Animation function
+            function startSimulation() {
+                document.getElementById('startButton').disabled = true;
 
-</script>
+                animationInterval = setInterval(function() {
+                    // Get the current slider value (now named 'd')
+                    var d = distanceSlider.Value();
+                    // Map the slider's 0-1 range to the planet's distance range (r)
+                    var r = VIRTUAL_SCHWARZSCHILD_RADIUS + d * 9;
+                    
+                    planet.moveTo([r, 0]);
+                    
+                    document.getElementById('distance-value').innerText = r.toFixed(2);
+                    
+                    var timeDilutionFactor = Math.sqrt(1 - VIRTUAL_SCHWARZSCHILD_RADIUS / r);
+                    
+                    timeOutside += 0.03;
+                    
+                    timeInside += 0.03 * timeDilutionFactor;
 
+                    document.getElementById('clockOutside').innerText = timeOutside.toFixed(2);
+                    document.getElementById('clockInside').innerText = timeInside.toFixed(2);
+                    
+                    board.update();
+                }, 30); 
+            }
+
+            // Reset function
+            function resetSimulation() {
+                clearInterval(animationInterval); 
+                timeOutside = 0;
+                timeInside = 0;
+                
+                document.getElementById('clockOutside').innerText = "0.00";
+                document.getElementById('clockInside').innerText = "0.00";
+                document.getElementById('startButton').disabled = false;
+                
+                distanceSlider.setValue(initialSliderValue);
+                planet.moveTo([initialPlanetDistance, 0]);
+
+                board.update();
+            }
+
+            document.getElementById('startButton').addEventListener('click', startSimulation);
+            document.getElementById('resetButton').addEventListener('click', resetSimulation);
+        });
+    </script>
 </body>
 </html>

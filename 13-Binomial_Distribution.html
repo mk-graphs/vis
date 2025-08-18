@@ -4,31 +4,45 @@
   <meta charset="UTF-8">
   <title>Binomial Distribution</title>
   <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+     body {
+   font-family: Arial, sans-serif;
+    margin: 0 auto; /* Sets top/bottom margins to 0 and left/right to auto */
+    max-width: 960px; /* Optional but recommended: keeps content from being too wide */
+   padding: 20px; /* Adds space around the content */
+     }
+   #box {
+     width: 800px;
+     height: 500px;
+    border: 1px solid #aaa;
+     margin-top: 20px;
+     }
+     label {
+     display: inline-block;
+     margin: 10px 10px 10px 0;
     }
-    #box {
-      width: 800px;
-      height: 500px;
-      border: 1px solid #aaa;
-      margin-top: 20px;
+     .controls {
+    margin-bottom: 10px;
     }
-    label {
-      display: inline-block;
-      margin: 10px 10px 10px 0;
-    }
-    .controls {
-      margin-bottom: 10px;
-    }
-    #explanation {
-      background-color: #f0f8ff;
-      padding: 10px;
-      border-left: 5px solid steelblue;
-    }
-  </style>
+     #explanation {
+     background-color: #f0f8ff;
+     padding: 10px;
+    border-left: 5px solid steelblue;
+     }
+    </style>
 </head>
 <body>
 
@@ -59,12 +73,74 @@
 </div>
 
 <div id="box"></div>
+<div class="graph-labels">
+  <strong>Graph Labels:</strong>
+  <ul>
+      <li>The **X-axis** (horizontal axis) represents the number of successes ($k$).</li>
+      <li>The **Y-axis** (vertical axis) represents the probability ($P(X=k)$).</li>
+  </ul>
+</div>
+<div class="practice-question">
+    <h3>Practice Question: Applying the Binomial Formula</h3>
+    <p>Based on the scenario from the explanation, try to solve this problem using the formula.</p>
+    
+    <p><strong>Question:</strong> A new drug has a 60% cure rate. If 20 patients take the drug, what is the probability that <strong>exactly 15</strong> of them will be cured?</p>
+
+    <ol type="A">
+        <li>0.015</li>
+        <li>0.075</li>
+        <li>0.124</li>
+        <li>0.250</li>
+    </ol>
+</div>
+
+<div class="answer-section">
+    <h3>Answer and Explanation</h3>
+    <p><strong>Correct Answer: B) 0.075</strong></p>
+
+    <h4>Explanation & Calculation:</h4>
+    <p>To solve this, we use the binomial probability formula:</p>
+    
+    <p>\(P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}\)</p>
+
+    <p>Here are our known values from the problem:</p>
+    <ul>
+        <li><strong>n</strong> (number of trials) = 20 patients</li>
+        <li><strong>k</strong> (number of successes) = 15 patients</li>
+        <li><strong>p</strong> (probability of success) = 0.60 (60% cure rate)</li>
+        <li><strong>(1-p)</strong> (probability of failure) = 1 - 0.60 = 0.40</li>
+    </ul>
+
+    <p>Now, we substitute these values into the formula:</p>
+    <p>\(P(X=15) = \binom{20}{15} (0.60)^{15} (0.40)^{20-15}\)</p>
+    <p>\(P(X=15) = \binom{20}{15} (0.60)^{15} (0.40)^5\)</p>
+
+    <ol>
+        <li><strong>Calculate the binomial coefficient:</strong> <br>
+            \(\binom{20}{15} = \frac{20!}{15!5!} = 15,504\)
+        </li>
+        <li><strong>Calculate the probability terms:</strong> <br>
+            \((0.60)^{15} \approx 0.0004701\) <br>
+            \((0.40)^5 = 0.01024\)
+        </li>
+        <li><strong>Multiply the results:</strong> <br>
+            \(P(X=15) = 15,504 \times 0.0004701 \times 0.01024 \approx 0.07464\)
+        </li>
+    </ol>
+    <p>Rounding to three decimal places, the probability is **0.075**.</p>
+</div>
 
 <script>
   // Initialize JSXGraph board
   const board = JXG.JSXGraph.initBoard('box', {
     boundingbox: [-1, 1.1, 31, -0.1],
-    axis: true,
+    axis: {
+        names: {
+            // New lines added here for axis labels
+            x: 'Number of Successes (k)',
+            y: 'Probability (P(X=k))'
+        }
+    },
     showNavigation: false,
     zoom: {wheel: false},
     pan: {enabled: false}
@@ -134,3 +210,4 @@
 
 </body>
 </html>
+

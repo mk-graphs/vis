@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Forgetting Curve - Language Learning</title>
+  <title>The Power of Review</title>
   <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
   <style>
@@ -16,29 +16,33 @@
       font-family: Arial, sans-serif;
       margin-bottom: 1em;
     }
+    .info {
+      font-family: Arial, sans-serif;
+    }
   </style>
 </head>
 <body>
 
 <div class="description">
-  <h2>Forgetting Curve in Language Learning</h2>
+  <h2>The Power of Review: A Forgetting Curve Simulation</h2>
   <p>
-    This graph models how memory retention declines over time without review, based on the exponential forgetting curve:
+    This graph compares three learning scenarios based on the **Ebbinghaus forgetting curve**. The initial memory retention starts at 100%.
   </p>
-  <p style="font-family: monospace; font-size: 1.2em;">
-    R(t) = e<sup>-λt</sup>
-  </p>
+  <ul>
+    <li>The **Red Curve** shows what happens with **no review**.</li>
+    <li>The **Green Curve** shows memory with **weekly reviews**.</li>
+    <li>The **Blue Curve** shows memory with **daily reviews**.</li>
+  </ul>
   <p>
-    Use the sliders to adjust the forgetting rate (λ) and the number of days since learning (t), then observe the current retention level.
+    Use the sliders to adjust the initial forgetting rate (λ) and the effectiveness of your review sessions.
   </p>
 </div>
 
 <div id="jxgbox"></div>
 
-<p>
-  Forgetting rate (λ): <span id="lambdaVal">0.3</span><br />
-  Days since learning (t): <span id="timeVal">0</span><br />
-  Retention at day t: <span id="retentionVal">100%</span>
+<p class="info">
+  Forgetting Rate (λ): <span id="lambdaVal">0.3</span><br />
+  Review Effectiveness: <span id="boostVal">0.3</span>
 </p>
 
 <script>
@@ -55,61 +59,82 @@ const lambdaSlider = board.create('slider', [[2, 1], [10, 1], [0.05, 0.3, 1]], {
   fillColor: '#dd6666'
 });
 
-const timeSlider = board.create('slider', [[2, 0.7], [30, 0.7], [0, 0, 30]], {
-  name: 't',
-  snapWidth: 1,
-  fillColor: '#6666dd'
+const boostSlider = board.create('slider', [[2, 0.7], [10, 0.7], [0, 0.3, 1]], {
+  name: 'Boost',
+  snapWidth: 0.05,
+  fillColor: '#66dd66'
 });
 
-// Retention function R(t) = exp(-lambda * t)
-function retention(t, lambda) {
+// Forgetting function: R(t) = e^(-λt)
+function forgetting(t, lambda) {
   return Math.exp(-lambda * t);
 }
 
-// Draw forgetting curve dynamically depending on lambda
-let curve = board.create('functiongraph', [
+// Correctly calculates the cumulative effect of reviews.
+function calculateRetention(t, reviewInterval, lambda, boost) {
+    let retention = 1; // Start at 100%
+    const numReviews = Math.floor(t / reviewInterval);
+
+    for (let i = 0; i < numReviews; i++) {
+        const timeElapsed = reviewInterval;
+        retention = retention * forgetting(timeElapsed, lambda);
+        retention += (1 - retention) * boost;
+    }
+
+    const timeSinceLastReview = t % reviewInterval;
+    return retention * forgetting(timeSinceLastReview, lambda);
+}
+
+// --- Dynamic Curves ---
+
+// 1. No Review (Red)
+board.create('functiongraph', [
   function(t) {
-    return retention(t, lambdaSlider.Value());
+    return forgetting(t, lambdaSlider.Value());
   }, 0, 30
 ], {
-  strokeColor: '#dd5533',
+  strokeColor: 'red',
   strokeWidth: 3
 });
 
-// Point showing retention at current time t
-const pointOnCurve = board.create('point', [
-  () => timeSlider.Value(),
-  () => retention(timeSlider.Value(), lambdaSlider.Value())
+// 2. Weekly Review (Green)
+board.create('functiongraph', [
+  function(t) {
+    const lambda = lambdaSlider.Value();
+    const boost = boostSlider.Value();
+    return calculateRetention(t, 7, lambda, boost);
+  }, 0, 30
 ], {
-  name: 'Current Retention',
-  size: 4,
-  fillColor: '#dd5533',
-  withLabel: true,
-  label: {
-    position: 'rt',
-    offset: [10, -10],
-    fontSize: 14,
-  }
+  strokeColor: 'green',
+  strokeWidth: 3
 });
+
+// 3. Daily Review (Blue)
+board.create('functiongraph', [
+  function(t) {
+    const lambda = lambdaSlider.Value();
+    const boost = boostSlider.Value();
+    return calculateRetention(t, 1, lambda, boost);
+  }, 0, 30
+], {
+  strokeColor: 'blue',
+  strokeWidth: 3
+});
+
 
 // Update labels and board
 function updateLabels() {
   const λ = lambdaSlider.Value();
-  const t = timeSlider.Value();
-  const ret = retention(t, λ);
+  const boost = boostSlider.Value();
 
   document.getElementById("lambdaVal").innerText = λ.toFixed(2);
-  document.getElementById("timeVal").innerText = t.toFixed(0);
-  document.getElementById("retentionVal").innerText = (ret * 100).toFixed(1) + "%";
-
+  document.getElementById("boostVal").innerText = boost.toFixed(2);
+  
   board.update();
 }
 
-lambdaSlider.on('drag', () => {
-  curve.setFunction(function(t) { return retention(t, lambdaSlider.Value()); });
-  updateLabels();
-});
-timeSlider.on('drag', updateLabels);
+lambdaSlider.on('drag', updateLabels);
+boostSlider.on('drag', updateLabels);
 
 updateLabels();
 </script>

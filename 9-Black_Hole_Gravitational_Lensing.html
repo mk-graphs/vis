@@ -1,170 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Black Hole Gravitational Lensing Visualization</title>
-  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
-  <style>
-    html, body {
-      margin: 0; padding: 0;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f9f9f9;
-    }
-    .jxgbox {
-      margin: 20px auto 40px auto;
-      border: 1px solid #ccc;
-      width: 700px;
-      height: 600px;
-      background: white;
-    }
-    .theory {
-      max-width: 700px;
-      margin: 20px auto;
-      text-align: left;
-      padding: 15px;
-      background: #fff;
-      border: 1px solid #ddd;
-      font-size: 16px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      font-family: Consolas, monospace;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Black Hole Gravitational Lensing</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <script>
+        MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          },
+          svg: {
+            fontCache: 'global'
+          }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+    <style>
+        html, body {
+            margin: 0; padding: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #0d1a26;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        .container {
+            background-color: #1a2c3d;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h1, h3 {
+            color: #fff;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #34495e;
+            margin: 1em auto;
+        }
+        p, ul, li {
+            color: #bdc3c7;
+            font-family: Consolas, monospace;
+            text-align: left;
+            line-height: 1.6;
+        }
+        #box {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            border: 2px solid #2c3e50;
+            border-radius: 1rem;
+            margin: 1.5rem auto;
+            background-color: #000;
+        }
+        .controls {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            color: #95a5a6;
+            margin-right: 1em;
+        }
+        input[type="range"] {
+            width: 80%;
+            -webkit-appearance: none;
+            background: #2c3e50;
+            border-radius: 0.5rem;
+            height: 8px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #solution-content {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Black Hole Gravitational Lensing</h1>
+<div class="container">
+    <h1>Black Hole Gravitational Lensing</h1>
 
-<div class="theory">
-  Theory and Explanation:
-  ----------------------------------------
-  Gravitational lensing occurs when light rays bend around a massive object like a black hole.<br><br>
-  The bending angle α can be approximated by:<br>
-  α = (4GM) / (c² b)<br><br>
-  where:<br>
-  - G: gravitational constant<br>
-  - M: mass of black hole<br>
-  - c: speed of light<br>
-  - b: impact parameter (closest distance of the light ray to black hole)<br><br>
-  In this visualization, the black hole is at the origin.<br>
-  Multiple light rays start from the left with different offsets.<br>
-  Rays bend near the black hole with bending angle inversely proportional to b.<br><br>
-  Use the slider to adjust the mass M and see how the bending changes.
+    <div class="theory">
+        <h3>Core Physics Concepts</h3>
+        <p>This visualization demonstrates key principles of General Relativity:</p>
+        <ul>
+            <li><b>Spacetime Curvature:</b> Massive objects like black holes curve the spacetime around them.</li>
+            <li><b>Gravitational Lensing:</b> Light rays, which follow the shortest path through spacetime, appear to bend when passing near a massive object.</li>
+            <li><b>Dependence on Mass (M) and Impact Parameter (b):</b> The amount of bending is proportional to the black hole's mass (M) and inversely proportional to the light ray's closest distance (b) to the black hole.</li>
+        </ul>
+
+        <h3>Theory and Explanation:</h3>
+        <hr>
+        Gravitational lensing occurs when light rays bend around a massive object like a black hole.<br><br>
+        The bending angle $\alpha$ can be approximated by:<br>
+        $$
+        \alpha \approx \frac{4GM}{c^2 b}
+        $$<br>
+        where:<br>
+        - G: gravitational constant<br>
+        - M: mass of black hole<br>
+        - c: speed of light<br>
+        - b: impact parameter (closest distance of the light ray to black hole)<br><br>
+        In this visualization, the black hole is at the origin.<br>
+        Multiple light rays start from the left with different offsets.<br>
+        Rays bend near the black hole with bending angle inversely proportional to b.<br><br>
+        Use the slider to adjust the mass M and see how the bending changes.
+    </div>
+
+    <div id="box" class="jxgbox"></div>
+
+    <div class="controls">
+        <label for="massSlider">Black Hole Mass (M):</label>
+        <span id="massVal">1.00</span>
+        <input type="range" id="massSlider" min="0.1" max="3" value="1" step="0.01" />
+    </div>
+
+    <div class="problem-section">
+        <h3>Problem for Students</h3>
+        <hr>
+        <p>A light ray passes by a black hole with a mass M. The ray is observed to bend with an angle of $\alpha = 0.5$ radians. Use the formula provided in the visualization to solve the following problems. <b>Note: For this problem, assume the normalized units from the simulation (G = 1, c = 1).</b></p>
+        <ol>
+            <li>If the light ray's impact parameter is $b = 2$, what is the mass (M) of the black hole?</li>
+            <li>If the black hole's mass is $M = 1.5$, what is the impact parameter (b) of a light ray that bends by $\alpha = 0.5$ radians?</li>
+        </ol>
+    </div>
+
+    <div class="solution-section">
+        <h3>Show Answer</h3>
+        <button onclick="toggleSolution()">Show Solution</button>
+        <div id="solution-content">
+            <hr>
+            <p><b>Given Formula:</b></p>
+            <p>$\alpha = \frac{4GM}{c^2 b}$</p>
+            <p><b>Given Values:</b></p>
+            <ul>
+                <li>$\alpha = 0.5$</li>
+                <li>$G = 1$</li>
+                <li>$c = 1$</li>
+            </ul>
+
+            <h4>Solution to Problem 1:</h4>
+            <p><b>Find M when b = 2</b></p>
+            <p>Substitute the given values into the formula:</p>
+            $$0.5 = \frac{4 \cdot 1 \cdot M}{1^2 \cdot 2}$$
+            $$0.5 = 2M$$
+            $$M = \frac{0.5}{2}$$
+            <p><b>Answer: M = 0.25</b></p>
+
+            <h4>Solution to Problem 2:</h4>
+            <p><b>Find b when M = 1.5</b></p>
+            <p>First, rearrange the formula to solve for b:</p>
+            $$b = \frac{4GM}{c^2 \alpha}$$
+            <p>Substitute the given values:</p>
+            $$b = \frac{4 \cdot 1 \cdot 1.5}{1^2 \cdot 0.5}$$
+            $$b = \frac{6}{0.5}$$
+            <p><b>Answer: b = 12</b></p>
+        </div>
+    </div>
 </div>
 
-<div id="box" class="jxgbox"></div>
-
 <script type="text/javascript">
-  const board = JXG.JSXGraph.initBoard('box', {
-    boundingbox: [-6, 6, 6, -6],
-    axis: true,
-    grid: false,
-    showNavigation: false,
-    showCopyright: false
-  });
+    const board = JXG.JSXGraph.initBoard('box', {
+        boundingbox: [-6, 6, 6, -6],
+        axis: false, // Hide axes for a clean look
+        grid: false,
+        showNavigation: false,
+        showCopyright: false,
+        // Add custom background function to create a starfield
+        renderer: 'canvas', // Use canvas renderer for better background drawing
+        draw: function(board) {
+            const ctx = board.renderer.canvas.getContext('2d');
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, board.canvasWidth, board.canvasHeight);
 
-  // Constants (normalized units)
-  const c = 1;      // speed of light (normalized)
-  let G = 1;        // gravitational constant (normalized)
-  let M = 1;        // black hole mass (variable by slider)
-
-  // Draw black hole as filled black circle at origin
-  board.create('circle', [[0, 0], 0.3], {
-    fillColor: 'black',
-    fillOpacity: 1,
-    strokeColor: 'black',
-    strokeWidth: 1,
-    fixed: true
-  });
-
-  // Mass slider to change black hole mass M
-  const massSlider = board.create('slider', [[-5, 5.5], [5, 5.5], [0.1, 1, 3]], {
-    name: 'Mass M',
-    snapWidth: 0.01,
-    precision: 2
-  });
-
-  // Text showing current mass M
-  const massText = board.create('text', [-5, 5.8, function() {
-    return `Black Hole Mass M = ${massSlider.Value().toFixed(2)}`;
-  }], { fontSize: 16 });
-
-  // Function: bending angle α = 4GM / (c² b)
-  // Here c=1, G=1 (normalized), so α = 4 * M / b
-
-  // Number of rays
-  const raysCount = 7;
-
-  // Impact parameters (y offsets) spaced between -3 and 3, excluding very close to zero to avoid singularity
-  let impactParameters = [];
-  for(let i = 0; i < raysCount; i++) {
-    // avoid zero: distribute from -3 to 3, skipping near zero
-    let y = -3 + i * (6/(raysCount-1));
-    if (Math.abs(y) < 0.3) y = (y > 0) ? 0.3 : -0.3;
-    impactParameters.push(y);
-  }
-
-  // Clear old rays if exist
-  let rays = [];
-
-  function drawRays() {
-    // Remove old rays
-    rays.forEach(ray => board.removeObject(ray));
-    rays = [];
-
-    M = massSlider.Value();
-
-    // For each ray, calculate bending and plot piecewise curve
-    impactParameters.forEach(y0 => {
-      // Bending angle alpha
-      const alpha = 4 * M / Math.abs(y0);
-
-      // Maximum x before bending region (start bending at x=0)
-      const xStart = -5;
-
-      // Ray before bending: straight line y = y0
-      const beforeBend = board.create('line', [[xStart, y0], [0, y0]], {
-        strokeWidth: 1,
-        strokeColor: 'blue',
-        straightFirst: false,
-        straightLast: false
-      });
-
-      // Ray after bending: deflect by angle alpha around origin
-      // Approximate as a straight line starting at (0, y0), rotated by alpha
-
-      // Calculate direction vector after bending
-      // Initial direction vector: (1,0)
-      // After bending: rotated by sign of y0 * alpha (to keep bending direction correct)
-      const sign = (y0 > 0) ? -1 : 1; // bending toward origin
-      const bendAngle = sign * alpha;
-
-      // Calculate endpoint for ray after bending
-      const lengthAfter = 6; // arbitrary length after bending
-
-      const xEnd = lengthAfter * Math.cos(bendAngle);
-      const yEnd = y0 + lengthAfter * Math.sin(bendAngle);
-
-      const afterBend = board.create('line', [[0, y0], [xEnd, yEnd]], {
-        strokeWidth: 1,
-        strokeColor: 'blue',
-        straightFirst: false,
-        straightLast: false
-      });
-
-      rays.push(beforeBend, afterBend);
+            // Draw a few hundred random stars
+            for (let i = 0; i < 300; i++) {
+                ctx.beginPath();
+                ctx.arc(
+                    Math.random() * board.canvasWidth, 
+                    Math.random() * board.canvasHeight, 
+                    Math.random() * 0.5 + 0.5, 
+                    0, 
+                    2 * Math.PI
+                );
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fill();
+            }
+        }
     });
-  }
 
-  // Initial draw
-  drawRays();
+    const c = 1;
+    const G = 1;
 
-  // Update rays on slider change
-  massSlider.on('drag', drawRays);
-  massSlider.on('up', drawRays);
+    // --- Create a more dynamic black hole with an accretion disk ---
+    // Outer glow/accretion disk (orange)
+    board.create('circle', [[0, 0], 1], {
+        fillColor: '#FF4500', // OrangeRed
+        fillOpacity: 0.1,
+        strokeColor: 'transparent',
+        fixed: true
+    });
+    // Middle glow (red)
+    board.create('circle', [[0, 0], 0.6], {
+        fillColor: '#B22222', // FireBrick
+        fillOpacity: 0.3,
+        strokeColor: 'transparent',
+        fixed: true
+    });
+    // Inner glow (darker red)
+    board.create('circle', [[0, 0], 0.4], {
+        fillColor: '#8B0000', // DarkRed
+        fillOpacity: 0.8,
+        strokeColor: 'transparent',
+        fixed: true
+    });
+    // The event horizon (the actual black hole)
+    board.create('circle', [[0, 0], 0.3], {
+        fillColor: '#000000', // Black
+        fillOpacity: 1,
+        strokeColor: '#000000',
+        strokeWidth: 2,
+        fixed: true
+    });
 
+    const massSlider = document.getElementById('massSlider');
+    const massVal = document.getElementById('massVal');
+    
+    let currentMass = parseFloat(massSlider.value);
+    massVal.textContent = currentMass.toFixed(2);
+
+    const raysCount = 7;
+    let impactParameters = [];
+    for(let i = 0; i < raysCount; i++) {
+        let y = -3 + i * (6 / (raysCount - 1));
+        if (Math.abs(y) < 0.5) {
+            y = (y > 0) ? 0.5 : -0.5;
+        }
+        impactParameters.push(y);
+    }
+
+    let rays = [];
+
+    function drawRays() {
+        rays.forEach(ray => board.removeObject(ray));
+        rays = [];
+
+        const M = parseFloat(massSlider.value);
+
+        impactParameters.forEach(b => {
+            const alpha = (4 * G * M) / (c * c * Math.abs(b));
+            
+            const curve = board.create('curve', [
+                function(t) {
+                    return t;
+                },
+                function(t) {
+                    const sign = (b > 0) ? -1 : 1;
+                    const x = t;
+                    const y = b;
+                    const r = Math.sqrt(x*x + y*y);
+                    const bendFactor = sign * alpha * (Math.exp(-r/1.5) / (r*r));
+                    return y + (bendFactor * (x));
+                }
+            ], {
+                strokeWidth: 1.5,
+                strokeColor: '#FFFFFF', // White light ray
+                fixed: true
+            });
+            rays.push(curve);
+        });
+        board.update();
+    }
+
+    massSlider.addEventListener('input', () => {
+        massVal.textContent = parseFloat(massSlider.value).toFixed(2);
+        drawRays();
+    });
+
+    function toggleSolution() {
+        const solutionDiv = document.getElementById('solution-content');
+        const button = document.querySelector('.solution-section button');
+        if (solutionDiv.style.display === 'none') {
+            solutionDiv.style.display = 'block';
+            button.textContent = 'Hide Solution';
+        } else {
+            solutionDiv.style.display = 'none';
+            button.textContent = 'Show Solution';
+        }
+    }
+
+    drawRays();
 </script>
 
 </body>

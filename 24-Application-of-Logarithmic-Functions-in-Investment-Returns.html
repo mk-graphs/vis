@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application of Logarithmic Functions in Investment Returns</title>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.6.0/distrib/jsxgraphcore.js"></script>
+    <script>
+        MathJax = {
+          tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+          svg: { fontCache: 'global' }
+        };
+      </script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+  
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.6.0/distrib/jsxgraph.css" />
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        h1 { text-align: center; }
+        .math-block {
+            padding: 15px;
+            background-color: #f8f8ff;
+            border-left: 4px solid #0056b3;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        #jxgbox {
+            width: 100%;
+            height: 500px;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .controls {
+            padding: 20px;
+            background-color: #f0f0f5;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .slider-label {
+            flex-shrink: 0;
+            width: 150px;
+            font-weight: bold;
+        }
+        .slider-input {
+            flex-grow: 1;
+        }
+        .result {
+            font-size: 1.1em;
+            text-align: center;
+            font-weight: bold;
+        }
+        .exact-result { color: #28a745; }
+        .approx-result { color: #dc3545; }
+        .diff-result { color: #6c757d; }
+
+        .question-section, .solution-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #e6f7ff;
+            border-radius: 8px;
+            border: 1px solid #b3e0ff;
+        }
+        .question {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options-list li {
+            margin-bottom: 10px;
+        }
+        .options-list input[type="radio"] {
+            margin-right: 10px;
+        }
+        .check-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .check-button:hover {
+            background-color: #0056b3;
+        }
+        .answer-feedback {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .correct { color: #28a745; }
+        .incorrect { color: #dc3545; }
+        .solution-content {
+            display: none;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Application of Logarithmic Functions in Investment Returns</h1>
+    <p>This example intuitively demonstrates how logarithmic functions simplify complex compound growth problems, especially when calculating the annualized rate of return in finance.</p>
+
+    <h2>1. Traditional Calculation Method: Exponential Equation</h2>
+    <p>Suppose you have an initial investment of <b>P</b> that grows to <b>A</b> after <b>t</b> years. You want to calculate the annualized rate of return, <b>r</b>. This can be expressed with an exponential equation:</p>
+    <div class="math-block">
+        $$A = P \times (1+r)^t$$
+    </div>
+    <p>To solve for <b>r</b>, we need to algebraically rearrange the formula:</p>
+    <div class="math-block">
+        $$(1+r)^t = \frac{A}{P}$$
+        $$1+r = \left(\frac{A}{P}\right)^{\frac{1}{t}}$$
+        $$r = \left(\frac{A}{P}\right)^{\frac{1}{t}} - 1$$
+    </div>
+    <p>This formula involves a fractional exponent, which is very difficult to calculate manually without a calculator.</p>
+
+    <h2>2. Using Logarithms to Simplify Calculations</h2>
+    <p>Now, let's start with the same formula but simplify it using logarithms. We take the natural logarithm (ln) of both sides of the equation:</p>
+    <div class="math-block">
+        $$\ln(A) = \ln(P \times (1+r)^t)$$
+    </div>
+    <p>Based on two core properties of logarithms: the logarithm of a product is the sum of the logarithms $\ln(xy) = \ln(x) + \ln(y)$ and the logarithm of a power is the exponent times the logarithm $\ln(x^y) = y \cdot \ln(x)$, we can simplify the formula:</p>
+    <div class="math-block">
+        $$\ln(A) = \ln(P) + \ln((1+r)^t)$$
+        $$\ln(A) = \ln(P) + t \cdot \ln(1+r)$$
+    </div>
+    <p>Now, we solve for $\ln(1+r)$ with simple algebra:</p>
+    <div class="math-block">
+        $$\ln(A) - \ln(P) = t \cdot \ln(1+r)$$
+        $$\ln\left(\frac{A}{P}\right) = t \cdot \ln(1+r)$$
+        $$\ln(1+r) = \frac{\ln(A/P)}{t}$$
+    </div>
+    <p>Here, a key mathematical approximation comes into play: when the rate of return <b>r</b> is very small, $\ln(1+r)$ is approximately equal to <b>r</b>. This is an important application of the Taylor series expansion and is widely used in finance for quick estimation.</p>
+    <p>Using this approximation, our annualized rate of return <b>r</b> can be approximated as:</p>
+    <div class="math-block">
+        $$r \approx \frac{\ln(A/P)}{t}$$
+    </div>
+
+    <h2>3. Interactive Comparison and Visualization</h2>
+    <p>Below, you can adjust the parameters by dragging the sliders to observe the rates of return calculated by both methods and their corresponding growth curves. This will visually demonstrate the convenience of the logarithmic approximation method and the error it introduces.</p>
+
+    <div id="jxgbox" class="jxgbox"></div>
+    <div class="controls">
+        <div class="slider-container">
+            <label class="slider-label" for="P">Principal (P):</label>
+            <input type="range" id="P" class="slider-input" min="100" max="2000" value="1000" step="100">
+            <span id="P-value">1000</span>
+        </div>
+        <div class="slider-container">
+            <label class="slider-label" for="A">Final Amount (A):</label>
+            <input type="range" id="A" class="slider-input" min="100" max="4000" value="1500" step="100">
+            <span id="A-value">1500</span>
+        </div>
+        <div class="slider-container">
+            <label class="slider-label" for="t">Time (t):</label>
+            <input type="range" id="t" class="slider-input" min="1" max="20" value="5" step="1">
+            <span id="t-value">5</span> years
+        </div>
+        <div class="result">
+            <p class="exact-result">Exact Rate of Return: <span id="exact-rate"></span></p>
+            <p class="approx-result">Logarithmic Approx. Rate: <span id="approx-rate"></span></p>
+        </div>
+    </div>
+
+    <hr>
+    
+    <div class="question-section">
+        <h2>Practice Question</h2>
+        <div class="question">
+            <p>You invest a principal of $1,000, and after 10 years, your investment grows to $1,350. Using the logarithmic approximation method, what is the approximate annualized rate of return (r)?</p>
+            <p>(Hint: $\ln(1.35) \approx 0.3$) </p>
+        </div>
+        <ul class="options-list">
+            <li>
+                <input type="radio" id="optionA" name="question1" value="A">
+                <label for="optionA">A) 3.5%</label>
+            </li>
+            <li>
+                <input type="radio" id="optionB" name="question1" value="B">
+                <label for="optionB">B) 3.0%</label>
+            </li>
+            <li>
+                <input type="radio" id="optionC" name="question1" value="C">
+                <label for="optionC">C) 2.8%</label>
+            </li>
+            <li>
+                <input type="radio" id="optionD" name="question1" value="D">
+                <label for="optionD">D) 4.2%</label>
+            </li>
+        </ul>
+        <button class="check-button" onclick="checkAnswer()">Check Answer</button>
+        <div class="answer-feedback" id="feedback"></div>
+    </div>
+    
+    <div class="solution-section">
+        <h2>Solution</h2>
+        <div class="solution-content" id="solution-content">
+            <p>The logarithmic approximation formula for the annualized rate of return is:</p>
+            <div class="math-block">
+                $$r \approx \frac{\ln(A/P)}{t}$$
+            </div>
+            <p>In this problem, we have the following values:</p>
+            <ul>
+                <li>Principal $(P) = \$1,000$</li>
+                <li>Final Amount $(A) = \$1,350$</li>
+                <li>Time $(t) = 10$ years</li>
+            </ul>
+            <p>First, calculate the ratio of the final amount to the principal:</p>
+            <div class="math-block">
+                $$\frac{A}{P} = \frac{1350}{1000} = 1.35$$
+            </div>
+            <p>Next, substitute this value and the time into the formula. We are given the hint that $\ln(1.35) \approx 0.3$:</p>
+            <div class="math-block">
+                $$r \approx \frac{\ln(1.35)}{10} \approx \frac{0.3}{10}$$
+            </div>
+            <p>Finally, perform the division to get the approximate rate:</p>
+            <div class="math-block">
+                $$r \approx 0.03$$
+            </div>
+            <p>To express this as a percentage, multiply by 100:</p>
+            <div class="math-block">
+                $$r \approx 0.03 \times 100\% = 3.0\%$$
+            </div>
+            <p>Therefore, the correct answer is B) 3.0%.</p>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-1, 4200, 21, -100],
+        axis: true,
+        showNavigation: false,
+        showCopyright: false,
+        zoom: { factorX: 1.25, factorY: 1.25 }
+    });
+
+    board.create('text', [21, 0, 'Time (Years)'], { anchorX: 'right', anchorY: 'top', offset: [0, -10], fontSize: 14 });
+    board.create('text', [0, 4200, 'Amount'], { anchorX: 'left', anchorY: 'bottom', offset: [10, 0], fontSize: 14 });
+
+    const principalSlider = document.getElementById('P');
+    const finalAmountSlider = document.getElementById('A');
+    const timeSlider = document.getElementById('t');
+    const principalValueSpan = document.getElementById('P-value');
+    const finalAmountValueSpan = document.getElementById('A-value');
+    const timeValueSpan = document.getElementById('t-value');
+    const exactRateSpan = document.getElementById('exact-rate');
+    const approxRateSpan = document.getElementById('approx-rate');
+
+    let exactCurve, approxCurve;
+    let startPoint, endPoint;
+
+    function updateGraph() {
+        const principal = parseFloat(principalSlider.value);
+        const finalAmount = parseFloat(finalAmountSlider.value);
+        const time = parseFloat(timeSlider.value);
+
+        principalValueSpan.textContent = principal;
+        finalAmountValueSpan.textContent = finalAmount;
+        timeValueSpan.textContent = time;
+
+        // Only display "Invalid Input" if time is not positive
+        if (time <= 0) {
+            if (exactCurve) {
+                board.removeObject([exactCurve, approxCurve, startPoint, endPoint]);
+            }
+            exactRateSpan.textContent = 'Invalid Input';
+            approxRateSpan.textContent = 'Invalid Input';
+            return;
+        }
+
+        // Calculate the annualized rates, including negative values for losses
+        const exactRate = (Math.pow(finalAmount / principal, 1 / time) - 1);
+        const approxRate = (Math.log(finalAmount / principal) / time);
+
+        exactRateSpan.textContent = `${(exactRate * 100).toFixed(2)} %`;
+        approxRateSpan.textContent = `${(approxRate * 100).toFixed(2)} %`;
+
+        // Remove old curves and points
+        if (exactCurve) {
+            board.removeObject([exactCurve, approxCurve, startPoint, endPoint]);
+        }
+        
+        // Plot new curves and points, whether the return is positive or negative
+        exactCurve = board.create('functiongraph', [function(x) {
+            return principal * Math.pow(1 + exactRate, x);
+        }], { strokeColor: '#28a745', strokeWidth: 3, name: 'Exact Curve', withLabel: false });
+
+        approxCurve = board.create('functiongraph', [function(x) {
+            return principal * Math.pow(1 + approxRate, x);
+        }], { strokeColor: '#dc3545', strokeWidth: 3, name: 'Approx. Curve', withLabel: false });
+
+        startPoint = board.create('point', [0, principal], { name: `P = ${principal}`, fixed: true, size: 4, face: 'o', color: 'blue' });
+        endPoint = board.create('point', [time, finalAmount], { name: `A = ${finalAmount}`, fixed: true, size: 4, face: 'o', color: 'blue' });
+
+        board.update();
+    }
+
+    principalSlider.addEventListener('input', updateGraph);
+    finalAmountSlider.addEventListener('input', updateGraph);
+    timeSlider.addEventListener('input', updateGraph);
+
+    updateGraph();
+
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="question1"]:checked');
+        const feedback = document.getElementById('feedback');
+        const solutionContent = document.getElementById('solution-content');
+
+        if (!selectedOption) {
+            feedback.textContent = 'Please select an answer.';
+            feedback.className = 'answer-feedback incorrect';
+            solutionContent.style.display = 'none';
+            return;
+        }
+
+        const correctAnswer = 'B';
+        if (selectedOption.value === correctAnswer) {
+            feedback.textContent = 'Correct! That is the right answer.';
+            feedback.className = 'answer-feedback correct';
+            solutionContent.style.display = 'block';
+        } else {
+            feedback.textContent = 'Incorrect. Please review the material and try again.';
+            feedback.className = 'answer-feedback incorrect';
+            solutionContent.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

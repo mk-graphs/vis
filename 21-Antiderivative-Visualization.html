@@ -4,12 +4,15 @@
 <meta charset="UTF-8" />
 <title>Antiderivative Visualization</title>
 <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+<script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
 <style>
   body {
     font-family: Arial, sans-serif;
     max-width: 750px;
     padding: 20px;
+    margin: 0 auto;
   }
   #box {
     width: 700px;
@@ -26,21 +29,77 @@
     line-height: 1.5;
     color: #333;
   }
+  #controls {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+  }
+  #sliderC {
+    width: 400px;
+  }
+  #quiz {
+    margin-top: 25px;
+    padding: 15px;
+    background: #fff8e1;
+    border: 1px solid #f0c36d;
+  }
+  #quiz h3 {
+    margin-top: 0;
+  }
+  #result {
+    margin-top: 10px;
+    font-weight: bold;
+  }
 </style>
 </head>
 <body>
 
 <h2>Antiderivative (Integral) Visualization</h2>
 
+
 <div id="explanation">
   <strong>Concept Explanation:</strong><br />
-  The antiderivative (indefinite integral) of a function f(x) is a family of functions F(x) such that F'(x) = f(x).<br />
-  The constant of integration (C) shifts the antiderivative vertically.<br />
-  This visualization shows both f(x) and its antiderivative F(x).<br />
-  Move the slider to see how the constant C changes the vertical position of F(x).
+  The antiderivative (indefinite integral) of a function \( f(x) \) is a family of functions \( F(x) \) such that
+  \[
+    F'(x) = f(x).
+  \]
+  The constant of integration \( C \) shifts the antiderivative vertically:
+  \[
+    F(x) = \int f(x)\,dx + C.
+  \]
+  In this example,
+  \[
+    f(x) = 2x + 1, \quad F(x) = x^2 + x + C.
+  \]
+  This visualization shows both \( f(x) \) (blue line) and its antiderivative \( F(x) \) (red line).
+  Move the slider to see how the constant \( C \) changes the vertical position of \( F(x) \).
 </div>
 
 <div id="box"></div>
+
+<div id="controls">
+  <label for="sliderC">Constant C: </label>
+  <input type="range" id="sliderC" min="-20" max="20" step="1" value="0" />
+  <span id="labelC">0</span>
+</div>
+
+<!-- Quiz Section -->
+<div id="quiz">
+  <h3>Quiz Question</h3>
+  <p>The function is f(x) = 2x + 1. An antiderivative is F(x) = x² + x + C.<br>
+  If C = 3, what is the value of F(2)?</p>
+  
+  <form id="quizForm">
+    <label><input type="radio" name="answer" value="A"> A. 5</label><br>
+    <label><input type="radio" name="answer" value="B"> B. 9</label><br>
+    <label><input type="radio" name="answer" value="C"> C. 13</label><br>
+    <label><input type="radio" name="answer" value="D"> D. 21</label><br><br>
+    <button type="button" onclick="checkAnswer()">Check Answer</button>
+  </form>
+  
+  <div id="result"></div>
+</div>
 
 <script>
   const board = JXG.JSXGraph.initBoard('box', {
@@ -64,11 +123,9 @@
   // Draw original function f(x)
   board.create('functiongraph', [f, -5, 10], {
     strokeColor: 'blue',
-    strokeWidth: 2,
-    name: 'f(x)'
+    strokeWidth: 2
   });
 
-  // Create the antiderivative graph with dynamic C
   let C = 0;
   const antiderivative = board.create('functiongraph', [
     function (x) { return F(x, C); }, -5, 10
@@ -77,29 +134,46 @@
     strokeWidth: 2
   });
 
-  // Create slider for C
-  const slider = board.create('slider', [[-4, -8], [4, -8], [-20, 0, 20]], {
-    name: 'C',
-    snapWidth: 1
-  });
+  // Connect HTML slider
+  const sliderC = document.getElementById('sliderC');
+  const labelC = document.getElementById('labelC');
 
-  // Label for current value of C
-  const labelC = board.create('text', [0, -9, 'Constant C = 0'], {
-    fontSize: 14
-  });
+  sliderC.addEventListener('input', () => {
+    C = parseFloat(sliderC.value);
+    labelC.textContent = C;
 
-  // On slider move: update graph without recreating it
-  slider.on('drag', function () {
-    C = slider.Value();
-    labelC.setText('Constant C = ' + C.toFixed(1));
-
-    // Update function definition of the antiderivative
+    // Update the function
     antiderivative.Y = function (x) {
       return F(x, C);
     };
 
-    board.update(); // Redraw board
+    board.update();
   });
+
+  // Quiz logic
+  function checkAnswer() {
+    const choices = document.getElementsByName('answer');
+    let selected = null;
+    for (const choice of choices) {
+      if (choice.checked) {
+        selected = choice.value;
+        break;
+      }
+    }
+    const result = document.getElementById('result');
+    if (!selected) {
+      result.textContent = "Please select an answer.";
+      result.style.color = "black";
+      return;
+    }
+    if (selected === "B") {
+      result.textContent = "Correct! F(2) = 4 + 2 + 3 = 9.";
+      result.style.color = "green";
+    } else {
+      result.textContent = "Incorrect. Try again!";
+      result.style.color = "red";
+    }
+  }
 </script>
 
 </body>
