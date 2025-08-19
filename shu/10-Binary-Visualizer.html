@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Binary Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraphcore.js"></script>
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraph.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f0f0f0;
+        }
+        #jxgbox {
+            width: 900px;
+            height: 400px;
+            margin: 20px auto;
+            background: white;
+            border: 1px solid #ccc;
+        }
+        .info {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        .jxgbox button {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5em;
+            transition: 0.2s;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .controls input {
+            padding: 5px;
+            font-size: 1em;
+            width: 150px;
+        }
+        .explanation {
+            max-width: 800px;
+            margin: 20px auto;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .quiz {
+            max-width: 800px;
+            margin: 40px auto;
+            text-align: left;
+            padding: 20px;
+            background: #e9e9e9;
+            border-radius: 8px;
+        }
+        .quiz h2 {
+            text-align: center;
+        }
+        .quiz .answer {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Interactive Binary Visualizer</h1>
+<div class="explanation">
+    <p>Welcome to the binary learning tool! This tool helps you intuitively understand the relationship between binary and decimal numbers.</p>
+    <p><strong>How to Use:</strong></p>
+    <ul>
+        <li><strong>Method 1: Click the buttons.</strong> Click the circular buttons below to toggle them between **0** and **1**. Observe how the decimal value above changes with each click.</li>
+        <li><strong>Method 2: Enter a decimal number.</strong> Type a decimal number between 0 and 255 into the input box below and press Enter. The binary bits will automatically update to show the corresponding combination.</li>
+    </ul>
+    <p>Below each button is a number representing its 'place value,' which is its decimal value in the calculation. For example, the rightmost bit's place value is $2^0 = 1$, the second is $2^1 = 2$, and so on. Adding up the place values of all the buttons that are '1' gives you the total decimal number.</p>
+</div>
+
+<div id="jxgbox" class="jxgbox"></div>
+<div class="controls">
+    <label for="decimalInput">Enter Decimal Value (0-255): </label>
+    <input type="number" id="decimalInput" min="0" max="255">
+</div>
+<div class="info" id="binaryText">Current Binary: 00000000</div>
+<div class="info" id="decimalText">Decimal Value: 0</div>
+
+<script>
+    // Initialize the JSXGraph board for visualization
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-1, 10, 9, -1],
+        axis: false,
+        showNavigation: false
+    });
+
+    const numBits = 8;
+    // An array to store the current binary value, initialized to all zeros
+    let binaryValue = new Array(numBits).fill(0);
+    const buttons = [];
+
+    const binaryTextDiv = document.getElementById('binaryText');
+    const decimalTextDiv = document.getElementById('decimalText');
+    const decimalInput = document.getElementById('decimalInput');
+
+    // Function to update the on-screen display of binary and decimal values
+    function updateDisplay() {
+        const decimal = binaryValue.reduce((sum, bit, index) => sum + bit * Math.pow(2, index), 0);
+        // Reverse the array to display from most significant bit to least significant bit
+        const binaryString = binaryValue.slice().reverse().join('');
+        binaryTextDiv.textContent = `Current Binary: ${binaryString}`;
+        decimalTextDiv.textContent = `Decimal Value: ${decimal}`;
+        // Keep the input field in sync with the current decimal value
+        decimalInput.value = decimal;
+    }
+
+    // Function to update the visualizer based on a decimal number input
+    function updateFromDecimal(decimal) {
+        // Basic validation to ensure the number is within the 8-bit range
+        if (isNaN(decimal) || decimal < 0 || decimal > 255) {
+            alert("Please enter a number between 0 and 255.");
+            return;
+        }
+        
+        // Convert the decimal number to a binary string and pad with leading zeros to 8 bits
+        const binaryString = decimal.toString(2).padStart(numBits, '0');
+        
+        // Convert the binary string to an array of numbers and reverse it to match the board layout
+        binaryValue = binaryString.split('').reverse().map(Number);
+        
+        // Loop through the buttons and update their text and style based on the new binary value
+        for (let i = 0; i < numBits; i++) {
+            const bit = binaryValue[i];
+            const button = buttons[i];
+            button.setText(bit.toString());
+            const domButton = button.rendNodeButton;
+            if (bit === 1) {
+                domButton.style.backgroundColor = '#FFD700';
+                domButton.style.boxShadow = '0 0 10px #FFD700';
+            } else {
+                domButton.style.backgroundColor = '#E0E0E0';
+                domButton.style.boxShadow = 'none';
+            }
+        }
+        
+        // Update the main display with the new values
+        updateDisplay();
+    }
+
+    // Loop to create 8 interactive bits
+    for (let i = 0; i < numBits; i++) {
+        const xPosition = i + 0.5;
+        const bitWeight = Math.pow(2, i);
+
+        // Create a JSXGraph button for each bit
+        const button = board.create('button', [
+            xPosition,
+            6,
+            '0',
+            function () {
+                // Toggle the binary value of the current bit
+                binaryValue[i] = binaryValue[i] === 0 ? 1 : 0;
+                this.setText(binaryValue[i].toString());
+
+                // Update the button's visual style based on the new bit value
+                const domButton = this.rendNodeButton;
+                if (binaryValue[i] === 1) {
+                    domButton.style.backgroundColor = '#FFD700';
+                    domButton.style.boxShadow = '0 0 10px #FFD700';
+                } else {
+                    domButton.style.backgroundColor = '#E0E0E0';
+                    domButton.style.boxShadow = 'none';
+                }
+                updateDisplay(); // Refresh the display
+            }
+        ], {
+            fontSize: 16
+        });
+        buttons.push(button);
+
+        // Create a text label showing the bit's power of 2
+        board.create('text', [
+            xPosition,
+            4.5,
+            `$2^{${i}} = ${bitWeight}$`
+        ], {
+            fontSize: 14,
+            anchorX: 'middle'
+        });
+    }
+
+    // Add an event listener to the decimal input field to handle the 'Enter' key
+    decimalInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const decimal = parseInt(decimalInput.value, 10);
+            updateFromDecimal(decimal);
+        }
+    });
+
+    // Initial update to set the default display values
+    updateDisplay();
+</script>
+
+<div class="quiz">
+    <h2>Binary Quiz</h2>
+    <p>Using the learning tool above, see if you can answer the following question:</p>
+    <p>If a byte (8 bits) is represented by the binary number <code>00101101</code>, what is its decimal value?</p>
+    <p>A. 45</p>
+    <p>B. 77</p>
+    <p>C. 210</p>
+    <p>D. 101</p>
+    <hr>
+    <div class="answer">
+        <h3>Answer and Analysis</h3>
+        <p><strong>Correct Answer: A. 45</strong></p>
+        <p><strong>Analysis:</strong></p>
+        <p>To convert the binary number <code>00101101</code> to decimal, we need to add up the place values of each position where there is a '1'. The place values are calculated from right to left, starting with $2^0$.</p>
+        <p>In this binary number, there are four positions with a value of 1:</p>
+        <ol>
+            <li>The first '1' is on the far right, its place value is $2^0 = 1$.</li>
+            <li>The second '1' is at the 3rd position from the right, its place value is $2^2 = 4$.</li>
+            <li>The third '1' is at the 4th position from the right, its place value is $2^3 = 8$.</li>
+            <li>The fourth '1' is at the 6th position from the right, its place value is $2^5 = 32$.</li>
+        </ol>
+        <p>Add up these place values:</p>
+        <p>$32 + 8 + 4 + 1 = 45$</p>
+        <p>Therefore, the decimal value for <code>00101101</code> is **45**.</p>
+    </div>
+</div>
+
+</body>
+</html>

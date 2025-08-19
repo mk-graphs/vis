@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Interactive Guitar Harmonics with Sound</title>
+<script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.58/build/Tone.js"></script>
+<style>
+  #jxgbox {
+    width: 900px;
+    height: 400px;
+    border: 1px solid #ccc;
+  }
+  .explanation {
+    max-width: 900px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 2em;
+  }
+  .explanation h2 {
+    color: #0056b3;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 5px;
+  }
+  .explanation p {
+    line-height: 1.6;
+  }
+  #freqVal {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+  .bar-label {
+    font-size: 14px;
+    font-family: monospace;
+    text-anchor: middle;
+  }
+  .harmonic-label {
+    font-weight: bold;
+    fill: #cc3333;
+    font-size: 16px;
+  }
+  .controls {
+    max-width: 900px;
+    margin-top: 20px;
+    text-align: center;
+  }
+  .controls button {
+    padding: 10px 15px;
+    margin: 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #f0f0f0;
+    transition: background-color 0.2s;
+  }
+  .controls button:hover {
+    background-color: #e0e0e0;
+  }
+  .controls button:active {
+    background-color: #d0d0d0;
+  }
+  #question-section {
+    max-width: 900px;
+    margin-top: 2em;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  #question-section h3 {
+    color: #333;
+    margin-top: 0;
+  }
+  #question-section label {
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  #question-section input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  #feedback {
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center;
+  }
+  #feedback.correct {
+    color: green;
+  }
+  #feedback.incorrect {
+    color: red;
+  }
+</style>
+</head>
+<body>
+
+<div class="explanation">
+  <h2>Understanding the Physics and Math of a Guitar</h2>
+  <p>
+    Have you ever wondered why a guitar sounds different from a piano, even when they play the same note? The answer lies in a simple but powerful physics concept: **harmonics**.
+  </p>
+  <p>
+    When a guitar string vibrates, it doesn't just produce one single wave. It creates a **fundamental wave** (the main one that determines the note's pitch) and many smaller, faster waves on top of it. These smaller waves are called **harmonics**. Their frequencies are always exact integer multiples of the fundamental frequency.
+  </p>
+  <p>
+    This simulation shows you how these waves combine. The unique mix of a note's fundamental wave and its harmonics is what gives it its distinct sound quality, or **timbre**.
+  </p>
+  <h3>How to Read the Graph:</h3>
+  <ul>
+    <li>The **X-axis** shows the **harmonic number** (1st, 2nd, 3rd, etc.).</li>
+    <li>The **Y-axis** shows the **relative amplitude** or strength of each harmonic. Notice that the fundamental is the strongest, and the harmonics get weaker as they get higher. This is a key reason for a guitar's warm sound.</li>
+    <li>The **bar chart** shows each harmonic's frequency and its relative strength.</li>
+    <li>The **colored waves** (red, green, blue) show the individual shapes of the fundamental and the first two harmonics. They are simple, repeating sine waves.</li>
+    <li>The **white wave** is the most important part. It's the **combined wave**—the result of all the individual waves adding together. This complex, irregular shape is the actual sound wave that a guitar string produces.</li>
+  </ul>
+  <h3>How to Use the Controls:</h3>
+  <ul>
+    <li>**Slider:** Adjust the fundamental frequency to see how all the harmonics and the combined wave scale with it.</li>
+    <li>**Buttons:** Click to hear the sound. The "Play Combined Sound" button lets you hear the full, rich timbre created by all the harmonics working together. The individual "Play" buttons let you hear how simple and pure each harmonic sounds on its own.</li>
+  </ul>
+</div>
+
+<div id="jxgbox"></div>
+
+<div style="margin-top:10px;">
+  <label for="freqSlider">Fundamental Frequency (Hz): </label>
+  <input type="range" id="freqSlider" min="70" max="95" step="0.1" value="82.4" style="width:400px;">
+</div>
+
+<div class="controls">
+    <button id="playAllBtn">Play Combined Sound</button>
+    <button id="playFundamentalBtn">Play Fundamental</button>
+    <button id="play2ndBtn">Play 2nd Harmonic</button>
+    <button id="play3rdBtn">Play 3rd Harmonic</button>
+    <button id="play4thBtn">Play 4th Harmonic</button>
+    <button id="play5thBtn">Play 5th Harmonic</button>
+    <button id="stopBtn">Stop All</button>
+    <button id="resetBtn">Reset</button>
+</div>
+
+<script>
+// Initialize the JXG.JSXGraph board
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+  boundingbox: [0.5, 1.2, 6.5, -0.2],
+  axis: true,
+  keepaspectratio: false,
+  showCopyright: false,
+  showNavigation: false
+});
+
+const maxHarmonic = 6;
+
+let bars = [];
+let freqLabels = [];
+let harmonicLabels = [];
+
+// Function to draw the bar chart for a given fundamental frequency
+function drawBars(fundamentalFreq) {
+  // Remove previous bars and labels
+  bars.forEach(bar => board.removeObject(bar));
+  freqLabels.forEach(label => board.removeObject(label));
+  harmonicLabels.forEach(label => board.removeObject(label));
+  bars = [];
+  freqLabels = [];
+  harmonicLabels = [];
+
+  for (let n = 1; n <= maxHarmonic; n++) {
+    // n represents the harmonic number, which is the X-axis value
+    const amp = 1 / n; // Amplitude of the harmonic, which is the Y-axis value
+    const freq = fundamentalFreq * n;
+
+    // Draw vertical bar for each harmonic
+    let bar = board.create('segment', [[n, 0], [n, amp]], {
+      strokeColor: '#3366cc',
+      strokeWidth: 10,
+      fixed: true
+    });
+    bars.push(bar);
+
+    // Frequency label above bar
+    let freqLabel = board.create('text', [n, amp + 0.06, freq.toFixed(1) + ' Hz'], {
+      anchorX: 'middle',
+      fontSize: 14,
+      fixed: true,
+      cssClass: 'bar-label'
+    });
+    freqLabels.push(freqLabel);
+
+    // Harmonic number label (e.g., "1st", "2nd")
+    let harmonicLabelText = '';
+    if (n === 1) {
+      harmonicLabelText = 'Fundamental';
+    } else {
+      harmonicLabelText = `${n}th Harmonic`;
+    }
+
+    let harmonicLabel = board.create('text', [n, amp + 0.12, harmonicLabelText], {
+      anchorX: 'middle',
+      fontSize: 18,
+      fixed: true,
+      cssClass: 'harmonic-label'
+    });
+    harmonicLabels.push(harmonicLabel);
+  }
+}
+
+// Initial draw
+let currentFundFreq = 82.4;
+drawBars(currentFundFreq);
+
+// Update function
+function update() {
+  currentFundFreq = parseFloat(document.getElementById('freqSlider').value);
+  // Re-draw the entire graph with the new fundamental frequency
+  drawBars(currentFundFreq);
+  board.update();
+}
+
+// Event listener for the slider
+document.getElementById('freqSlider').addEventListener('input', update);
+
+// Tone.js setup for sound generation
+Tone.context.resume();
+const fundamentalOsc = new Tone.Oscillator().toDestination();
+const harmonic2Osc = new Tone.Oscillator().toDestination();
+const harmonic3Osc = new Tone.Oscillator().toDestination();
+const harmonic4Osc = new Tone.Oscillator().toDestination();
+const harmonic5Osc = new Tone.Oscillator().toDestination();
+
+// Set initial frequencies
+fundamentalOsc.frequency.value = currentFundFreq;
+harmonic2Osc.frequency.value = currentFundFreq * 2;
+harmonic3Osc.frequency.value = currentFundFreq * 3;
+harmonic4Osc.frequency.value = currentFundFreq * 4;
+harmonic5Osc.frequency.value = currentFundFreq * 5;
+
+// Update frequencies based on slider
+document.getElementById('freqSlider').addEventListener('input', () => {
+    const freq = parseFloat(document.getElementById('freqSlider').value);
+    fundamentalOsc.frequency.value = freq;
+    harmonic2Osc.frequency.value = freq * 2;
+    harmonic3Osc.frequency.value = freq * 3;
+    harmonic4Osc.frequency.value = freq * 4;
+    harmonic5Osc.frequency.value = freq * 5;
+});
+
+// Play/Stop button functionality
+const playAllBtn = document.getElementById('playAllBtn');
+const playFundamentalBtn = document.getElementById('playFundamentalBtn');
+const play2ndBtn = document.getElementById('play2ndBtn');
+const play3rdBtn = document.getElementById('play3rdBtn');
+const play4thBtn = document.getElementById('play4thBtn');
+const play5thBtn = document.getElementById('play5thBtn');
+const stopBtn = document.getElementById('stopBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+function stopAll() {
+    fundamentalOsc.stop();
+    harmonic2Osc.stop();
+    harmonic3Osc.stop();
+    harmonic4Osc.stop();
+    harmonic5Osc.stop();
+}
+
+playAllBtn.addEventListener('click', () => {
+    stopAll();
+    fundamentalOsc.start();
+    harmonic2Osc.start();
+    harmonic3Osc.start();
+    harmonic4Osc.start();
+    harmonic5Osc.start();
+});
+
+playFundamentalBtn.addEventListener('click', () => {
+    stopAll();
+    fundamentalOsc.start();
+});
+
+play2ndBtn.addEventListener('click', () => {
+    stopAll();
+    harmonic2Osc.start();
+});
+
+play3rdBtn.addEventListener('click', () => {
+    stopAll();
+    harmonic3Osc.start();
+});
+
+play4thBtn.addEventListener('click', () => {
+    stopAll();
+    harmonic4Osc.start();
+});
+
+play5thBtn.addEventListener('click', () => {
+    stopAll();
+    harmonic5Osc.start();
+});
+
+stopBtn.addEventListener('click', stopAll);
+
+// Reset button functionality
+resetBtn.addEventListener('click', () => {
+    stopAll();
+    const freqSlider = document.getElementById('freqSlider');
+    const initialFreq = 82.4;
+    freqSlider.value = initialFreq;
+    update();
+    
+    // Reset quiz feedback
+    feedbackEl.textContent = '';
+    feedbackEl.className = '';
+    document.querySelectorAll('input[name="quiz"]').forEach(cb => cb.checked = false);
+});
+
+</script>
+
+<div id="question-section">
+  <h3>Multiple Choice Question:</h3>
+  <p>Based on the simulation above, which of the following factors are the main reasons for a guitar's unique timbre? (Select all correct options)</p>
+  <div>
+    <label><input type="checkbox" name="quiz" value="A"> A. The volume of the sound</label>
+    <label><input type="checkbox" name="quiz" value="B"> B. The frequency of the fundamental note</label>
+    <label><input type="checkbox" name="quiz" value="C"> C. The combination of the fundamental note and all harmonics</label>
+    <label><input type="checkbox" name="quiz" value="D"> D. The relative strength of each harmonic</label>
+    <label><input type="checkbox" name="quiz" value="E"> E. The color of the guitar</label>
+  </div>
+  <div style="text-align: center; margin-top: 20px;">
+    <button id="checkAnswerBtn">Submit</button>
+    <button id="resetQuizBtn">Reset</button>
+  </div>
+  <p id="feedback"></p>
+</div>
+
+<script>
+  const checkAnswerBtn = document.getElementById('checkAnswerBtn');
+  const resetQuizBtn = document.getElementById('resetQuizBtn');
+  const feedbackEl = document.getElementById('feedback');
+  
+  checkAnswerBtn.addEventListener('click', () => {
+    const selected = document.querySelectorAll('input[name="quiz"]:checked');
+    const selectedValues = Array.from(selected).map(el => el.value).sort().join('');
+    
+    // Correct answers are C and D.
+    const correctAnswers = ['C', 'D'];
+    
+    // Check if the number of selected answers is correct
+    if (selected.length !== correctAnswers.length) {
+      feedbackEl.textContent = 'Your answer is incorrect. Please try again.';
+      feedbackEl.className = 'incorrect';
+      return;
+    }
+    
+    // Check if the selected values match the correct ones
+    const isCorrect = correctAnswers.every(val => selectedValues.includes(val));
+    
+    if (isCorrect) {
+      feedbackEl.textContent = 'Correct! Congratulations!';
+      feedbackEl.className = 'correct';
+    } else {
+      feedbackEl.textContent = 'Your answer is incorrect. Please try again.';
+      feedbackEl.className = 'incorrect';
+    }
+  });
+
+  // New Reset button functionality for the quiz
+  resetQuizBtn.addEventListener('click', () => {
+    feedbackEl.textContent = '';
+    feedbackEl.className = '';
+    document.querySelectorAll('input[name="quiz"]').forEach(cb => cb.checked = false);
+  });
+</script>
+
+</body>
+</html>

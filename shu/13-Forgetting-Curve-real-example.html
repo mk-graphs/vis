@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Forgetting Curve - Finnish Words</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    #jxgbox {
+      width: 900px;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+    .description {
+      max-width: 900px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 1em;
+    }
+    .math-explanation {
+      max-width: 900px;
+      font-family: Arial, sans-serif;
+      margin-top: 1em;
+      background-color: #f0f0f0;
+      padding: 15px;
+      border-left: 5px solid #007BFF;
+    }
+    .math-explanation h3 {
+        margin-top: 0;
+        color: #007BFF;
+    }
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+      max-width: 900px;
+      margin: 20px auto;
+    }
+    .review-day {
+      width: 40px;
+      height: 40px;
+      background-color: #ddd;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .review-day.reviewed {
+      background-color: #66dd66;
+      color: white;
+    }
+    .quiz-question {
+        max-width: 900px;
+        font-family: Arial, sans-serif;
+        margin-top: 2em;
+    }
+    .controls {
+        max-width: 900px;
+        margin: 10px auto;
+        text-align: center;
+    }
+    .reset-btn {
+        padding: 8px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="description">
+  <h2>Learning 10 New Finnish Words</h2>
+  <p>
+    This simulation shows how your memory for 10 new Finnish words changes over 30 days. Click the squares below to **simulate reviewing** the words on that day and see how your memory retention jumps back up!
+  </p>
+  <p><b>Your Memory Status: <span id="retentionVal">100%</span> Retention</b></p>
+</div>
+
+<div class="review-grid">
+  </div>
+
+<div class="controls">
+    <button id="resetBtn" class="reset-btn">Reset Review Days</button>
+</div>
+
+<div id="jxgbox"></div>
+
+<div class="math-explanation">
+  <h3>The Forgetting Curve Formula</h3>
+  <p>
+    This simulation is based on the **Ebbinghaus Forgetting Curve**, which is an exponential decay function.
+    The core formula for memory retention is:
+  </p>
+  <p style="text-align: center; font-size: 1.2em; font-weight: bold;">
+    R(t) = e<sup>-λt</sup>
+  </p>
+  <ul>
+      <li><b>The X-Axis</b> represents **time** in days.</li>
+      <li><b>The Y-Axis</b> represents **memory retention** from 0% to 100%.</li>
+      <li><b>R(t)</b> is the memory retention at time **t**.</li>
+      <li><b>e</b> is the base of the natural logarithm.</li>
+      <li><b>λ</b> (lambda) is the forgetting rate. A higher value means you forget faster.</li>
+      <li><b>t</b> is the time that has passed since your last review.</li>
+  </ul>
+  <p>When you click a day to review, the curve jumps up, and the forgetting process starts over from a new, higher retention level. This visually demonstrates the power of consistent review in fighting memory decay.</p>
+</div>
+
+<div class="quiz-question">
+  <h3>Question for Students:</h3>
+  <p><b>Using the interactive graph, which review strategy leads to the highest memory retention on Day 30?</b></p>
+  <ol>
+    <li>**Strategy A:** No review.</li>
+    <li>**Strategy B:** Review only on Day 10.</li>
+    <li>**Strategy C:** Review on Days 3, 7, and 14.</li>
+    <li>**Strategy D:** Review on Days 1, 2, 3, and 4.</li>
+  </ol>
+  <p>Try each strategy by clicking the corresponding day squares. Observe the final memory retention on Day 30 to find the best strategy. The best answer is **C**.</p>
+</div>
+
+<script>
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+  boundingbox: [-1, 1.2, 31, -0.2],
+  axis: true,
+  keepaspectratio: false
+});
+
+const forgettingRate = 0.3; // λ
+const reviewBoost = 0.7;    // Memory boost after a review (0 to 1)
+
+const reviewDates = [];
+let currentDay = 0;
+
+function forgetting(t) {
+  return Math.exp(-forgettingRate * t);
+}
+
+function calculateRetention(day) {
+    let currentRetention = 1; // Starts at 100%
+    let lastReviewDay = 0;
+    
+    // Iterate through all review dates before the current day
+    for (const reviewDay of reviewDates) {
+        if (day < reviewDay) break;
+        
+        // 1. Apply forgetting from the last event (start or last review)
+        currentRetention *= forgetting(reviewDay - lastReviewDay);
+        
+        // 2. Apply the boost from the review
+        currentRetention += (1 - currentRetention) * reviewBoost;
+        
+        // Update the last event day
+        lastReviewDay = reviewDay;
+    }
+    
+    // Apply final forgetting from the last review to the current day
+    return currentRetention * forgetting(day - lastReviewDay);
+}
+
+let memoryCurve = board.create('functiongraph', [
+  function(t) {
+    return calculateRetention(t);
+  }, 0, 30
+], {
+  strokeColor: '#dd5533',
+  strokeWidth: 3
+});
+
+const memoryPoint = board.create('point', [
+  () => currentDay,
+  () => calculateRetention(currentDay)
+], {
+  name: '',
+  size: 4,
+  fillColor: '#dd5533',
+  withLabel: false
+});
+
+function animateDay() {
+  if (currentDay <= 30) {
+    const currentRetention = calculateRetention(currentDay);
+    document.getElementById("retentionVal").innerText = (currentRetention * 100).toFixed(1) + "%";
+    board.update();
+    currentDay++;
+    setTimeout(animateDay, 100);
+  }
+}
+
+const gridContainer = document.querySelector('.review-grid');
+for (let i = 1; i <= 30; i++) {
+  const dayBlock = document.createElement('div');
+  dayBlock.className = 'review-day';
+  dayBlock.textContent = i;
+  dayBlock.dataset.day = i;
+  dayBlock.onclick = function() {
+    const day = parseInt(this.dataset.day);
+    const dayIndex = reviewDates.indexOf(day);
+    if (dayIndex === -1) {
+        reviewDates.push(day);
+        reviewDates.sort((a, b) => a - b);
+        this.classList.add('reviewed');
+    } else {
+        reviewDates.splice(dayIndex, 1);
+        this.classList.remove('reviewed');
+    }
+    memoryCurve.setFunction(function(t) { return calculateRetention(t); });
+    board.update();
+    currentDay = 0;
+    animateDay();
+  };
+  gridContainer.appendChild(dayBlock);
+}
+
+// Reset button functionality
+document.getElementById('resetBtn').onclick = function() {
+    reviewDates.length = 0;
+    document.querySelectorAll('.review-day').forEach(el => el.classList.remove('reviewed'));
+    memoryCurve.setFunction(function(t) { return calculateRetention(t); });
+    board.update();
+    currentDay = 0;
+    animateDay();
+};
+
+// Start the initial animation after 1 second
+setTimeout(animateDay, 1000);
+</script>
+
+</body>
+</html>

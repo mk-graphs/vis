@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>The Power of Review</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    #jxgbox {
+      width: 900px;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+    .description {
+      max-width: 900px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 1em;
+    }
+    .info {
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+<div class="description">
+  <h2>The Power of Review: A Forgetting Curve Simulation</h2>
+  <p>
+    This graph compares three learning scenarios based on the **Ebbinghaus forgetting curve**. The initial memory retention starts at 100%.
+  </p>
+  <ul>
+    <li>The **Red Curve** shows what happens with **no review**.</li>
+    <li>The **Green Curve** shows memory with **weekly reviews**.</li>
+    <li>The **Blue Curve** shows memory with **daily reviews**.</li>
+  </ul>
+  <p>
+    Use the sliders to adjust the initial forgetting rate (λ) and the effectiveness of your review sessions.
+  </p>
+</div>
+
+<div id="jxgbox"></div>
+
+<p class="info">
+  Forgetting Rate (λ): <span id="lambdaVal">0.3</span><br />
+  Review Effectiveness: <span id="boostVal">0.3</span>
+</p>
+
+<script>
+const board = JXG.JSXGraph.initBoard('jxgbox', {
+  boundingbox: [-1, 1.2, 31, -0.2],
+  axis: true,
+  keepaspectratio: false
+});
+
+// Sliders
+const lambdaSlider = board.create('slider', [[2, 1], [10, 1], [0.05, 0.3, 1]], {
+  name: 'λ',
+  snapWidth: 0.01,
+  fillColor: '#dd6666'
+});
+
+const boostSlider = board.create('slider', [[2, 0.7], [10, 0.7], [0, 0.3, 1]], {
+  name: 'Boost',
+  snapWidth: 0.05,
+  fillColor: '#66dd66'
+});
+
+// Forgetting function: R(t) = e^(-λt)
+function forgetting(t, lambda) {
+  return Math.exp(-lambda * t);
+}
+
+// Correctly calculates the cumulative effect of reviews.
+function calculateRetention(t, reviewInterval, lambda, boost) {
+    let retention = 1; // Start at 100%
+    const numReviews = Math.floor(t / reviewInterval);
+
+    for (let i = 0; i < numReviews; i++) {
+        const timeElapsed = reviewInterval;
+        retention = retention * forgetting(timeElapsed, lambda);
+        retention += (1 - retention) * boost;
+    }
+
+    const timeSinceLastReview = t % reviewInterval;
+    return retention * forgetting(timeSinceLastReview, lambda);
+}
+
+// --- Dynamic Curves ---
+
+// 1. No Review (Red)
+board.create('functiongraph', [
+  function(t) {
+    return forgetting(t, lambdaSlider.Value());
+  }, 0, 30
+], {
+  strokeColor: 'red',
+  strokeWidth: 3
+});
+
+// 2. Weekly Review (Green)
+board.create('functiongraph', [
+  function(t) {
+    const lambda = lambdaSlider.Value();
+    const boost = boostSlider.Value();
+    return calculateRetention(t, 7, lambda, boost);
+  }, 0, 30
+], {
+  strokeColor: 'green',
+  strokeWidth: 3
+});
+
+// 3. Daily Review (Blue)
+board.create('functiongraph', [
+  function(t) {
+    const lambda = lambdaSlider.Value();
+    const boost = boostSlider.Value();
+    return calculateRetention(t, 1, lambda, boost);
+  }, 0, 30
+], {
+  strokeColor: 'blue',
+  strokeWidth: 3
+});
+
+
+// Update labels and board
+function updateLabels() {
+  const λ = lambdaSlider.Value();
+  const boost = boostSlider.Value();
+
+  document.getElementById("lambdaVal").innerText = λ.toFixed(2);
+  document.getElementById("boostVal").innerText = boost.toFixed(2);
+  
+  board.update();
+}
+
+lambdaSlider.on('drag', updateLabels);
+boostSlider.on('drag', updateLabels);
+
+updateLabels();
+</script>
+
+</body>
+</html>

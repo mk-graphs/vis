@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Binomial Distribution</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+     body {
+   font-family: Arial, sans-serif;
+    margin: 0 auto; /* Sets top/bottom margins to 0 and left/right to auto */
+    max-width: 960px; /* Optional but recommended: keeps content from being too wide */
+   padding: 20px; /* Adds space around the content */
+     }
+   #box {
+     width: 800px;
+     height: 500px;
+    border: 1px solid #aaa;
+     margin-top: 20px;
+     }
+     label {
+     display: inline-block;
+     margin: 10px 10px 10px 0;
+    }
+     .controls {
+    margin-bottom: 10px;
+    }
+     #explanation {
+     background-color: #f0f8ff;
+     padding: 10px;
+    border-left: 5px solid steelblue;
+     }
+    </style>
+</head>
+<body>
+
+<h2>Binomial Distribution</h2>
+
+<div id="explanation">
+  <strong>Concept:</strong> The binomial distribution models the number of successes in a fixed number of independent Bernoulli trials. <br>
+  The formula for probability is:
+  <br>
+  \( P(X = k) = \binom{n}{k} p^k (1-p)^{n-k} \)
+  <ul>
+    <li>n = number of trials</li>
+    <li>p = probability of success</li>
+  </ul>
+  Use the sliders below to explore how n and p affect the distribution shape.
+</div>
+
+<div class="controls">
+  <label for="nSlider">n (trials):
+    <input type="range" id="nSlider" min="1" max="30" value="10">
+    <span id="nVal">10</span>
+  </label>
+
+  <label for="pSlider">p (success probability):
+    <input type="range" id="pSlider" min="0" max="1" step="0.01" value="0.5">
+    <span id="pVal">0.5</span>
+  </label>
+</div>
+
+<div id="box"></div>
+<div class="graph-labels">
+  <strong>Graph Labels:</strong>
+  <ul>
+      <li>The **X-axis** (horizontal axis) represents the number of successes ($k$).</li>
+      <li>The **Y-axis** (vertical axis) represents the probability ($P(X=k)$).</li>
+  </ul>
+</div>
+<div class="practice-question">
+    <h3>Practice Question: Applying the Binomial Formula</h3>
+    <p>Based on the scenario from the explanation, try to solve this problem using the formula.</p>
+    
+    <p><strong>Question:</strong> A new drug has a 60% cure rate. If 20 patients take the drug, what is the probability that <strong>exactly 15</strong> of them will be cured?</p>
+
+    <ol type="A">
+        <li>0.015</li>
+        <li>0.075</li>
+        <li>0.124</li>
+        <li>0.250</li>
+    </ol>
+</div>
+
+<div class="answer-section">
+    <h3>Answer and Explanation</h3>
+    <p><strong>Correct Answer: B) 0.075</strong></p>
+
+    <h4>Explanation & Calculation:</h4>
+    <p>To solve this, we use the binomial probability formula:</p>
+    
+    <p>\(P(X=k) = \binom{n}{k} p^k (1-p)^{n-k}\)</p>
+
+    <p>Here are our known values from the problem:</p>
+    <ul>
+        <li><strong>n</strong> (number of trials) = 20 patients</li>
+        <li><strong>k</strong> (number of successes) = 15 patients</li>
+        <li><strong>p</strong> (probability of success) = 0.60 (60% cure rate)</li>
+        <li><strong>(1-p)</strong> (probability of failure) = 1 - 0.60 = 0.40</li>
+    </ul>
+
+    <p>Now, we substitute these values into the formula:</p>
+    <p>\(P(X=15) = \binom{20}{15} (0.60)^{15} (0.40)^{20-15}\)</p>
+    <p>\(P(X=15) = \binom{20}{15} (0.60)^{15} (0.40)^5\)</p>
+
+    <ol>
+        <li><strong>Calculate the binomial coefficient:</strong> <br>
+            \(\binom{20}{15} = \frac{20!}{15!5!} = 15,504\)
+        </li>
+        <li><strong>Calculate the probability terms:</strong> <br>
+            \((0.60)^{15} \approx 0.0004701\) <br>
+            \((0.40)^5 = 0.01024\)
+        </li>
+        <li><strong>Multiply the results:</strong> <br>
+            \(P(X=15) = 15,504 \times 0.0004701 \times 0.01024 \approx 0.07464\)
+        </li>
+    </ol>
+    <p>Rounding to three decimal places, the probability is **0.075**.</p>
+</div>
+
+<script>
+  // Initialize JSXGraph board
+  const board = JXG.JSXGraph.initBoard('box', {
+    boundingbox: [-1, 1.1, 31, -0.1],
+    axis: {
+        names: {
+            // New lines added here for axis labels
+            x: 'Number of Successes (k)',
+            y: 'Probability (P(X=k))'
+        }
+    },
+    showNavigation: false,
+    zoom: {wheel: false},
+    pan: {enabled: false}
+  });
+
+  let bars = [];
+
+  // Compute binomial probability P(X = k)
+  function binomial(n, k, p) {
+    function factorial(x) {
+      if (x === 0 || x === 1) return 1;
+      let result = 1;
+      for (let i = 2; i <= x; i++) result *= i;
+      return result;
+    }
+    const comb = factorial(n) / (factorial(k) * factorial(n - k));
+    return comb * Math.pow(p, k) * Math.pow(1 - p, n - k);
+  }
+
+  // Draw or redraw the distribution
+  function drawDistribution(n, p) {
+    // Remove old bars
+    bars.forEach(bar => board.removeObject(bar));
+    bars = [];
+
+    // Create new bars
+    for (let k = 0; k <= n; k++) {
+      const prob = binomial(n, k, p);
+      const bar = board.create('polygon', [
+        [k - 0.4, 0],
+        [k - 0.4, prob],
+        [k + 0.4, prob],
+        [k + 0.4, 0]
+      ], {
+        fillColor: '#4682B4',
+        fillOpacity: 0.7,
+        borders: {strokeColor: '#333'},
+        highlight: false
+      });
+      bars.push(bar);
+    }
+
+    board.update();
+  }
+
+  // Handle sliders
+  const nSlider = document.getElementById('nSlider');
+  const pSlider = document.getElementById('pSlider');
+  const nVal = document.getElementById('nVal');
+  const pVal = document.getElementById('pVal');
+
+  function update() {
+    const n = parseInt(nSlider.value);
+    const p = parseFloat(pSlider.value);
+    nVal.textContent = n;
+    pVal.textContent = p.toFixed(2);
+    drawDistribution(n, p);
+  }
+
+  // Add event listeners
+  nSlider.addEventListener('input', update);
+  pSlider.addEventListener('input', update);
+
+  // Initial draw
+  update();
+</script>
+
+</body>
+</html>
+

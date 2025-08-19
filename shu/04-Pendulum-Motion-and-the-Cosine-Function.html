@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pendulum Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .board-container { display: flex; justify-content: space-around; }
+        #board-function, #board-pendulum { width: 45%; height: 400px; border: 1px solid #ccc; }
+        .controls { margin-top: 20px; }
+        .controls label { margin-right: 20px; }
+        #equation { font-size: 1.2em; margin-bottom: 10px; }
+        .problem-section { margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        .answer-section { margin-top: 20px; padding: 15px; border: 1px solid #ddd; background-color: #f9f9f9; }
+        .answer-section h4 { margin-top: 0; }
+        .options { list-style-type: upper-alpha; }
+    </style>
+</head>
+<body>
+
+<h2>Pendulum Simulation</h2>
+<p>The graph on the left shows the cosine function curve, while the graph on the right simulates the real-time motion of a pendulum.</p>
+<p>
+    <strong>Pendulum Motion and the Cosine Function</strong><br>
+    The motion of a pendulum can be described using the cosine function: <br>
+    <code>d(t) = A · cos(B t)</code><br>
+    <ul>
+        <li><strong>A (Amplitude):</strong> Maximum distance from the resting position.</li>
+        <li><strong>B (Frequency Parameter):</strong> Determines how fast the pendulum swings.</li>
+        <li><strong>Period (T):</strong> Time for one full swing back and forth: <code>T = 2π / B</code></li>
+        <li>Cosine is used because at t=0 the pendulum is at its farthest position, where cos(0)=1.</li>
+    </ul>
+</p>
+
+<div class="controls">
+    <div id="equation">d(t) = 3·cos(3t)</div>
+    <label>A (Max Distance):
+       <input type="range" id="aSlider" min="1" max="10" step="0.1" value="3">
+<span id="aVal">3</span>
+        <span id="aWarning" style="color:red; margin-left:10px; display:none;">⚠ Maximum ≤ Pendulum Length</span>
+    </label>
+    <label>B (Frequency Parameter):
+        <input type="range" id="bSlider" min="0.1" max="5" step="0.1" value="3.14">
+        <span id="bVal">3.14</span>
+    </label>
+</div>
+
+<div class="board-container">
+    <div id="board-function"></div>
+    <div id="board-pendulum"></div>
+</div>
+
+<script>
+    // --- Board 1: Function Graph ---
+    const boardFunction = JXG.JSXGraph.initBoard('board-function', {
+        boundingbox: [-1, 12, 5, -2],
+        axis: true,
+        title: 'Function Curve: y = A·cos(B t)'
+    });
+
+    let functionGraph;
+
+    // --- Board 2: Pendulum Simulation ---
+    const boardPendulum = JXG.JSXGraph.initBoard('board-pendulum', {
+        boundingbox: [-15, 15, 15, -5],
+        axis: false,
+        title: 'Dynamic Pendulum Simulation'
+    });
+
+    // Pendulum fixed point
+    const fixedPoint = boardPendulum.create('point', [0, 10], { name: '', size: 2, color: 'black' });
+    const pendulumLine = boardPendulum.create('segment', [[0, 10], [0, 0]], { strokeWidth: 2, strokeColor: 'green' });
+    const pendulumBob = boardPendulum.create('point', [0, 0], { name: 'Bob', size: 5, color: 'red' });
+
+    let time = 0;
+    let animationInterval;
+
+    function updateAll() {
+        const L = 10; // Pendulum length
+        let A = parseFloat(document.getElementById('aSlider').value);
+        const B = parseFloat(document.getElementById('bSlider').value);
+
+        // Limit amplitude to pendulum length
+        if (A > L) {
+            A = L;
+            document.getElementById('aSlider').value = L;
+            document.getElementById('aWarning').style.display = 'inline';
+        } else {
+            document.getElementById('aWarning').style.display = 'none';
+        }
+
+        // Update displayed values and equation
+        document.getElementById('aVal').textContent = A;
+        document.getElementById('bVal').textContent = B;
+        document.getElementById('equation').textContent = `d(t) = ${A}·cos(${B}t)`;
+
+        // Update function graph
+        if (functionGraph) boardFunction.removeObject(functionGraph);
+        const func = (t) => A * Math.cos(B * t);
+        functionGraph = boardFunction.create('functiongraph', [func, -0.5, 5], {
+            strokeWidth: 2,
+            strokeColor: 'blue'
+        });
+        boardFunction.update();
+
+        // Update pendulum animation
+        if (animationInterval) clearInterval(animationInterval);
+
+        time = 0;
+        const period = 2 * Math.PI / B;
+        const animationSpeed = 50; // ms
+        const maxAngle = Math.asin(A / L); // Maximum swing angle
+
+        animationInterval = setInterval(() => {
+            const theta = maxAngle * Math.cos(B * time);
+            const bobX = L * Math.sin(theta);
+            const bobY = 10 - L * Math.cos(theta);
+            pendulumBob.moveTo([bobX, bobY]);
+            pendulumLine.point2.moveTo([bobX, bobY]);
+
+            time += animationSpeed / 1000;
+
+            if (time > period) time = 0;
+        }, animationSpeed);
+    }
+
+    updateAll();
+
+    document.getElementById('aSlider').addEventListener('input', updateAll);
+    document.getElementById('bSlider').addEventListener('input', updateAll);
+</script>
+
+<div class="problem-section">
+    <h3>Pendulum Motion Problem (Multiple Choice)</h3>
+    <p>The motion of a pendulum can be described by the following cosine function:</p>
+    <p><code>d(t) = 5 · cos(π t)</code></p>
+    <p>Starting from the beginning of its swing (t=0), how long does it take for the pendulum to <strong>return to its farthest right position for the first time</strong>?</p>
+    <ul class="options">
+        <li>A) 0.5 seconds</li>
+        <li>B) 1 second</li>
+        <li>C) 2 seconds</li>
+        <li>D) 4 seconds</li>
+    </ul>
+</div>
+
+<div class="answer-section">
+    <h4>Answer and Explanation</h4>
+    <p><strong>Thought Process:</strong></p>
+    <p>The pendulum returns to its "farthest right position" after completing one full <strong>period (T)</strong>.</p>
+    <p>For <code>d(t) = 5 · cos(π t)</code>, the frequency parameter B = π.</p>
+    <p>Period formula: <code>T = 2π / B</code></p>
+    <p>Substitute B = π → T = 2π / π = 2 seconds.</p>
+    <p><strong>Correct answer: C) 2 seconds</strong></p>
+</div>
+
+</body>
+</html>

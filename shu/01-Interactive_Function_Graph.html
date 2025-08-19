@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Accurate and Dynamic Function Graphs</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    #box {
+      width: 700px;
+      height: 500px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    label {
+      margin-right: 10px;
+    }
+    select, input[type=range] {
+      margin-right: 20px;
+    }
+    span {
+      font-weight: bold;
+    }
+    .question {
+        margin-top: 20px;
+        border-top: 1px solid #ccc;
+        padding-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Accurate and Dynamic Function Graphs</h2>
+  <p>The curve remains accurate while small points move along it, and the mouse can trace precise values! These moving points help to visualize the dynamic behavior of the function, showing how the y-value changes as the x-value continuously moves along the curve. They turn a static graph into a dynamic, engaging tool for understanding function relationships.</p>
+
+  <div id="box"></div>
+
+  <div>
+    <label for="funcType">Function Type:</label>
+    <select id="funcType">
+      <option value="linear">Linear: y = ax + b</option>
+      <option value="quadratic">Quadratic: y = ax² + b</option>
+      <option value="sine">Sine: y = A·sin(Bx)</option>
+    </select>
+  </div>
+
+  <div>
+    <label>a or A:
+      <input type="range" id="aSlider" min="-5" max="5" step="0.1" value="1">
+      <span id="aVal">1</span>
+    </label>
+    <label>b or B:
+      <input type="range" id="bSlider" min="-5" max="5" step="0.1" value="0">
+      <span id="bVal">0</span>
+    </label>
+  </div>
+
+  <div class="question">
+    <h3>Question:</h3>
+    <p>Using the sliders, which values for **A** and **B** will make the sine wave have an amplitude of **2** and complete **3** full cycles within the bounding box ($x=-10$ to $x=10$)?</p>
+    <label for="answer">Select your answer:</label>
+    <select id="answer">
+      <option value="incorrect1">A = 2, B = 0.3</option>
+      <option value="incorrect2">A = 1, B = 0.6</option>
+      <option value="correct">A = 2, B = 0.94</option>
+      <option value="incorrect3">A = 3, B = 0.94</option>
+    </select>
+    <button onclick="checkAnswer()">Check Answer</button>
+    <p id="feedback"></p>
+  </div>
+
+  <script>
+    const board = JXG.JSXGraph.initBoard('box', {
+      boundingbox: [-12, 12, 12, -12],
+      axis: true,
+      showCopyright: false
+    });
+
+    let graph;
+    const movingPoints = [];
+
+    function updateGraph() {
+      const type = document.getElementById('funcType').value;
+      const a = parseFloat(document.getElementById('aSlider').value);
+      const b = parseFloat(document.getElementById('bSlider').value);
+
+      document.getElementById('aVal').textContent = a.toFixed(1);
+      document.getElementById('bVal').textContent = b.toFixed(1);
+
+      if (graph) board.removeObject(graph);
+      movingPoints.forEach(p => board.removeObject(p));
+      movingPoints.length = 0;
+
+      let f;
+      if (type === 'linear') {
+        f = x => a * x + b;
+      } else if (type === 'quadratic') {
+        f = x => a * x * x + b;
+      } else if (type === 'sine') {
+        f = x => a * Math.sin(b * x);
+      }
+
+      graph = board.create('functiongraph', [f, -10, 10], {
+        strokeWidth: 3,
+        strokeColor: 'blue'
+      });
+
+      for (let i = 0; i < 8; i++) {
+        const x0 = Math.random() * 20 - 10;
+        const px = board.create('point', [x0, f(x0)], {size: 2, color: 'orange', name: ''});
+        movingPoints.push(px);
+      }
+    }
+
+    function checkAnswer() {
+        const selectedAnswer = document.getElementById('answer').value;
+        const feedback = document.getElementById('feedback');
+        if (selectedAnswer === 'correct') {
+            feedback.textContent = "Correct! The amplitude is determined by |A|, so A=2 gives an amplitude of 2. The period is (2π)/|B|. To have 3 cycles in a 20-unit range (-10 to 10), the period should be 20/3. Solving (2π)/B = 20/3 gives B ≈ 0.94.";
+            feedback.style.color = "green";
+        } else {
+            feedback.textContent = "Incorrect. Try again by adjusting the sliders to see what the correct values should look like.";
+            feedback.style.color = "red";
+        }
+    }
+
+    updateGraph();
+
+    document.getElementById('funcType').addEventListener('change', updateGraph);
+    document.getElementById('aSlider').addEventListener('input', updateGraph);
+    document.getElementById('bSlider').addEventListener('input', updateGraph);
+
+    const tracker = board.create('point', [0, 0], {size: 3, color: 'red', visible: false, fixed: true, name: ''});
+    board.on('mousemove', function(e) {
+      const absPos = JXG.getPosition(e, 0);
+      const x = board.canvasXToUsr(absPos[0]);
+      const y = graph.Y(x);
+      if (x < -10 || x > 10) {
+        tracker.setAttribute({visible: false});
+        return;
+      }
+      tracker.moveTo([x, y]);
+      tracker.setAttribute({
+        visible: true,
+        name: `(${x.toFixed(2)}, ${y.toFixed(2)})`,
+        color: `hsl(${(x * 30) % 360}, 80%, 50%)`
+      });
+    });
+
+    function animate() {
+      movingPoints.forEach(p => {
+        let x = p.X() + 0.05;
+        if (x > 10) x = -10;
+        p.moveTo([x, graph.Y(x)]);
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>

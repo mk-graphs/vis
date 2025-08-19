@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tangent and Inertia</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        #box {
+            width: 500px;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin: 20px auto;
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            color: #555;
+            margin: 0 auto 10px;
+        }
+        .knowledge-points {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: inline-block;
+            text-align: left;
+            max-width: 900px;
+        }
+        .knowledge-points h3 {
+            margin-top: 0;
+            color: #0077cc;
+        }
+        .controls {
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #0077cc;
+            color: white;
+            transition: background-color 0.3s;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #0055aa;
+        }
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        .quiz-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            text-align: left;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .quiz-section h3 {
+            color: #333;
+            border-bottom: 2px solid #0077cc;
+            padding-bottom: 5px;
+        }
+        .quiz-option {
+            margin-bottom: 10px;
+        }
+        .answer-analysis {
+            margin-top: 15px;
+            padding: 10px;
+            border-left: 3px solid #0077cc;
+            background-color: #eaf6ff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="knowledge-points">
+        <h2>Tangent Lines and Inertia</h2>
+        <p>Watch as the car moves around the circle. The green line is the tangent, representing the car's direction of motion. The blue line is the radius, and they are always perpendicular.</p>
+        <h3>Core Concepts</h3>
+        <ol>
+            <li>
+                **Tangent and Radius**: In geometry, a circle's **tangent line** is a straight line that "just touches" a circle at a single point. A fundamental property is that the tangent line is always **perpendicular** (at a 90° angle) to the **radius** at that point.
+                $$ \text{Radius} \perp \text{Tangent} $$
+            </li>
+            <li>
+                **Inertia**: In physics, **inertia** is the property of an object to resist changes in its state of motion. An object in motion wants to continue moving in a straight line at a constant speed unless acted upon by an external force.
+            </li>
+            <li>
+                **Connecting the Concepts**: As the car moves in a circular path, its **instantaneous velocity** is always directed along the tangent line at its current position. This is because, due to inertia, the car's natural tendency is to travel straight. The continuous external force (steering and friction) is what forces it to curve. If this force is suddenly removed, the car will move off along the tangent path, as dictated by its inertia.
+            </li>
+        </ol>
+    </div>
+
+    <div id="box"></div>
+
+    <div class="controls">
+        <button id="startButton">Start Driving</button>
+        <button id="resetButton" disabled>Reset</button>
+    </div>
+
+    <div class="quiz-section">
+        <h3>Practice Question</h3>
+        <p>Based on the animation above, what is the relationship between the car's distance from the center and its velocity direction (the tangent line) as it moves in a uniform circular motion?</p>
+        
+        <div class="quiz-option">
+            <input type="radio" id="optionA" name="quiz" value="A">
+            <label for="optionA">A. The distance changes continuously, while the velocity direction remains constant.</label>
+        </div>
+        <div class="quiz-option">
+            <input type="radio" id="optionB" name="quiz" value="B">
+            <label for="optionB">B. The distance remains constant, but the velocity direction continuously changes.</label>
+        </div>
+        <div class="quiz-option">
+            <input type="radio" id="optionC" name="quiz" value="C">
+            <label for="optionC">C. Both the distance and velocity direction change continuously.</label>
+        </div>
+        <div class="quiz-option">
+            <input type="radio" id="optionD" name="quiz" value="D">
+            <label for="optionD">D. Both the distance and velocity direction remain constant.</label>
+        </div>
+        
+        <div class="answer-analysis">
+            <h4>Answer Analysis</h4>
+            <p><strong>Correct Answer: B. The distance remains constant, but the velocity direction continuously changes.</strong></p>
+            <p><strong>Analysis:</strong></p>
+            <p>1. **Distance**: As the car moves along the circumference, its distance from the center (point O) is always the circle's radius. Therefore, this distance is a fixed value and **remains constant**.</p>
+            <p>2. **Velocity Direction**: The car's velocity direction is always tangent to its path. As the car moves on the circle, the tangent direction continuously changes. This is the main point of the demonstration—you can see the green tangent line rotating as the car moves. Therefore, the car's velocity direction **continuously changes**.</p>
+        </div>
+    </div>
+
+
+    <script>
+        const board = JXG.JSXGraph.initBoard('box', {
+            boundingbox: [-7, 7, 7, -7],
+            axis: false,
+            showCopyright: false,
+            pan: { enabled: false },
+            zoom: { enabled: false }
+        });
+
+        const center = board.create('point', [0, 0], { name: 'O', fixed: true, visible: false });
+        const radius = 4;
+        let angle = 0.5;
+        let car, radiusLine, tangentPath, angleDisplay;
+        let animationID;
+
+        const startButton = document.getElementById('startButton');
+        const resetButton = document.getElementById('resetButton');
+
+        function createElements() {
+            // Circular track
+            const track = board.create('circle', [center, radius], {
+                strokeColor: '#aaa',
+                strokeWidth: 2,
+                dash: 1
+            });
+
+            // The car point that moves on the circle
+            car = board.create('point', [
+                () => radius * Math.cos(angle),
+                () => radius * Math.sin(angle)
+            ], {
+                name: '🚗',
+                label: { autoPosition: true, offset: [-15, 10] ,fontSize: 15},
+                size: 6, fillColor: 'red', strokeColor: 'red'
+            });
+
+            // Radius line from center to car
+            radiusLine = board.create('line', [center, car], {
+                straightFirst: false,
+                straightLast: false,
+                strokeColor: '#0077cc',
+                dash: 2,
+                strokeWidth: 1.5
+            });
+
+            // Tangent line at the car's position
+            tangentPath = board.create('tangent', [car, track], {
+                strokeColor: 'green',
+                strokeWidth: 3,
+                name: 'Tangent',
+                label: {
+                    position: 'top',
+                    offset: [0, 10],
+                    fontSize: 14
+                }
+            });
+
+            // Helper point for the angle
+            const helperPoint = board.create('point', [
+                () => car.X() + (car.Y() - center.Y()),
+                () => car.Y() - (car.X() - center.X())
+            ], { visible: false });
+
+            // Angle display (always 90°)
+            angleDisplay = board.create('angle', [helperPoint, car, center], {
+                type: 'sector',
+                radius: 0.8,
+                name: '90°',
+                fillColor: '#90EE90',
+                strokeColor: '#32CD32'
+            });
+        }
+
+        function animateCar() {
+            angle += 0.02; // Adjust to change speed
+            board.update();
+            animationID = requestAnimationFrame(animateCar);
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', () => {
+            animateCar();
+            startButton.disabled = true;
+            resetButton.disabled = false;
+        });
+
+        resetButton.addEventListener('click', () => {
+            cancelAnimationFrame(animationID);
+            angle = 0.5; // Reset position
+            board.update();
+            startButton.disabled = false;
+            resetButton.disabled = true;
+        });
+
+        // Initialize elements on page load
+        createElements();
+    </script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Finnish Aurora Kaleidoscope</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background-color: #0d1a26; /* Dark theme for night sky */
+            color: #ecf0f1;
+        }
+        .container {
+            background-color: #1a2c3d;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h2 {
+            color: #fff;
+        }
+        p {
+            color: #bdc3c7;
+        }
+        #jxgbox {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            border: 2px solid #2c3e50;
+            border-radius: 1rem;
+            margin: 1.5rem auto;
+            background-color: #000; /* Black for the night sky */
+            cursor: crosshair;
+        }
+        .controls {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            color: #95a5a6;
+            margin-right: 1em;
+        }
+        input[type="range"] {
+            width: 80%;
+            -webkit-appearance: none;
+            background: #2c3e50;
+            border-radius: 0.5rem;
+            height: 8px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            background: #3498db;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Finnish Aurora Kaleidoscope</h2>
+    <p>Move your mouse over the black box to see the Northern Lights pattern form. Adjust the number of mirrors (symmetry order) with the slider.</p>
+
+    <br>
+    <hr>
+    <h3>The Math and Physics of the Aurora Kaleidoscope</h3>
+    <p>
+        This visualization beautifully connects **mathematics** and **physics**. The colorful patterns you see are an artistic representation of the **Aurora Borealis**, a physical phenomenon caused by charged particles from the sun interacting with Earth's magnetic field. While we aren't simulating the exact physics, we are using the principles of **symmetry**, a key concept in both fields, to create the visual effect.
+    </p>
+
+    <p>
+        The kaleidoscope effect is based on two fundamental geometric transformations: **reflection** and **rotation**. By taking a base pattern (the points you move with your mouse) and repeatedly applying these transformations, we generate a symmetrical design.
+    </p>
+
+    <h4>Mathematical Transformations</h4>
+    <p>
+        A point $(x, y)$ can be transformed using the following rules:
+    </p>
+    <ul>
+        <li>
+            **Reflection:** The code reflects points across the x-axis, which can be expressed with the transformation matrix:
+            $$
+            \begin{pmatrix} x' \\ y' \end{pmatrix} = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix}
+            $$
+            This gives us the reflected point $(x', y') = (x, -y)$.
+        </li>
+        <li>
+            **Rotation:** A point is rotated around the origin by an angle $\theta$ (in degrees). The new coordinates $(x', y')$ are calculated using the rotation formulas:
+            $$
+            x' = x \cos(\theta) - y \sin(\theta)
+            $$
+            $$
+            y' = x \sin(\theta) + y \cos(\theta)
+            $$
+        </li>
+    </ul>
+
+    <p>
+        The visualization works by taking your mouse's position, reflecting it, and then rotating both the original point and its reflection to create all the symmetrical copies. The number of mirrors you set with the slider determines the **rotational symmetry**, or the number of identical "slices" that make up the whole pattern.
+    </p>
+    <hr>
+
+    <div id="jxgbox"></div>
+
+    <div class="controls">
+        <label for="mirrorSlider">Number of Mirrors (Symmetry Order): </label>
+        <input type="range" id="mirrorSlider" min="2" max="12" value="6" step="1" />
+        <span id="mirrorVal">6</span>
+    </div>
+
+    <!-- Quiz Section -->
+    <div style="margin-top: 3rem; text-align: left;">
+        <h3>Quiz: Test Your Knowledge</h3>
+        <p>
+            Using the rotation formulas above, what is the new coordinate of a point located at (2, 3) after a rotation of 90 degrees?
+        </p>
+        <form id="quizForm1">
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz1" value="A"> A. (3, 2)</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz1" value="B"> B. (-3, 2)</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz1" value="C"> C. (-2, -3)</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz1" value="D"> D. (2, -3)</label>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="checkAnswerBtn1">Check Answer</button>
+        </div>
+        <p id="feedback1" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+    </div>
+
+    <div style="margin-top: 3rem; text-align: left;">
+        <p>
+            Adjust the slider to a **symmetry order of 3**. What is the angle between the two closest mirror lines, in degrees?
+        </p>
+        <form id="quizForm2">
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz2" value="A"> A. 60°</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz2" value="B"> B. 90°</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz2" value="C"> C. 120°</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz2" value="D"> D. 180°</label>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="checkAnswerBtn2">Check Answer</button>
+        </div>
+        <p id="feedback2" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+    </div>
+
+    <div style="margin-top: 3rem; text-align: left; background-color: #2c3e50; padding: 1.5rem; border-radius: 1rem;">
+        <h4>Understanding Symmetry Order and Mirror Angle</h4>
+        <p>
+            It's easy to get confused between the number of mirrors and the angle you see in each repeating segment of the pattern.
+        </p>
+        <p>
+            The **Symmetry Order ($n$)** is the number of identical "slices" that make up the whole circle. This is determined by the number of mirrors you set with the slider.
+        </p>
+        <p>
+            The **Angle between two closest mirror lines ($\theta$)** is the total angle of the circle ($360^\circ$) divided by the number of slices. This relationship is always true:
+            $$
+            \theta = \frac{360^\circ}{n}
+            $$
+        </p>
+        <p>
+            For example, if you set the **Symmetry Order to 3**, the circle is divided into 3 equal slices. Therefore, the angle between each mirror is $\theta = 360^\circ / 3 = 120^\circ$. If you set the order to 6, the angle is $60^\circ$.
+        </p>
+    </div>
+
+    <div style="margin-top: 3rem; text-align: left; background-color: #2c3e50; padding: 1.5rem; border-radius: 1rem;">
+        <h4>Solution for Quiz Question 1</h4>
+        <p>
+            Let's solve the first quiz question step-by-step using the rotation formulas. The question asks for the new coordinates of a point at $(2, 3)$ after a $90^\circ$ rotation.
+        </p>
+        <p>
+            The given values are:
+            <ul>
+                <li>Initial point: $(x, y) = (2, 3)$</li>
+                <li>Rotation angle: $\theta = 90^\circ$</li>
+            </ul>
+        </p>
+        <p>
+            First, recall the values of sine and cosine for $90^\circ$:
+            $$
+            \sin(90^\circ) = 1
+            $$
+            $$
+            \cos(90^\circ) = 0
+            $$
+        </p>
+        <p>
+            Now, let's plug these values into the rotation formulas:
+            $$
+            x' = x \cos(\theta) - y \sin(\theta) = (2) \cos(90^\circ) - (3) \sin(90^\circ)
+            $$
+            $$
+            x' = (2)(0) - (3)(1) = 0 - 3 = -3
+            $$
+            $$
+            y' = x \sin(\theta) + y \cos(\theta) = (2) \sin(90^\circ) + (3) \cos(90^\circ)
+            $$
+            $$
+            y' = (2)(1) + (3)(0) = 2 + 0 = 2
+            $$
+        </p>
+        <p>
+            The new coordinate of the point is $(-3, 2)$, which corresponds to **Option B**.
+        </p>
+    </div>
+
+</div>
+
+<script>
+    // Initialize the JXG.JSXGraph board
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [-10, 10, 10, -10],
+        axis: false,
+        showNavigation: false,
+        keepaspectratio: true,
+        showCopyright: false,
+    });
+
+    // Center point (origin)
+    const center = board.create('point', [0, 0], { visible: false });
+
+    // Number of mirrors slider and display
+    const mirrorSlider = document.getElementById('mirrorSlider');
+    const mirrorVal = document.getElementById('mirrorVal');
+
+    // Group to hold all kaleidoscope points and lines
+    let kaleidoElements = [];
+
+    // Colors for the Aurora theme
+    const auroraColors = ['#00FF00', '#32CD32', '#00FFFF', '#00BFFF', '#9932CC', '#4B0082'];
+
+    // Add variables to store the last known mouse position.
+    // This fixes the issue where the slider doesn't update the pattern
+    // because it doesn't know the mouse position.
+    let lastMouseX = 4;
+    let lastMouseY = 3;
+
+    // Function to clear previous elements
+    function clearKaleido() {
+        kaleidoElements.forEach(el => board.removeObject(el));
+        kaleidoElements = [];
+    }
+
+    // Function to create kaleidoscope points and mirror lines
+    function createKaleidoPattern(order, mouseX, mouseY) {
+        clearKaleido();
+        
+        // Angle between each mirror line
+        const angleBetweenMirrors = 360 / order;
+
+        // Create the mirror lines
+        for (let i = 0; i < order; i++) {
+            const angle = (i * angleBetweenMirrors) * Math.PI / 180;
+            const x = Math.cos(angle) * 10;
+            const y = Math.sin(angle) * 10;
+            const line = board.create('line', [center, [x, y]], {
+                strokeColor: '#34495e',
+                strokeWidth: 1,
+                dash: 2,
+                fixed: true,
+                highlight: false,
+            });
+            kaleidoElements.push(line);
+        }
+
+        // The base pattern is no longer a single point, but a set of relative coordinates
+        const basePattern = [
+            [0, 0],
+            [0.5, 0.2],
+            [0.8, -0.3],
+            [-0.3, 0.5],
+            [-0.7, -0.2]
+        ];
+
+        // The core logic: we generate points for the first "slice" of the kaleidoscope
+        const pointsToRotate = [];
+        basePattern.forEach(p => {
+            pointsToRotate.push([mouseX + p[0], mouseY + p[1]]);
+            pointsToRotate.push([mouseX + p[0], -(mouseY + p[1])]);
+        });
+
+        for(let i = 0; i < order; i++) {
+            const angle = (i * angleBetweenMirrors) * Math.PI / 180;
+            const cosA = Math.cos(angle);
+            const sinA = Math.sin(angle);
+
+            pointsToRotate.forEach(point => {
+                // Apply rotation
+                const xRot = point[0] * cosA - point[1] * sinA;
+                const yRot = point[0] * sinA + point[1] * cosA;
+
+                // Create the point for the pattern
+                const pt = board.create('point', [xRot, yRot], {
+                    name: '',
+                    size: 2,
+                    fixed: true,
+                    color: auroraColors[Math.floor(Math.random() * auroraColors.length)], // Random color from the aurora palette
+                    highlight: false,
+                    showInfobox: false,
+                    withLabel: false,
+                });
+                kaleidoElements.push(pt);
+            });
+        }
+    }
+
+    // Initial creation of the pattern using the default last known mouse position
+    createKaleidoPattern(parseInt(mirrorSlider.value), lastMouseX, lastMouseY);
+
+    // Update kaleidoscope points on slider change
+    mirrorSlider.addEventListener('input', () => {
+        const order = parseInt(mirrorSlider.value);
+        mirrorVal.textContent = order;
+        // Use the stored last known mouse position to update the pattern
+        createKaleidoPattern(order, lastMouseX, lastMouseY);
+    });
+
+    // Update kaleidoscope on mouse move and store the last known position
+    board.on('mousemove', (e) => {
+        const order = parseInt(mirrorSlider.value);
+        const coords = board.get.pointCoordinates(e);
+        lastMouseX = coords[0]; // Store the new mouse X coordinate
+        lastMouseY = coords[1]; // Store the new mouse Y coordinate
+        createKaleidoPattern(order, lastMouseX, lastMouseY);
+    });
+
+    // --- Quiz Logic for Question 1 ---
+    const checkAnswerBtn1 = document.getElementById('checkAnswerBtn1');
+    const quizForm1 = document.getElementById('quizForm1');
+    const feedback1El = document.getElementById('feedback1');
+
+    checkAnswerBtn1.addEventListener('click', () => {
+        const selectedOption = document.querySelector('input[name="quiz1"]:checked');
+        if (!selectedOption) {
+            feedback1El.textContent = 'Please select an answer.';
+            feedback1El.style.color = '#e74c3c';
+            return;
+        }
+
+        const answer = selectedOption.value;
+        const correctAnswer = 'B';
+
+        if (answer === correctAnswer) {
+            feedback1El.textContent = 'Correct! Great job!';
+            feedback1El.style.color = '#2ecc71';
+        } else {
+            feedback1El.textContent = 'Incorrect. Please try again.';
+            feedback1El.style.color = '#e74c3c';
+        }
+    });
+
+    // --- Quiz Logic for Question 2 ---
+    const checkAnswerBtn2 = document.getElementById('checkAnswerBtn2');
+    const quizForm2 = document.getElementById('quizForm2');
+    const feedback2El = document.getElementById('feedback2');
+
+    checkAnswerBtn2.addEventListener('click', () => {
+        const selectedOption = document.querySelector('input[name="quiz2"]:checked');
+        if (!selectedOption) {
+            feedback2El.textContent = 'Please select an answer.';
+            feedback2El.style.color = '#e74c3c';
+            return;
+        }
+
+        const answer = selectedOption.value;
+        const correctAnswer = 'C';
+
+        if (answer === correctAnswer) {
+            feedback2El.textContent = 'Correct! Great job!';
+            feedback2El.style.color = '#2ecc71';
+        } else {
+            feedback2El.textContent = 'Incorrect. Please try again.';
+            feedback2El.style.color = '#e74c3c';
+        }
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Interactive Riemann Sums: Math & Real-Life Example</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    #box {
+      width: 750px;
+      height: 450px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    .controls {
+      margin-bottom: 10px;
+    }
+    label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    input[type=range] {
+      vertical-align: middle;
+      width: 300px;
+    }
+    #sumValue {
+      font-size: 1.2em;
+      color: #0066cc;
+      font-weight: bold;
+      margin-left: 15px;
+    }
+    #explanation {
+      background-color: #eef6fb;
+      border-left: 4px solid #2196F3;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+      line-height: 1.5;
+      color: #333;
+    }
+    #quiz {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+    #quiz h3 {
+      margin-top: 0;
+    }
+    .option {
+      margin: 6px 0;
+    }
+    #feedback {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Interactive Riemann Sums</h2>
+
+  <div id="explanation">
+    <strong>Concept:</strong><br />
+    The <em>Riemann sum</em> is a method to approximate the value of a <strong>definite integral</strong>. 
+    The idea is to divide the interval of interest into smaller subintervals, then for each subinterval draw a rectangle whose height is determined by the function value at a chosen point (e.g., the left endpoint). 
+    The total area of all these rectangles gives an approximation of the area under the curve. <br /><br />
+
+    As the number of rectangles increases (and their widths decrease), this approximation becomes closer and closer to the true integral. 
+    In fact, in the limit as the rectangle width goes to zero, the Riemann sum exactly equals the definite integral. <br /><br />
+
+    <strong>Scenarios in this demo:</strong><br />
+    • <b>Math Example:</b> \(f(x) = x^2\). The sum of rectangle areas approximates the total area under the parabola between \(a\) and \(b\). This shows how the abstract idea of integration works in a purely mathematical setting.<br /><br />
+
+    • <b>Real-life Example:</b> \(v(t) = 10 + 2t - 0.2t^2\). Here the function represents the <em>velocity of a car</em> over time. 
+    The area under the velocity–time graph gives the <strong>total distance traveled</strong>. 
+    Since velocity is not constant, we cannot simply use "distance = velocity × time". Instead, we approximate the distance by splitting the trip into many short time intervals, assuming velocity is nearly constant in each, and summing up (velocity × time) for all intervals. 
+    The more rectangles we use, the more accurate the estimate of the car's total distance.
+  </div>
+
+  <div class="controls">
+    <label for="functionSelect">Choose Example: </label>
+    <select id="functionSelect">
+      <option value="x2">Math: f(x) = x²</option>
+      <option value="velocity">Real-life: Car velocity</option>
+    </select>
+  </div>
+
+  <div id="box"></div>
+
+  <div class="controls">
+    <label for="aRange">a (start): </label>
+    <input type="range" id="aRange" step="0.1" />
+    <span id="aVal"></span>
+  </div>
+
+  <div class="controls">
+    <label for="bRange">b (end): </label>
+    <input type="range" id="bRange" step="0.1" />
+    <span id="bVal"></span>
+  </div>
+
+  <div class="controls">
+    <label for="nRange">Number of rectangles (n): </label>
+    <input type="range" id="nRange" min="1" max="100" step="1" value="20" />
+    <span id="nVal">20</span>
+  </div>
+
+  <div>
+    Approximation ≈ <span id="sumValue">0</span>
+  </div>
+
+  <!-- Quiz Section -->
+  <div id="quiz">
+    <h3>Quick Check: Multiple Choice Question</h3>
+    <p>
+      Suppose the velocity of a car is given by \(v(t) = 10 + 2t - 0.2t^2\) (in meters/second). 
+      Which of the following best describes what the <em>area under this curve</em> from \(t=0\) to \(t=10\) represents?
+    </p>
+    <div class="option">
+      <input type="radio" name="q1" value="A"> A) The car’s maximum velocity
+    </div>
+    <div class="option">
+      <input type="radio" name="q1" value="B"> B) The total distance the car travels in the first 10 seconds
+    </div>
+    <div class="option">
+      <input type="radio" name="q1" value="C"> C) The average acceleration of the car
+    </div>
+    <div class="option">
+      <input type="radio" name="q1" value="D"> D) The slope of the velocity curve at \(t=10\)
+    </div>
+    <button onclick="checkAnswer()">Submit Answer</button>
+    <div id="feedback"></div>
+  </div>
+
+<script>
+  const board = JXG.JSXGraph.initBoard('box', {
+    boundingbox: [-1, 30, 6, -5], // default, will update per mode
+    axis: true,
+    showNavigation: false,
+    zoom: { wheel: false, needshift: false, pinch: false },
+    pan: { enabled: false }
+  });
+
+  // --- Functions ---
+  function f_x2(x) {
+    return x * x;
+  }
+  function f_velocity(t) {
+    return Math.max(0, 10 + 2 * t - 0.2 * t * t);
+  }
+
+  // Graph & rectangles
+  let graph = null;
+  let rectangles = [];
+
+  // Current parameters
+  let a = 0, b = 2, n = 10;
+  let currentMode = "x2";
+
+  const sumDisplay = document.getElementById('sumValue');
+
+  function clearRectangles() {
+    rectangles.forEach(rect => board.removeObject(rect));
+    rectangles = [];
+  }
+
+  function drawRectangles(f, a, b, n) {
+    clearRectangles();
+    if (b <= a) return;
+
+    const deltaX = (b - a) / n;
+    let sum = 0;
+
+    for (let i = 0; i < n; i++) {
+      let xLeft = a + i * deltaX;
+      let height = f(xLeft);
+      sum += height * deltaX;
+
+      const pts = [
+        [xLeft, 0],
+        [xLeft, height],
+        [xLeft + deltaX, height],
+        [xLeft + deltaX, 0]
+      ];
+
+      let rect = board.create('polygon', pts, {
+        fillColor: '#fbb4ae',
+        fillOpacity: 0.6,
+        strokeColor: '#fb8072',
+        strokeWidth: 2
+      });
+
+      rectangles.push(rect);
+    }
+    sumDisplay.textContent = sum.toFixed(2);
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    if (graph) board.removeObject(graph);
+
+    if (mode === "x2") {
+      a = 0; b = 2; n = 10;
+      board.setBoundingBox([-1, 30, 6, -5], false);
+      graph = board.create('functiongraph', [f_x2, 0, 5], {strokeColor: 'blue', strokeWidth: 3});
+
+      document.getElementById('aRange').min = 0;
+      document.getElementById('aRange').max = 4;
+      document.getElementById('aRange').value = a;
+
+      document.getElementById('bRange').min = 0.1;
+      document.getElementById('bRange').max = 5;
+      document.getElementById('bRange').value = b;
+    } else {
+      a = 0; b = 10; n = 20;
+      board.setBoundingBox([-1, 35, 26, -5], false);
+      graph = board.create('functiongraph', [f_velocity, 0, 25], {strokeColor: 'blue', strokeWidth: 3});
+
+      document.getElementById('aRange').min = 0;
+      document.getElementById('aRange').max = 15;
+      document.getElementById('aRange').value = a;
+
+      document.getElementById('bRange').min = 0.1;
+      document.getElementById('bRange').max = 25;
+      document.getElementById('bRange').value = b;
+    }
+
+    document.getElementById('nRange').value = n;
+    update();
+  }
+
+  function update() {
+    a = parseFloat(document.getElementById('aRange').value);
+    b = parseFloat(document.getElementById('bRange').value);
+    n = parseInt(document.getElementById('nRange').value);
+
+    if (b <= a) {
+      b = a + 0.1;
+      document.getElementById('bRange').value = b.toFixed(1);
+    }
+
+    document.getElementById('aVal').textContent = a.toFixed(1);
+    document.getElementById('bVal').textContent = b.toFixed(1);
+    document.getElementById('nVal').textContent = n;
+
+    if (currentMode === "x2") {
+      drawRectangles(f_x2, a, b, n);
+    } else {
+      drawRectangles(f_velocity, a, b, n);
+    }
+
+    board.update();
+  }
+
+  document.getElementById('functionSelect').addEventListener('change', e => {
+    switchMode(e.target.value);
+  });
+  document.getElementById('aRange').addEventListener('input', update);
+  document.getElementById('bRange').addEventListener('input', update);
+  document.getElementById('nRange').addEventListener('input', update);
+
+  switchMode("x2");
+
+  // Quiz logic
+  function checkAnswer() {
+    const options = document.getElementsByName("q1");
+    let chosen = null;
+    for (let opt of options) {
+      if (opt.checked) chosen = opt.value;
+    }
+
+    const feedback = document.getElementById("feedback");
+
+    if (!chosen) {
+      feedback.textContent = "Please select an answer before submitting.";
+      feedback.style.color = "black";
+      return;
+    }
+
+    if (chosen === "B") {
+      feedback.textContent = "✅ Correct! The area under the velocity–time graph gives the total distance traveled.";
+      feedback.style.color = "green";
+    } else {
+      feedback.textContent = "❌ Not correct. Remember: area under a velocity–time graph = total distance traveled.";
+      feedback.style.color = "red";
+    }
+  }
+</script>
+
+</body>
+</html>

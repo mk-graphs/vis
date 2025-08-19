@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Diminishing Marginal Utility of Hamburgers</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css">
+    <style>
+        #jxgbox {
+            width: 900px;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+        .description {
+            max-width: 900px;
+            font-family: Arial, sans-serif;
+            margin-bottom: 1em;
+        }
+        .math-explanation {
+            max-width: 900px;
+            font-family: Arial, sans-serif;
+            margin-top: 1em;
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-left: 5px solid #007BFF;
+        }
+        .math-explanation h3 {
+            margin-top: 0;
+            color: #007BFF;
+        }
+        .quiz {
+            max-width: 900px;
+            font-family: Arial, sans-serif;
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="description">
+        <h2>Diminishing Marginal Utility: Hamburgers Example</h2>
+        <p>
+            The graph shows how a hungry person's satisfaction (total utility) increases as they consume more hamburgers. The <b>first few hamburgers provide a lot of satisfaction</b>, but each additional burger adds less and less. This is known as the <b>Law of Diminishing Marginal Utility</b>.
+        </p>
+        <p>
+            You can use the sliders below to see how different parameters affect the curve.
+        </p>
+    </div>
+
+    <div id="jxgbox"></div>
+
+    <p>
+        Maximum Satisfaction (a): <span id="aVal">10.00</span><br>
+        Growth Rate (b): <span id="bVal">0.5</span>
+    </p>
+
+    <div class="math-explanation">
+        <h3>The Mathematical Model</h3>
+        <p>
+            This graph uses an exponential function to model utility, which accurately represents the concept. The formula is:
+        </p>
+        <p style="text-align: center; font-size: 1.2em; font-weight: bold;">
+            U(n) = a * (1 - e<sup>-b * n</sup>)
+        </p>
+        <ul>
+            <li><b>U(n)</b> represents the <b>total utility</b> after eating <b>n</b> hamburgers.</li>
+            <li><b>a</b> is the <b>maximum possible satisfaction</b> or the total utility ceiling. The curve will never exceed this value, no matter how many hamburgers are eaten.</li>
+            <li><b>b</b> is the <b>initial growth rate</b>. A higher value of <b>b</b> means satisfaction rises more quickly at the beginning, representing a hungrier person.</li>
+        </ul>
+        <p>The curve's shape perfectly illustrates that the rate of satisfaction gain slows down as <b>n</b> increases, demonstrating diminishing returns.</p>
+    </div>
+
+    <div class="quiz">
+        <h3>Multiple-Choice Questions</h3>
+
+        <p><b>Question 1:</b><br>
+        If you are very, very hungry, which slider would you most likely adjust to a higher value to represent your situation?
+        </p>
+        <ul>
+            <li>A. The **a** (Maximum Satisfaction) slider.</li>
+            <li>B. The **b** (Growth Rate) slider.（√）</li>
+            <li>C. Both **a** and **b** to higher values.</li>
+            <li>D. You would adjust neither slider.</li>
+        </ul>
+
+        <p><b>Question 2:</b><br>
+        According to the Law of Diminishing Marginal Utility, as you eat more and more hamburgers, what happens to the additional satisfaction you get from each new hamburger?
+        </p>
+        <ul>
+            <li>A. It stays the same.</li>
+            <li>B. It increases at an increasing rate.</li>
+            <li>C. It increases at a decreasing rate.</li>
+            <li>D. It decreases.（√）</li>
+        </ul>
+
+        <p><b>Question 3:</b><br>
+        If you observe the curve getting flatter and flatter as you move to the right, what does this visually demonstrate?
+        </p>
+        <ul>
+            <li>A. The Law of Supply and Demand.</li>
+            <li>B. The Law of Diminishing Marginal Utility.(√)</li>
+            <li>C. The principle of compound interest.</li>
+            <li>D. The effect of inflation.</li>
+        </ul>
+    </div>
+
+    <script>
+        const board = JXG.JSXGraph.initBoard('jxgbox', {
+            boundingbox: [-1, 12, 16, -1],
+            axis: true,
+            keepaspectratio: false
+        });
+
+        const aSlider = board.create('slider', [[1, 11], [10, 11], [5, 10, 20]], {
+            name: 'a',
+            snapWidth: 0.1,
+            fillColor: '#66cc66'
+        });
+
+        const bSlider = board.create('slider', [[1, 10.5], [10, 10.5], [0.1, 0.5, 1.0]], {
+            name: 'b',
+            snapWidth: 0.01,
+            fillColor: '#6699cc'
+        });
+
+        const utilityCurve = board.create('functiongraph', [
+            function(n) {
+                const a = aSlider.Value();
+                const b = bSlider.Value();
+                return a * (1 - Math.exp(-b * n));
+            },
+            0, 15
+        ], {
+            strokeColor: 'orange',
+            strokeWidth: 3
+        });
+
+        function updateLabels() {
+            const a = aSlider.Value();
+            const b = bSlider.Value();
+            document.getElementById("aVal").innerText = a.toFixed(2);
+            document.getElementById("bVal").innerText = b.toFixed(2);
+            board.update();
+        }
+
+        aSlider.on('drag', updateLabels);
+        bSlider.on('drag', updateLabels);
+        updateLabels();
+    </script>
+
+</body>
+</html>

@@ -4,6 +4,9 @@
     <title>Dynamic Logarithm Graph</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraph.css" />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.7.0/distrib/jsxgraphcore.js"></script>
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,6 +78,33 @@
             border-radius: 4px;
             font-family: 'Courier New', Courier, monospace;
         }
+        .quiz {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e9f5ff;
+            border: 1px solid #b3e0ff;
+            border-radius: 8px;
+            width: 800px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .quiz button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .quiz button:hover {
+            background-color: #0056b3;
+        }
+        .quiz #answer {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #28a745;
+            display: none; /* Initially hidden */
+        }
     </style>
 </head>
 <body>
@@ -95,20 +125,20 @@
 
     <div class="explanation">
         <h3>Mathematical Principles and Explanations</h3>
-        <p>This interactive graph is designed to demonstrate the core relationship between <b>exponential functions</b> (<code>y = b^x</code>) and <b>logarithmic functions</b> (<code>y = log_b(x)</code>).</p>
+        <p>This interactive graph is designed to demonstrate the core relationship between <b>exponential functions</b> ($$y = b^x$$) and <b>logarithmic functions</b> ($$y = \log_b(x)$$).</p>
         
         <ul>
             <li>
                 <h4>Inverse Functions</h4>
-                <p>The most important takeaway is that the blue curve (exponential function <code>y = b^x</code>) and the red curve (logarithmic function <code>y = log_b(x)</code>) are <b>inverse functions</b> of each other. This means they "undo" each other's operation. For example, <code>log_b(b^x) = x</code>.</p>
-                <p>Geometrically, the graphs of inverse functions are always symmetrical with respect to the line <code>y = x</code>. The gray dashed line in the graph represents <code>y = x</code>, and you can see how the blue and red curves mirror each other across this line.</p>
+                <p>The most important takeaway is that the blue curve (exponential function $$y = b^x$$) and the red curve (logarithmic function $$y = \log_b(x)$$) are <b>inverse functions</b> of each other. This means they "undo" each other's operation. For example, $$\log_b(b^x) = x$$.</p>
+                <p>Geometrically, the graphs of inverse functions are always symmetrical with respect to the line $$y = x$$. The gray dashed line in the graph represents $$y = x$$, and you can see how the blue and red curves mirror each other across this line.</p>
             </li>
             <li>
-                <h4>The Effect of the Base <code>b</code></h4>
-                <p>The slider allows you to change the value of the base <code>b</code>. Observe what happens as you adjust it:</p>
+                <h4>The Effect of the Base `b`</h4>
+                <p>The slider allows you to change the value of the base `b`. Observe what happens as you adjust it:</p>
                 <ul>
-                    <li>As <code>b</code> <b>increases</b>, the <b>exponential function</b> (<code>y = b^x</code>) grows <b>faster</b>, and its curve becomes steeper.</li>
-                    <li>Conversely, the <b>logarithmic function</b> (<code>y = log_b(x)</code>) grows <b>slower</b>, and its curve becomes flatter.</li>
+                    <li>As `b` <b>increases</b>, the <b>exponential function</b> ($$y = b^x$$) grows <b>faster</b>, and its curve becomes steeper.</li>
+                    <li>Conversely, the <b>logarithmic function</b> ($$y = \log_b(x)$$) grows <b>slower</b>, and its curve becomes flatter.</li>
                 </ul>
                 <p>This illustrates the "compression effect" of logarithms, which allows them to effectively handle and represent values that span a vast range, such as in the Richter scale for earthquakes or decibels for sound intensity.</p>
             </li>
@@ -116,12 +146,25 @@
                 <h4>Domain and Range</h4>
                 <p>Another key relationship between these functions is in their domain and range:</p>
                 <ul>
-                    <li>The <b>exponential function's</b> (<code>y = b^x</code>) <b>domain</b> (all possible x-values) is all real numbers, and its <b>range</b> (all possible y-values) is all positive numbers.</li>
-                    <li>The <b>logarithmic function's</b> (<code>y = log_b(x)</code>) <b>domain</b> is all positive numbers, and its <b>range</b> is all real numbers.</li>
+                    <li>The <b>exponential function's</b> ($$y = b^x$$) <b>domain</b> (all possible x-values) is all real numbers, and its <b>range</b> (all possible y-values) is all positive numbers.</li>
+                    <li>The <b>logarithmic function's</b> ($$y = \log_b(x)$$) <b>domain</b> is all positive numbers, and its <b>range</b> is all real numbers.</li>
                 </ul>
                 <p>This is a fundamental property of inverse functions: the domain of one is the range of the other, and vice versa.</p>
             </li>
         </ul>
+    </div>
+    
+    <div class="quiz">
+        <h3>Test Your Knowledge</h3>
+        <p>Using the graph and your understanding of inverse functions, if the exponential function passes through the point \( (2, 9) \), what point must the logarithmic function pass through?</p>
+        <ol type="A">
+            <li>(9, 2)</li>
+            <li>(2, 9)</li>
+            <li>(3, 2)</li>
+            <li>(2, 3)</li>
+        </ol>
+        <button onclick="showAnswer()">Show Answer</button>
+        <p id="answer">The correct answer is A. Since exponential and logarithmic functions are inverses, they reverse the x and y coordinates. If the exponential function has the point (2, 9), the inverse logarithmic function must have the point (9, 2).</p>
     </div>
 
     <script>
@@ -197,6 +240,16 @@
         
         // Initial graph update
         updateGraphs();
+        
+        // --- 5. Quiz Logic ---
+        function showAnswer() {
+            const answerElement = document.getElementById('answer');
+            if (answerElement.style.display === 'none') {
+                answerElement.style.display = 'block';
+            } else {
+                answerElement.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>

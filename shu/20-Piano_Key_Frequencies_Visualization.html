@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Interactive Piano Key Frequencies</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.58/build/Tone.min.js"></script>
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: #34495e;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        #jxgbox {
+            width: 100%;
+            height: 450px;
+            border: 2px solid #ddd;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: #f7f9fc;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        #keyVal, #freqVal {
+            font-weight: bold;
+            color: #2980b9;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        input[type="range"] {
+            width: 80%;
+            -webkit-appearance: none;
+            background: #e0e7ee;
+            border-radius: 0.5rem;
+            height: 8px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            background: #3498db;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .jxgbox_label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Piano Key Frequencies and the Science of Music</h2>
+    <p>
+        This interactive graph visualizes the relationship between a piano key's number and its fundamental frequency, bringing together concepts from both mathematics and physics.
+    </p>
+
+    <h3>The Mathematics Behind the Sound</h3>
+    <p>
+        The frequency of each piano key is not a linear progression; it follows an <strong>exponential curve</strong>. This is based on the <strong>12-tone equal temperament</strong> system, a mathematical tuning method that divides an octave's frequency ratio (2:1) into 12 equal semitone steps. The frequency $f(n)$ of any key $n$ is calculated using the exponential formula:
+    </p>
+    <p style="font-family: monospace; font-size: 1.2em;">
+        $ f(n) = 440 \times 2^{\frac{n-49}{12}} $
+    </p>
+    <p>
+        In this formula, key 49 is the standard <strong>A4 note</strong>, which is universally tuned to <strong>440 Hz</strong>.
+    </p>
+
+    <h3>The Physics of Sound</h3>
+    <p>
+        In physics, <strong>frequency</strong> is a measure of how many times a sound wave vibrates per second, measured in <strong>Hertz (Hz)</strong>. The higher the frequency, the higher the pitch we perceive. The $y$-axis of this graph represents frequency, visually demonstrating how the pitch increases exponentially across the keyboard. When you press the "Play Note" button, a pure tone (a sine wave) with the calculated frequency is generated, allowing you to <strong>hear</strong> the physical manifestation of the formula.
+    </p>
+
+    <div id="jxgbox"></div>
+
+    <div class="info-panel">
+        <span class="info-label">Selected Key: <span id="keyVal">49</span></span>
+        <span class="info-label">Frequency: <span id="freqVal">440.00</span> Hz</span>
+    </div>
+
+    <div class="controls">
+        <label for="keySlider">Select Piano Key (1-88): </label>
+        <input type="range" id="keySlider" min="1" max="88" step="1" value="49">
+        <button id="playBtn">Play Note</button>
+    </div>
+
+    <div style="margin-top: 3rem; text-align: left;">
+        <h3>Quiz: Test Your Knowledge</h3>
+        <p>
+            Using the formula from the graph, what is the frequency of the note one octave below A4? (Note: An octave is 12 semitones.)
+        </p>
+        <form id="quizForm">
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz" value="A"> A. 220 Hz</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz" value="B"> B. 880 Hz</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz" value="C"> C. 110 Hz</label>
+            <label style="display: block; margin-bottom: 10px;"><input type="radio" name="quiz" value="D"> D. 330 Hz</label>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="checkAnswerBtn">Check Answer</button>
+        </div>
+        <p id="feedback" style="text-align: center; font-weight: bold; margin-top: 15px;"></p>
+    </div>
+
+</div>
+
+<script>
+    // Initialize the JXG.JSXGraph board
+    const board = JXG.JSXGraph.initBoard('jxgbox', {
+        boundingbox: [0, 5000, 90, 0], // x: 0-90 keys, y: freq 0-5000Hz
+        axis: true,
+        keepaspectratio: false,
+        showNavigation: false,
+        showCopyright: false
+    });
+
+    // Frequency function based on the equal temperament formula
+    function freq(n) {
+        return 440 * Math.pow(2, (n - 49) / 12);
+    }
+
+    // Initialize Tone.js synth for sound generation
+    const synth = new Tone.Synth().toDestination();
+
+    // Plot all keys as points
+    let points = [];
+    for(let n = 1; n <= 88; n++) {
+        points.push(board.create('point', [n, freq(n)], {
+            name: '',
+            size: 2,
+            fixed: true,
+            highlight: false,
+            showInfobox: false,
+            strokeColor: '#888',
+            fillColor: '#888'
+        }));
+    }
+
+    // Highlight A4 (key 49) and Middle C (key 40) for reference
+    const highlightA4 = board.create('point', [49, freq(49)], {
+        name: 'A4 (440Hz)',
+        size: 5,
+        fixed: true,
+        strokeColor: '#e74c3c',
+        fillColor: '#e74c3c',
+        withLabel: true,
+        label: { offset: [10, -15], fontWeight: 'bold', fontSize: 14 }
+    });
+
+    const highlightC4 = board.create('point', [40, freq(40)], {
+        name: 'Middle C (C4)',
+        size: 5,
+        fixed: true,
+        strokeColor: '#3498db',
+        fillColor: '#3498db',
+        withLabel: true,
+        label: { offset: [10, 15], fontWeight: 'bold', fontSize: 14 }
+    });
+
+    // Selected key marker (moves with slider)
+    const selectedKeyPoint = board.create('point', [49, freq(49)], {
+        name: '',
+        size: 8,
+        fillColor: '#27ae60',
+        strokeColor: '#27ae60',
+        fixed: true,
+        withLabel: false,
+        layer: 10
+    });
+
+    // Get DOM elements
+    const keySlider = document.getElementById('keySlider');
+    const keyValSpan = document.getElementById('keyVal');
+    const freqValSpan = document.getElementById('freqVal');
+    const playBtn = document.getElementById('playBtn');
+
+    // Function to update the point and display values based on slider
+    function updateSelectedKey() {
+        const n = parseInt(keySlider.value);
+        keyValSpan.textContent = n;
+        const f = freq(n);
+        freqValSpan.textContent = f.toFixed(2);
+        selectedKeyPoint.setPosition(JXG.COORDS_BY_USER, [n, f]);
+        board.update();
+    }
+
+    // Function to play the selected note
+    function playSelectedNote() {
+        const n = parseInt(keySlider.value);
+        const f = freq(n);
+        synth.triggerAttackRelease(f, "8n");
+    }
+
+    // Event listener for the slider
+    keySlider.addEventListener('input', updateSelectedKey);
+
+    // Event listener for the play button
+    playBtn.addEventListener('click', playSelectedNote);
+
+    // Initial update
+    updateSelectedKey();
+
+
+    // --- Quiz Logic ---
+    const checkAnswerBtn = document.getElementById('checkAnswerBtn');
+    const quizForm = document.getElementById('quizForm');
+    const feedbackEl = document.getElementById('feedback');
+
+    checkAnswerBtn.addEventListener('click', () => {
+        const selectedOption = document.querySelector('input[name="quiz"]:checked');
+        if (!selectedOption) {
+            feedbackEl.textContent = 'Please select an answer.';
+            feedbackEl.style.color = '#e74c3c';
+            return;
+        }
+
+        const answer = selectedOption.value;
+        const correctAnswer = 'A';
+
+        if (answer === correctAnswer) {
+            feedbackEl.textContent = 'Correct! Great job!';
+            feedbackEl.style.color = '#2ecc71';
+        } else {
+            feedbackEl.textContent = 'Incorrect. Please try again.';
+            feedbackEl.style.color = '#e74c3c';
+        }
+    });
+
+</script>
+
+</body>
+</html>
