@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Coffee Intake Comparison</title>
+    <script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.8.0/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.8.0/distrib/jsxgraph.css" />
+    <style>
+        .jxgbox { border: 1px solid #ccc; }
+        .controls { margin-top: 10px; text-align: center; }
+        button { padding: 8px 15px; font-size: 16px; cursor: pointer; margin: 0 5px; border: 1px solid #ccc; background-color: #f7f7f7; }
+        .input-group { display: inline-block; margin: 0 15px; vertical-align: top; }
+        .input-group label, .input-group input { font-size: 16px; }
+        .questions-container { margin-top: 30px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto; padding: 20px; border: 1px solid #eee; background-color: #f9f9f9; }
+        .question { margin-bottom: 20px; }
+        .question p { font-weight: bold; }
+        .options label { display: block; margin-bottom: 5px; cursor: pointer; }
+        .check-btn { margin-top: 10px; padding: 8px 20px; }
+        .result { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div id="jxgbox" class="jxgbox" style="width:800px; height:500px;"></div>
+    <div class="controls">
+        <div class="input-group">
+            <label>Daily Coffee Intake (cups):</label>
+            <input type="number" id="myCoffeeInput" value="2" min="0" max="20" step="0.1" style="width: 60px;">
+        </div>
+        <button id="dropCupsBtn">Start Simulation</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="questions-container">
+        <h2>Mathematical Questions</h2>
+        <div class="question" id="q1">
+            <p>1. If you drink 3.5 cups of coffee per day, what is the closest total annual coffee bean consumption in kilograms? (Assume each cup requires 8 grams of coffee beans)</p>
+            <div class="options">
+                <label><input type="radio" name="q1_option" value="a"> A) 10 kg</label>
+                <label><input type="radio" name="q1_option" value="b"> B) 15 kg</label>
+                <label><input type="radio" name="q1_option" value="c"> C) 20 kg</label>
+                <label><input type="radio" name="q1_option" value="d"> D) 25 kg</label>
+            </div>
+            <button class="check-btn" onclick="checkAnswer('q1', 'a')">Check Answer</button>
+            <div class="result" id="q1_result"></div>
+        </div>
+
+        <div class="question" id="q2">
+            <p>2. The average person in Finland drinks 8.5 cups of coffee per day, while the world average is 5.5 cups per day. How many times larger is the average annual coffee consumption in Finland compared to the world average?</p>
+            <div class="options">
+                <label><input type="radio" name="q2_option" value="a"> A) Approx. 1.2 times</label>
+                <label><input type="radio" name="q2_option" value="b"> B) Approx. 1.5 times</label>
+                <label><input type="radio" name="q2_option" value="c"> C) Approx. 2 times</label>
+                <label><input type="radio" name="q2_option" value="d"> D) Approx. 2.5 times</label>
+            </div>
+            <button class="check-btn" onclick="checkAnswer('q2', 'b')">Check Answer</button>
+            <div class="result" id="q2_result"></div>
+        </div>
+        
+        <div class="question" id="q3">
+            <p>3. Let x be the number of cups of coffee you drink per day. If your annual coffee bean consumption is half of the average annual consumption in Finland, what is the value of x?</p>
+            <div class="options">
+                <label><input type="radio" name="q3_option" value="a"> A) 2.25 cups</label>
+                <label><input type="radio" name="q3_option" value="b"> B) 4.25 cups</label>
+                <label><input type="radio" name="q3_option" value="c"> C) 5.5 cups</label>
+                <label><input type="radio" name="q3_option" value="d"> D) 8.5 cups</label>
+            </div>
+            <button class="check-btn" onclick="checkAnswer('q3', 'b')">Check Answer</button>
+            <div class="result" id="q3_result"></div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        const board = JXG.JSXGraph.initBoard('jxgbox', {
+            boundingbox: [-0.5, 35, 10, -5],
+            axis: {
+                x: { name: 'Coffee Type', withLabel: true },
+                y: { name: 'Coffee per Year (kg)', withLabel: true }
+            },
+            grid: false, pan: { enabled: false }, zoom: { enabled: false }
+        });
+
+        const coffeeBlocks = [];
+        const stackHeights = {};
+        const resultLabels = [];
+        let intervalId;
+        let myKgCount = 0, finlandKgCount = 0, worldKgCount = 0;
+
+        board.create('text', [1, 32, 'My Coffee vs. Finland and World Averages'], {fontSize: 18});
+        board.create('text', [1, 30, '(Each block represents 1 kg of coffee beans)'], {fontSize: 12});
+        board.create('text', [2, -0.2, 'My Coffee'], {fontSize: 12, anchorX: 'middle', anchorY: 'top'});
+        board.create('text', [5, -0.2, 'Finland Avg.'], {fontSize: 12, anchorX: 'middle', anchorY: 'top'});
+        board.create('text', [8, -0.2, 'World Avg.'], {fontSize: 12, anchorX: 'middle', anchorY: 'top'});
+        
+        const animateDrop = (block, targetY) => {
+            let currentY = 30;
+            const step = () => {
+                if (currentY > targetY) {
+                    currentY -= 1;
+                    block.setPosition(JXG.COORDS_BY_USER, [block.X(), currentY]);
+                    board.update();
+                    requestAnimationFrame(step);
+                } else {
+                    block.setPosition(JXG.COORDS_BY_USER, [block.X(), targetY]);
+                    board.update();
+                }
+            };
+            requestAnimationFrame(step);
+        };
+
+        const dropKgBlock = (color, xPosition) => {
+            const kgHeight = 1;
+            const currentHeight = stackHeights[xPosition] || 0;
+            const targetY = currentHeight * kgHeight;
+            stackHeights[xPosition] = currentHeight + 1;
+
+            const block = board.create('point', [xPosition, 30], {
+                name: '',
+                fillColor: color,
+                strokeColor: color,
+                size: 8,
+                fixed: true,
+                face: 'square'
+            });
+            coffeeBlocks.push(block);
+            
+            animateDrop(block, targetY);
+        };
+
+        document.getElementById('dropCupsBtn').addEventListener('click', () => {
+            resultLabels.forEach(label => board.removeObject(label));
+            resultLabels.length = 0;
+
+            const dailyCups = parseFloat(document.getElementById('myCoffeeInput').value);
+            const myTotalCups = dailyCups * 365;
+            const finlandTotalCups = 8.5 * 365;
+            const worldTotalCups = 5.5 * 365;
+
+            const myTotalKg = Math.round(myTotalCups * 0.008);
+            const finlandTotalKg = Math.round(finlandTotalCups * 0.008);
+            const worldTotalKg = Math.round(worldTotalCups * 0.008);
+
+            const myX = 2, finlandX = 5, worldX = 8;
+            myKgCount = 0; finlandKgCount = 0; worldKgCount = 0;
+            document.getElementById('dropCupsBtn').disabled = true;
+
+            intervalId = setInterval(() => {
+                let droppedThisCycle = false;
+                if (myKgCount < myTotalKg) { dropKgBlock('#3498db', myX); myKgCount++; droppedThisCycle = true; }
+                if (finlandKgCount < finlandTotalKg) { dropKgBlock('#2ecc71', finlandX); finlandKgCount++; droppedThisCycle = true; }
+                if (worldKgCount < worldTotalKg) { dropKgBlock('#e74c3c', worldX); worldKgCount++; droppedThisCycle = true; }
+
+                if (!droppedThisCycle) {
+                    clearInterval(intervalId);
+                    document.getElementById('dropCupsBtn').disabled = false;
+                    
+                    const createLabel = (x, y, kg, cups) => {
+                        const label = board.create('text', [x, y, `${kg} kg\n(approx. ${cups} cups)`], {
+                            anchorX: 'middle',
+                            anchorY: 'bottom',
+                            fontSize: 14,
+                            cssStyle: 'text-align: center;'
+                        });
+                        resultLabels.push(label);
+                    };
+
+                    createLabel(myX, myTotalKg + 1.5, myTotalKg, Math.round(myTotalCups));
+                    createLabel(finlandX, finlandTotalKg + 1.5, finlandTotalKg, Math.round(finlandTotalCups));
+                    createLabel(worldX, worldTotalKg + 1.5, worldTotalKg, Math.round(worldTotalCups));
+                }
+            }, 100);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            clearInterval(intervalId);
+            document.getElementById('dropCupsBtn').disabled = false;
+            coffeeBlocks.forEach(block => board.removeObject(block));
+            coffeeBlocks.length = 0;
+            resultLabels.forEach(label => board.removeObject(label));
+            resultLabels.length = 0;
+            for (const key in stackHeights) { delete stackHeights[key]; }
+            board.update();
+        });
+
+        function checkAnswer(questionId, correctAnswer) {
+            const selectedOption = document.querySelector(`#${questionId} input[name="${questionId}_option"]:checked`);
+            const resultElement = document.getElementById(`${questionId}_result`);
+
+            if (selectedOption) {
+                if (selectedOption.value === correctAnswer) {
+                    resultElement.textContent = "Correct Answer!";
+                    resultElement.style.color = "green";
+                } else {
+                    resultElement.textContent = "Incorrect. Please try again.";
+                    resultElement.style.color = "red";
+                }
+            } else {
+                resultElement.textContent = "Please select an answer.";
+                resultElement.style.color = "orange";
+            }
+        }
+    </script>
+</body>
+</html>

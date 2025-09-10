@@ -1,6 +1,6 @@
 # Interactive 2D Visualizations with JSXGraph
 
-This project contains 26 interactive 2D visualizations created using JSXGraph technology. Each visualization demonstrates mathematical and scientific concepts through dynamic, interactive graphics that help users understand complex topics through hands-on exploration.
+This project contains 31 interactive 2D visualizations created using JSXGraph technology. Each visualization demonstrates mathematical and scientific concepts through dynamic, interactive graphics that help users understand complex topics through hands-on exploration.
 
 ## Project Overview
 
@@ -13,7 +13,7 @@ The visualizations are organized into 7 categories, covering topics from basic m
 
 ## Categories and Visualizations
 
-### 1. Basic Mathematics & Functions (01-05)
+### 1. Basic Mathematics & Functions (01-05, 30)
 
 #### 01. Dynamic Function Graphs
 This interactive visualization lets you explore the behavior of different types of mathematical functions: linear, quadratic, and sine. It goes beyond a static graph by including dynamic elements that help you visualize how a function's output (y) changes as its input (x) varies.
@@ -67,6 +67,16 @@ This visualization explores the intersection points between a quadratic function
 - **Numerical Methods**: Uses bisection method to accurately locate intersection points
 - **Visual Feedback**: Green points mark the exact intersection locations
 - **Mathematical Understanding**: Helps visualize solutions to x² = mx + c
+
+#### 30. Fractal Tree Recursion Visualization
+This animated visualization demonstrates recursion concepts through the growth of a fractal tree.
+
+**Key Features:**
+- **Recursion Concept**: Visualizes how parent branches generate child branches recursively
+- **Interactive Parameters**: Adjust branch angle, length scale, and recursion depth
+- **Animated Growth**: Watch the tree grow branch by branch with smooth animation
+- **Mathematical Formula**: Shows the formula for calculating total branches in recursive structures
+- **Educational Quiz**: Practice calculating branch counts using recursive formulas
 
 ### 2. Calculus & Advanced Mathematics (06-10)
 
@@ -151,7 +161,7 @@ This practical application simulates learning 10 Finnish words over 30 days with
 - **Strategy Testing**: Compare different review strategies
 - **Educational Question**: Determine the best review strategy for maximum retention
 
-### 4. Physics & Motion (14-18)
+### 4. Physics & Motion (14-18, 28, 31)
 
 #### 14. Basketball Shot Parabola Simulation
 This simulation demonstrates projectile motion using a basketball shot scenario.
@@ -203,6 +213,26 @@ This visualization demonstrates how black holes bend light through gravitational
 - **Mathematical Formula**: Shows the bending angle formula
 - **Practice Problems**: Calculate mass and impact parameters
 
+#### 28. Realistic Rain Simulation
+This physics simulation demonstrates free fall motion and uniform distribution through animated raindrops.
+
+**Key Features:**
+- **Physics Concepts**: Demonstrates gravitational acceleration and free fall motion
+- **Mathematical Distribution**: Shows uniform distribution for raindrop positioning
+- **Interactive Controls**: Start, pause, and reset the rain simulation
+- **Real-time Animation**: Watch raindrops fall with increasing velocity due to gravity
+- **Educational Quiz**: Test understanding of physics and mathematical concepts
+
+#### 31. Temperature Heat Visualization
+This physics visualization demonstrates temperature changes and heat transfer during rainfall events.
+
+**Key Features:**
+- **Physics Concepts**: Shows specific heat capacity of water and heat transfer
+- **Real-time Simulation**: Displays temperature changes over time during rainfall
+- **Interactive Controls**: Adjust temperature drop and control simulation timing
+- **Mathematical Formulas**: Demonstrates Q = c·m·ΔT heat transfer equation
+- **Educational Quiz**: Test understanding of specific heat capacity concepts
+
 ### 5. Music & Sound (19-21)
 
 #### 19. Guitar Strings Harmonic Visualization
@@ -235,7 +265,7 @@ This artistic visualization demonstrates geometric symmetry and transformations.
 - **Educational Content**: Explains symmetry and geometric transformations
 - **Practice Problems**: Calculate rotation angles and coordinates
 
-### 6. Economics & Social Sciences (22-25)
+### 6. Economics & Social Sciences (22-25, 27)
 
 #### 22. Compound Effect of Habits
 This visualization demonstrates how small daily changes compound over time.
@@ -277,7 +307,17 @@ This health science visualization demonstrates how muscle mass affects basal met
 - **Real-time Updates**: Calculations update as parameters change
 - **Educational Content**: Explains the relationship between muscle and metabolism
 
-### 7. Communication & Learning (26-27)
+#### 27. Coffee Intake Comparison
+This visualization compares annual coffee consumption between personal intake, Finland average, and world average using animated falling blocks.
+
+**Key Features:**
+- **Personal Input**: Enter your daily coffee consumption in cups
+- **Animated Comparison**: Watch blocks fall to represent annual coffee bean consumption
+- **Three Categories**: Compare your consumption with Finland (8.5 cups/day) and world average (5.5 cups/day)
+- **Mathematical Calculations**: Converts cups to kilograms using 8g beans per cup
+- **Educational Quiz**: Practice problems about coffee consumption calculations
+
+### 7. Communication & Learning (26, 29)
 
 #### 26. Morse Code Game
 This interactive game teaches Morse code through visual and audio feedback.
@@ -288,6 +328,16 @@ This interactive game teaches Morse code through visual and audio feedback.
 - **Speed Control**: Adjust playback speed for practice
 - **Audio Feedback**: Hear the beep sounds for dots and dashes
 - **Educational Content**: Learn Morse code through interactive practice
+
+#### 29. Reading Speed Simulator
+This simulation compares reading speeds between different types of readers, visualizing eye movement patterns.
+
+**Key Features:**
+- **Personal Input**: Enter your reading speed in words per minute
+- **Comparative Analysis**: Compare with native speaker (250 wpm) and non-native speaker (150 wpm) speeds
+- **Eye Movement Visualization**: Watch animated points move across lines representing reading progress
+- **Research-Based Data**: Uses 2019 meta-analysis data for average reading speeds
+- **Educational Quiz**: Calculate reading times for classic literature
 
 ## Technical Details
 
@@ -315,9 +365,9 @@ This interactive game teaches Morse code through visual and audio feedback.
 ## Educational Value
 
 These visualizations are designed for:
-- **Students**: Learning mathematical and scientific concepts
-- **Teachers**: Demonstrating abstract concepts in the classroom
-- **Self-learners**: Exploring topics independently
-- **Researchers**: Visualizing mathematical relationships
+- **Students**: Learning mathematical and scientific concepts.
+- **Teachers**: Demonstrating abstract concepts in the classroom.
+- **Self-learners**: Exploring topics independently.
+- **Researchers**: Visualizing mathematical relationships.
 
 Each visualization combines theoretical understanding with practical application, making complex concepts accessible through interactive exploration.

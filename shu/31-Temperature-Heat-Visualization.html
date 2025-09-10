@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSXGraph Temperature & Heat Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsxgraph@1.8.0/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.8.0/distrib/jsxgraph.css" />
+    <style>
+        body { font-family: Arial; display:flex; flex-direction:column; align-items:center; margin:0; background:#f0f0f0;}
+        h1{margin-top:20px;}
+        #controls{margin:20px; display:flex; gap:15px; align-items:center;}
+        #jxgbox{width:800px;height:400px;border:1px solid #ccc;background:white;}
+        button{padding:8px 16px;font-size:16px;border-radius:5px;color:white; border:none; cursor:pointer;}
+        #startButton{background:#4CAF50;} #startButton:hover{background:#45a049;}
+        #rainButton{background:#007BFF;} #rainButton:hover{background:#0056b3;}
+        #resetButton{background:#dc3545;} #resetButton:hover{background:#c82333;}
+        input[type=range]{width:150px;}
+        .physics-info, .physics-question{width:800px;padding:15px;margin:10px 0;border-radius:8px;}
+        .physics-info{background:#e9ecef;border-left:5px solid #007BFF;}
+        .physics-info h2{margin-top:0;color:#0056b3;}
+        .physics-info p, .physics-info ul{margin:5px 0; line-height:1.6;}
+        .physics-question{background:#fff;border:1px solid #ccc;}
+        .physics-question h3{margin-top:0;color:#333;}
+        .options-list{list-style:none;padding:0;}
+        .options-list li{margin:5px 0;}
+        .options-list input[type=radio]{margin-right:10px;}
+        .label-text{font-weight:bold;color:red;}
+    </style>
+</head>
+<body>
+
+<h1>JSXGraph Temperature & Heat Visualization</h1>
+
+<div class="physics-info">
+<h2>Physics Concept: Specific Heat Capacity of Water</h2>
+<p>Specific heat capacity c indicates the energy required to raise 1 kg of a substance by 1℃. For water, c ≈ 4.2×10³ J/(kg·℃).</p>
+<p>Heat exchanged during temperature change: <b>Q = c·m·ΔT</b></p>
+<p>During rainfall, cooler raindrops absorb heat from the air, causing ambient temperature to drop. This can be visualized by ΔT and Q.</p>
+</div>
+
+<div id="controls">
+<button id="startButton">Start Simulation</button>
+<button id="rainButton" disabled>Start Rain</button>
+<button id="resetButton" disabled>Reset</button>
+<label for="dropSlider">Temperature Drop:</label>
+<input type="range" id="dropSlider" min="1" max="10" value="5">
+</div>
+
+<div id="jxgbox" class="jxgbox"></div>
+
+<div class="physics-question">
+<h3>Physics Multiple Choice Question</h3>
+<p><b>Question:</b> During rainfall, why does the temperature drop, and how is this related to water's specific heat capacity?</p>
+<ul class="options-list">
+<li><input type="radio" name="question1">A. Water molecules have a very simple structure.</li>
+<li><input type="radio" name="question1">B. High specific heat means water needs little heat to change temperature.</li>
+<li><input type="radio" name="question1">C. High specific heat means water absorbs/releases large heat to change temperature.</li>
+<li><input type="radio" name="question1">D. Water content in atmosphere is low; specific heat is not important.</li>
+</ul>
+<p><b>Correct Answer:</b> C</p>
+</div>
+
+<script>
+let board, curve, tempLabel, heatLabel, animationId;
+let data=[], xOffset=0;
+let isRaining=false, rainStartTime=0;
+let baseTemp=25;
+const displaySeconds=30, fps=60, maxData=displaySeconds*fps;
+const c=4200, m=1; // water 1kg
+
+const startBtn=document.getElementById('startButton');
+const rainBtn=document.getElementById('rainButton');
+const resetBtn=document.getElementById('resetButton');
+const dropSlider=document.getElementById('dropSlider');
+
+function initBoard(){
+    if(board) board.removeBoard();
+    board=JXG.JSXGraph.initBoard('jxgbox',{
+        boundingbox:[0,35,displaySeconds,10],axis:true,showNavigation:false,pan:{enabled:false}
+    });
+    curve=board.create('curve',[[],[]],{strokeColor:'blue',strokeWidth:2});
+    tempLabel=board.create('text',[displaySeconds-5,34,`Temp: ${baseTemp.toFixed(1)}℃`],{fontSize:16,color:'red',anchorX:'left',anchorY:'top'});
+    heatLabel=board.create('text',[displaySeconds-5,32,`Q: 0 J`],{fontSize:16,color:'green',anchorX:'left',anchorY:'top'});
+}
+
+function generateTemp(){
+    let y=baseTemp+(Math.random()-0.5)*0.5;
+    if(isRaining){
+        const elapsed=(Date.now()-rainStartTime)/1000;
+        const drop=parseFloat(dropSlider.value)*(1-Math.exp(-elapsed/3));
+        y=baseTemp-drop+(Math.random()-0.5)*0.2;
+        if(drop>=parseFloat(dropSlider.value)-0.1){
+            isRaining=false;
+            baseTemp=y;
+            rainBtn.textContent='Start Rain';
+            rainBtn.disabled=false;
+        }
+    }
+    return y;
+}
+
+function animate(){
+    const y=generateTemp();
+    data.push([xOffset,y]);
+    if(data.length>maxData) data.shift();
+    curve.dataX=data.map(p=>p[0]);
+    curve.dataY=data.map(p=>p[1]);
+    curve.updateCurve();
+
+    const xMin=Math.max(0,xOffset-displaySeconds);
+    const xMax=xOffset;
+    board.setBoundingBox([xMin,35,xMax,10],false);
+
+    tempLabel.setText(`Temp: ${y.toFixed(1)}℃`);
+    tempLabel.setCoords(xMax-5,34);
+    const deltaT=baseTemp-y;
+    const Q=c*m*deltaT;
+    heatLabel.setText(`Q: ${Q.toFixed(0)} J`);
+    heatLabel.setCoords(xMax-5,32);
+
+    board.update();
+    xOffset+=1/fps;
+    animationId=requestAnimationFrame(animate);
+}
+
+function startSim(){startBtn.disabled=true;rainBtn.disabled=false;resetBtn.disabled=false;animate();}
+function resetSim(){cancelAnimationFrame(animationId);data=[];xOffset=0;isRaining=false;baseTemp=25;rainBtn.disabled=true;rainBtn.textContent='Start Rain';startBtn.disabled=false;resetBtn.disabled=true;initBoard();}
+
+initBoard();
+startBtn.addEventListener('click',startSim);
+rainBtn.addEventListener('click',()=>{
+    if(!isRaining){isRaining=true;rainStartTime=Date.now();rainBtn.textContent='Raining...';rainBtn.disabled=true;}
+});
+resetBtn.addEventListener('click',resetSim);
+</script>
+
+</body>
+</html>
+

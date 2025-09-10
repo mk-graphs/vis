@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fractal Tree Animation - Recursion Visualization + Math Question</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.4.1/jsxgraph.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsxgraph/1.4.1/jsxgraphcore.js"></script>
+    <style>
+        html, body { height: 100%; margin: 0; font-family: sans-serif; }
+        #container { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        #knowledge { margin: 10px; font-size: 16px; color: #333; text-align: center; line-height: 1.5em; }
+        #box { width: 90%; height: 60vh; }
+        .controls { margin-top: 10px; }
+        .slider-label { margin: 5px 0; }
+        button { font-size: 16px; padding: 5px 10px; margin-right: 5px; }
+        #question { margin-top: 15px; font-size: 16px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="knowledge">
+            <strong>Mathematical Concept: Recursion</strong><br>
+            Recursion is a process where a problem is solved by calling a smaller version of itself.<br>
+            In this tree:<br>
+            - A <span style="color:blue">parent branch (blue)</span> grows <span style="color:green">child branches (green)</span><br>
+            - The <span style="color:green">child branches</span> in turn grow their own child branches, just like the parent<br>
+            - This process repeats until a minimum length or maximum depth is reached<br>
+            By watching the animation, you can visualize the concept of recursion.
+        </div>
+        <div id="box"></div>
+        <div class="controls">
+            <div class="slider-label">
+                Branch Angle: <span id="angleValue">30</span>°
+            </div>
+            <div class="slider-label">
+                Branch Length Scale: <span id="lengthValue">0.7</span>
+            </div>
+            <div class="slider-label">
+                Recursion Depth: <span id="depthValue">8</span>
+            </div>
+            <button id="startBtn">Start Growth</button>
+            <button id="pauseBtn">Pause Growth</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+        <div id="math-formula" style="margin-top: 15px; text-align: center;">
+            <strong>Total Branches Formula:</strong><br>
+            If each parent branch generates <em>b</em> child branches and the recursion depth is <em>d</em>, the total number of branches is **N = 1 + b + b² + ... + bᵈ**<br>
+            This is equivalent to: **N = (b⁽ᵈ⁺¹⁾ - 1)/(b-1)**<br>
+            For example, if b=3, d=2 → N = 1+3+3² = 13<br>
+        </div>
+
+        <div id="question">
+            <p><strong>Question:</strong> If each parent branch generates 2 child branches and the recursion depth is 3, what is the total number of branches?</p>
+            <input type="radio" name="q1" value="6" id="q1a"><label for="q1a">6</label><br>
+            <input type="radio" name="q1" value="7" id="q1b"><label for="q1b">7</label><br>
+            <input type="radio" name="q1" value="8" id="q1c"><label for="q1c">8</label><br>
+            <input type="radio" name="q1" value="15" id="q1d"><label for="q1d">15</label><br>
+            <button id="submitAnswer">Submit Answer</button>
+            <p id="answerResult"></p>
+        </div>
+    </div>
+
+    <script>
+        const board = JXG.JSXGraph.initBoard('box', {
+            boundingbox: [-15, 20, 15, -5],
+            axis: false,
+            showCopyright: false,
+            showNavigation: false,
+        });
+
+        const angleSlider = board.create('slider', [[-14, -4], [-10, -4], [30, 30, 90]], {snapWidth:1});
+        const lengthSlider = board.create('slider', [[-9, -4], [-5, -4], [0.7, 0.5, 0.9]], {snapWidth:0.01});
+        const depthSlider = board.create('slider', [[-4, -4], [0, -4], [8, 1, 12]], {snapWidth:1});
+
+        angleSlider.on('drag', function() { document.getElementById('angleValue').textContent = angleSlider.Value().toFixed(0); });
+        lengthSlider.on('drag', function() { document.getElementById('lengthValue').textContent = lengthSlider.Value().toFixed(2); });
+        depthSlider.on('drag', function() { document.getElementById('depthValue').textContent = depthSlider.Value().toFixed(0); });
+
+        let lines = [];
+        let isGrowing = false;
+        let animationQueue = [];
+
+        function animateBranch(x, y, x2, y2, duration, depth, callback) {
+            let t = 0;
+            const dt = 0.02;
+
+            const color = depth <= 2 ? 'green' : 'blue';
+            const line = board.create('line', [[x, y], [x, y2]], {straightFirst:false, straightLast:false, strokeColor: color, strokeWidth:2});
+            lines.push(line);
+
+            function step() {
+                if (!isGrowing) return; // Pause animation
+                t += dt;
+                const nx = x + (x2 - x) * t / duration;
+                const ny = y + (y2 - y) * t / duration;
+                line.point2.moveTo([nx, ny]);
+                if (t < duration) requestAnimationFrame(step);
+                else if (callback) callback();
+            }
+            animationQueue.push(step);
+            step();
+        }
+
+        function drawBranchAnimated(x, y, length, angle, depth) {
+            if (depth === 0 || length < 0.2) return;
+
+            const angleOffset = (Math.random() - 0.5) * 20;
+            const lengthFactor = lengthSlider.Value() * (0.9 + Math.random() * 0.2);
+
+            const rad = angle * Math.PI / 180;
+            const x2 = x + length * Math.sin(rad);
+            const y2 = y + length * Math.cos(rad);
+
+            const bbox = board.getBoundingBox();
+            let xx2 = Math.max(Math.min(x2, bbox[2]), bbox[0]);
+            let yy2 = Math.max(Math.min(y2, bbox[1]), bbox[3]);
+
+            animateBranch(x, y, xx2, yy2, 0.5, depth, function() {
+                drawBranchAnimated(xx2, yy2, length * lengthFactor, angle - angleSlider.Value() + angleOffset, depth - 1);
+                drawBranchAnimated(xx2, yy2, length * lengthFactor, angle + angleSlider.Value() + angleOffset, depth - 1);
+            });
+        }
+
+        function growTree() {
+            for (let l of lines) board.removeObject(l);
+            lines = [];
+            animationQueue = [];
+            drawBranchAnimated(0, -2, 5, 0, depthSlider.Value());
+        }
+
+        document.getElementById('startBtn').addEventListener('click', function() {
+            isGrowing = true;
+            if (lines.length === 0) growTree(); // Start on first click
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            isGrowing = false;
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            isGrowing = false;
+            for (let l of lines) board.removeObject(l);
+            lines = [];
+            animationQueue = [];
+        });
+
+        // Single-choice question logic
+        document.getElementById('submitAnswer').addEventListener('click', function() {
+            const radios = document.getElementsByName('q1');
+            let selected = null;
+            for (const r of radios) {
+                if (r.checked) selected = r.value;
+            }
+            const result = document.getElementById('answerResult');
+            if (selected === null) {
+                result.textContent = "Please select an answer first.";
+            } else if (selected === "15") {
+                result.textContent = "Correct! Each parent branch generates 2 child branches, at depth 3, total branches = 1+2+4+8=15.";
+            } else {
+                result.textContent = "Incorrect. Take another look at the recursion and try again.";
+            }
+        });
+    </script>
+</body>
+</html>

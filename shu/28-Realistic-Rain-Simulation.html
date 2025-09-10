@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Realistic Rain Simulation (with Concepts and Formulas)</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.8.0/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.8.0/distrib/jsxgraph.css" />
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .jxgbox {
+            border: 1px solid #ccc;
+            width: 600px;
+            height: 400px;
+            margin: 0 auto; /* Added for centering */
+        }
+        .controls {
+            margin-top: 10px;
+            text-align: center;
+        }
+        button {
+            padding: 8px 15px;
+            font-size: 16px;
+            margin: 0 5px;
+        }
+        button:disabled {
+            background-color: #ddd;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .concept-container {
+            width: 600px;
+            margin: 0 auto 20px;
+            text-align: left;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+        }
+        .concept-container h3 {
+            margin-top: 0;
+            color: #004085;
+        }
+        .concept-container p {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        .concept-container .formula {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+        .quiz {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .question {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .options input[type="radio"] {
+            margin-right: 8px;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .correct {
+            color: green;
+        }
+        .wrong {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="concept-container">
+        <h3>Physics Concept: Free Fall Motion</h3>
+        <p>
+            Free fall is the motion of an object solely under the influence of **gravity**. Gravitational acceleration (denoted by $g$) is a constant value, causing a falling object's velocity to increase over time. Our simulation models this by making the raindrops fall faster and faster.
+        </p>
+        <p>Related Formulas (ignoring air resistance):</p>
+        <p class="formula">
+            $$v = gt$$
+            $$h = \frac{1}{2}gt^2$$
+        </p>
+    </div>
+
+    <div class="concept-container">
+        <h3>Mathematics Concept: Uniform Distribution</h3>
+        <p>
+            A **uniform distribution** is a probability distribution where every value in a given range has an **equal** probability of being chosen. In our simulation, the horizontal position of each raindrop is generated randomly, following a uniform distribution on the interval $[-4, 4]$.
+        </p>
+        <p>Related Formula:</p>
+        <p class="formula">
+            $$f(x) = \frac{1}{b-a} \quad (\text{for } a \le x \le b)$$
+        </p>
+    </div>
+
+    <div id="jxgbox" class="jxgbox"></div>
+    <div class="controls">
+        <button id="startBtn">Start Rain</button>
+        <button id="pauseBtn" disabled>Pause</button>
+        <button id="resetBtn">Reset</button>
+    </div>
+
+    <div class="quiz">
+        <p class="question">1. In this simulation, how does the velocity of a raindrop change as it falls?</p>
+        <div class="options" id="q1-options">
+            <label><input type="radio" name="q1" value="A"> A. It remains constant. </label>
+            <label><input type="radio" name="q1" value="B"> B. It decreases gradually. </label>
+            <label><input type="radio" name="q1" value="C"> C. It increases gradually. </label>
+        </div>
+        <p class="feedback" id="q1-feedback"></p>
+
+        <p class="question">2. The random horizontal position of the raindrops in the simulation models which mathematical concept?</p>
+        <div class="options" id="q2-options">
+            <label><input type="radio" name="q2" value="A"> A. Linear Function </label>
+            <label><input type="radio" name="q2" value="B"> B. Uniform Distribution </label>
+            <label><input type="radio" name="q2" value="C"> C. Parabola </label>
+        </div>
+        <p class="feedback" id="q2-feedback"></p>
+    </div>
+
+    <script>
+        // Initialize the board
+        const board = JXG.JSXGraph.initBoard('jxgbox', {
+            boundingbox: [-5, 5, 5, -1],
+            axis: true,
+            grid: false,
+            pan: { enabled: false },
+            zoom: { enabled: false }
+        });
+
+        const raindrops = [];
+        let rainInterval = null;
+        let animationFrames = [];
+
+        // Function to create and animate a single raindrop
+        function dropRaindrop() {
+            const dropX = (Math.random() * 8) - 4; // Generate a random x-coordinate between -4 and +4
+            const raindrop = board.create('point', [dropX, 5], {
+                name: '',
+                fillColor: '#3498db',
+                strokeColor: 'none',
+                size: 4,
+                face: 'circle'
+            });
+            raindrops.push(raindrop);
+
+            let currentY = 5;
+            let velocity = 0; // Initial vertical velocity
+            const gravity = 0.005; // Simulated gravitational acceleration
+            let lastTime = performance.now();
+
+            function animate(currentTime) {
+                const deltaTime = (currentTime - lastTime) / 1000; // Convert milliseconds to seconds
+                lastTime = currentTime;
+
+                velocity += gravity * deltaTime * 60; // Increase velocity based on gravity
+                currentY -= velocity; // Update position based on the current velocity
+
+                if (currentY > -1) {
+                    raindrop.setPosition(JXG.COORDS_BY_USER, [dropX, currentY]);
+                    board.update();
+                    const frameId = requestAnimationFrame(animate);
+                    animationFrames.push({ raindrop: raindrop, id: frameId });
+                } else {
+                    raindrop.setPosition(JXG.COORDS_BY_USER, [dropX, -1]);
+                    board.update();
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // Control button logic
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        startBtn.addEventListener('click', () => {
+            if (!rainInterval) {
+                rainInterval = setInterval(dropRaindrop, 100);
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+            }
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            if (rainInterval) {
+                clearInterval(rainInterval);
+                rainInterval = null;
+                animationFrames.forEach(frame => cancelAnimationFrame(frame.id));
+                animationFrames = [];
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (rainInterval) {
+                clearInterval(rainInterval);
+                rainInterval = null;
+            }
+            animationFrames.forEach(frame => cancelAnimationFrame(frame.id));
+            animationFrames = [];
+
+            raindrops.forEach(drop => board.removeObject(drop));
+            raindrops.length = 0;
+            board.update();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        });
+
+        // Quiz logic
+        const q1Options = document.querySelectorAll('input[name="q1"]');
+        const q1Feedback = document.getElementById('q1-feedback');
+        q1Options.forEach(option => {
+            option.addEventListener('change', (event) => {
+                if (event.target.value === 'C') {
+                    q1Feedback.textContent = 'Correct!';
+                    q1Feedback.className = 'feedback correct';
+                } else {
+                    q1Feedback.textContent = 'Incorrect. The velocity of a falling object increases due to gravity.';
+                    q1Feedback.className = 'feedback wrong';
+                }
+                q1Feedback.style.display = 'block';
+            });
+        });
+
+        const q2Options = document.querySelectorAll('input[name="q2"]');
+        const q2Feedback = document.getElementById('q2-feedback');
+        q2Options.forEach(option => {
+            option.addEventListener('change', (event) => {
+                if (event.target.value === 'B') {
+                    q2Feedback.textContent = 'Correct!';
+                    q2Feedback.className = 'feedback correct';
+                } else {
+                    q2Feedback.textContent = 'Incorrect. Since every horizontal position has an equal chance of appearing, this is an example of a uniform distribution.';
+                    q2Feedback.className = 'feedback wrong';
+                }
+                q2Feedback.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
