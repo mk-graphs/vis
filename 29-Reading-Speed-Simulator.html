@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reading Speed Simulator - Eye Movement</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph@1.6.0/distrib/jsxgraphcore.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph@1.6.0/distrib/jsxgraph.css" />
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        #jxgbox { width: 600px; height: 400px; margin: 20px auto; border: 1px solid #ccc; }
+        input[type="number"] { padding: 5px; font-size: 16px; width: 80px; }
+        button { padding: 8px 15px; font-size: 16px; cursor: pointer; margin: 0 5px; }
+        .note { font-size: 14px; color: #555; margin-top: 5px; }
+        .reference { font-size: 13px; color: #444; margin-top: 10px; max-width: 600px; margin-left:auto; margin-right:auto; text-align:left; }
+        .quiz { font-size: 14px; color: #333; margin-top: 20px; text-align: left; max-width: 600px; margin-left:auto; margin-right:auto; }
+        .quiz input { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Reading Speed Simulator - Eye Movement</h1>
+
+    <div>
+        <label for="myWPM">
+            English Reading Speed (words per minute):
+        </label>
+        <input type="number" id="myWPM" value="200">
+        <div class="note">
+            Average native English readers: 238 wpm for non-fiction, 260 wpm for fiction (Brysbaert, 2019, meta-analysis)
+        </div>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <button onclick="startSimulation()">Start</button>
+        <button onclick="stopSimulation()">Stop</button>
+        <button onclick="resetSimulation()">Reset</button>
+    </div>
+
+    <div id="jxgbox"></div>
+
+    <div class="reference">
+        <strong>Reference:</strong> A 2019 meta-analysis by Marc Brysbaert, analyzing 190 studies, found that the average silent reading speed for English adults is approximately 238 words per minute for non-fiction and 260 words per minute for fiction. Source: <a href="https://www.sciencedirect.com/science/article/abs/pii/S0749596X19300786" target="_blank">ScienceDirect</a>.
+    </div>
+
+    <div class="note">
+        In this simulation, the "Native Speaker" reading speed is set to 250 words per minute, and the non-native English speaker speed is 150 words per minute. Each line is assumed to contain 10 words.
+    </div>
+
+    <div class="quiz">
+        <h3> Quick Quiz: Calculate the Reading Time</h3>
+        <p><strong>Question:</strong> If a native English speaker and a non-native English speaker both start reading "Pride and Prejudice" at the same time, how long will it take each of them to finish the book?</p>
+        <p><strong>Assumptions:</strong></p>
+        <ul>
+            <li>Word count of "Pride and Prejudice": 127,633 words</li>
+            <li>Native English speaker reading speed: 250 words per minute</li>
+            <li>Non-native English speaker reading speed: 150 words per minute</li>
+        </ul>
+        <p><strong>Options:</strong></p>
+        <label><input type="radio" name="quiz" value="A"> A. Native: 8.5 hours, Non-native: 14.2 hours</label><br>
+        <label><input type="radio" name="quiz" value="B"> B. Native: 10.6 hours, Non-native: 16.8 hours</label><br>
+        <label><input type="radio" name="quiz" value="C"> C. Native: 12.7 hours, Non-native: 19.1 hours</label><br>
+        <label><input type="radio" name="quiz" value="D"> D. Native: 14.8 hours, Non-native: 21.2 hours</label><br>
+        <button onclick="checkAnswer()">Submit Answer</button>
+        <p id="quizResult"></p>
+    </div>
+
+    <script>
+        // Initialize JSXGraph board
+        let board = JXG.JSXGraph.initBoard('jxgbox', {
+            boundingbox:[0, 10, 10, 0],
+            axis: false,
+            showNavigation: false
+        });
+
+        // Page rectangle
+        board.create('polygon', [[0,0],[10,0],[10,10],[0,10]], {
+            borders: { strokeColor: 'black', strokeWidth: 2 }, 
+            fillColor: 'lightyellow', fillOpacity: 0.5
+        });
+
+        // Page lines: 10 lines
+        let numLines = 10;
+        let linesY = [];
+        for (let i=0; i<numLines; i++){
+            let y = 10 - (i*10/numLines) - (10/(numLines*2));
+            board.create('line', [[0,y],[10,y]], {straightFirst:false, straightLast:false, strokeColor:'black', strokeWidth:1});
+            linesY.push(y);
+        }
+
+        // Eye movement points
+        let myPoint = board.create('point', [0, linesY[0]], {name:'You', color:'red', size:4});
+        let nativePoint = board.create('point', [0, linesY[0]], {name:'Native Speaker', color:'blue', size:4});
+
+        // Animation variables
+        let intervalId;
+        let lastTime;
+        let pageWidth = 10;
+        let wordsPerLine = 10;
+        let pauseDuration = 300; // milliseconds
+        let myPause = 0;
+        let nativePause = 0;
+        let myX=0, myLine=0;
+        let nativeX=0, nativeLine=0;
+
+        function startSimulation(){
+            stopSimulation();
+            let myWPM = parseFloat(document.getElementById('myWPM').value);
+            let nativeWPM = 250; // Native speaker speed
+            let nonNativeWPM = 150; // Non-native speed
+            let mySpeed = pageWidth * myWPM / 60 / wordsPerLine;
+            let nativeSpeed = pageWidth * nativeWPM / 60 / wordsPerLine;
+            let nonNativeSpeed = pageWidth * nonNativeWPM / 60 / wordsPerLine; // not used here
+            lastTime = performance.now();
+
+            function animate(time){
+                let delta = (time - lastTime)/1000;
+                lastTime = time;
+
+                // Red point (You)
+                if(myLine < linesY.length){ 
+                    if(myLine < linesY.length - 1){
+                        if(myPause <= 0){
+                            myX += mySpeed*delta;
+                            if(myX >= pageWidth){
+                                myX = pageWidth;
+                                myPause = pauseDuration;
+                            }
+                        } else {
+                            myPause -= delta*1000;
+                            if(myPause <= 0){
+                                myX = 0;
+                                myLine++;
+                            }
+                        }
+                    } else {
+                        myX += mySpeed*delta;
+                        if(myX >= pageWidth) myX = pageWidth;
+                    }
+                }
+                myPoint.setPosition(JXG.COORDS_BY_USER, [myX, linesY[Math.min(myLine, linesY.length-1)]]);
+
+                // Blue point (Native Speaker)
+                if(nativeLine < linesY.length){
+                    if(nativeLine < linesY.length -1){
+                        if(nativePause <= 0){
+                            nativeX += nativeSpeed*delta;
+                            if(nativeX >= pageWidth){
+                                nativeX = pageWidth;
+                                nativePause = pauseDuration;
+                            }
+                        } else {
+                            nativePause -= delta*1000;
+                            if(nativePause <=0){
+                                nativeX = 0;
+                                nativeLine++;
+                            }
+                        }
+                    } else {
+                        nativeX += nativeSpeed*delta;
+                        if(nativeX >= pageWidth) nativeX = pageWidth;
+                    }
+                }
+                nativePoint.setPosition(JXG.COORDS_BY_USER, [nativeX, linesY[Math.min(nativeLine, linesY.length-1)]]);
+
+                board.update();
+                intervalId = requestAnimationFrame(animate);
+            }
+
+            intervalId = requestAnimationFrame(animate);
+        }
+
+        function stopSimulation(){
+            if(intervalId){ cancelAnimationFrame(intervalId); intervalId=null; }
+        }
+
+        function resetSimulation(){
+            stopSimulation();
+            myX=0; myLine=0; myPause=0;
+            nativeX=0; nativeLine=0; nativePause=0;
+            myPoint.setPosition(JXG.COORDS_BY_USER, [myX, linesY[0]]);
+            nativePoint.setPosition(JXG.COORDS_BY_USER, [nativeX, linesY[0]]);
+            board.update();
+        }
+
+        function checkAnswer(){
+            let selected = document.querySelector('input[name="quiz"]:checked');
+            let result = document.getElementById('quizResult');
+            if(!selected){
+                result.textContent = "Please select an answer.";
+                return;
+            }
+            if(selected.value === "A"){
+                result.textContent = "Correct! Native: ~8.5 h, Non-native: ~14.2 h.";
+            } else {
+                result.textContent = "Incorrect. The correct answer is A.";
+            }
+        }
+    </script>
+</body>
+</html>
